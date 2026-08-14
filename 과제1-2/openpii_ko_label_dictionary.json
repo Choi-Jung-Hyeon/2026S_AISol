@@ -1,0 +1,648 @@
+{
+ "source": "ai4privacy/pii-masking-openpii-1.5m (language=ko, region=KR)",
+ "basis": "openpii_ko_full.jsonl 26,498행 전수",
+ "total_pii_items": 189429,
+ "label_count": 36,
+ "corp_categories": [
+  "주민등록번호",
+  "외국인등록번호",
+  "여권번호",
+  "운전면허번호",
+  "국문 성명",
+  "영문 성명",
+  "연락처",
+  "계좌번호",
+  "이메일 주소",
+  "주소",
+  "카드번호"
+ ],
+ "value_masking": "숫자→# / 한글→○ / 라틴문자→A (원문 PII 값 미포함)",
+ "labels": [
+  {
+   "label": "GIVENNAME",
+   "freq_full": 22725,
+   "share": 0.119966,
+   "distinct_values": 8118,
+   "pattern_kinds": 417,
+   "sample_patterns": [
+    "○○",
+    "○○ ○○",
+    "AAAAAA"
+   ],
+   "representative_pattern": "○○",
+   "representative_pattern_count": 12550,
+   "corp_category": "국문 성명 / 영문 성명",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ○○ (12,550/22,725); 선행 문맥 …녕하세요, AAAA / …안녕하세요, AAA / …AAA",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "DATE",
+   "freq_full": 21077,
+   "share": 0.111266,
+   "distinct_values": 12964,
+   "pattern_kinds": 12,
+   "sample_patterns": [
+    "##/##/####",
+    "####-##-##A##:##:##",
+    "#○/##"
+   ],
+   "representative_pattern": "##/##/####",
+   "representative_pattern_count": 6947,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 ##/##/#### (6,947/21,077); 선행 문맥 …AAAAAAA AA / …####년 / …/##/####부터",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "SURNAME",
+   "freq_full": 17062,
+   "share": 0.090071,
+   "distinct_values": 5886,
+   "pattern_kinds": 632,
+   "sample_patterns": [
+    "○",
+    "○ ○",
+    "○○"
+   ],
+   "representative_pattern": "○",
+   "representative_pattern_count": 8330,
+   "corp_category": "국문 성명 / 영문 성명",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ○ (8,330/17,062); 선행 문맥 …AAA AAAAAA / …AA AAAAAAA / …AAAA AAAAA",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "EMAIL",
+   "freq_full": 13362,
+   "share": 0.070538,
+   "distinct_values": 9633,
+   "pattern_kinds": 397,
+   "sample_patterns": [
+    "○○○@AAAAAAA.AAA",
+    "○○○@AAAAA.AAA",
+    "○@AAAAA.AAA"
+   ],
+   "representative_pattern": "○○○@AAAAAAA.AAA",
+   "representative_pattern_count": 765,
+   "corp_category": "이메일 주소",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ○○○@AAAAAAA.AAA (765/13,362); 선행 문맥 …다. 자세한 내용은 / …며, 자세한 내용은 / …니다. 추가 문의는",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "TITLE",
+   "freq_full": 12686,
+   "share": 0.06697,
+   "distinct_values": 30,
+   "pattern_kinds": 11,
+   "sample_patterns": [
+    "○",
+    "AAA",
+    "AAAA"
+   ],
+   "representative_pattern": "○",
+   "representative_pattern_count": 5709,
+   "corp_category": "국문 성명 / 영문 성명",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ○ (5,709/12,686); 선행 문맥 …안녕하세요, / …안녕하세요 / …안녕하십니까,",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "CITY",
+   "freq_full": 12100,
+   "share": 0.063876,
+   "distinct_values": 693,
+   "pattern_kinds": 44,
+   "sample_patterns": [
+    "○○○○○",
+    "○○○",
+    "○○○○○ ○○#○"
+   ],
+   "representative_pattern": "○○○○○",
+   "representative_pattern_count": 3462,
+   "corp_category": "주소",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ○○○○○ (3,462/12,100); 선행 문맥 …#/##/####에 / …A##:##:##에 / … 주소: #####",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "TELEPHONENUM",
+   "freq_full": 10594,
+   "share": 0.055926,
+   "distinct_values": 8955,
+   "pattern_kinds": 520,
+   "sample_patterns": [
+    "+####### ####",
+    "+#######-####",
+    "+## #########"
+   ],
+   "representative_pattern": "+####### ####",
+   "representative_pattern_count": 145,
+   "corp_category": "연락처",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 +####### #### (145/10,594); 선행 문맥 …AAA.AAA 또는 / …AAA.AAA 혹은 / …AAAAA.AAA와",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "AGE",
+   "freq_full": 9733,
+   "share": 0.051381,
+   "distinct_values": 90,
+   "pattern_kinds": 2,
+   "sample_patterns": [
+    "##",
+    "#"
+   ],
+   "representative_pattern": "##",
+   "representative_pattern_count": 8619,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 ## (8,619/9,733); 선행 문맥 …##에 태어나 현재 / …#### - 나이: / …### #. 나이:",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "BUILDINGNUM",
+   "freq_full": 8934,
+   "share": 0.047163,
+   "distinct_values": 2513,
+   "pattern_kinds": 16,
+   "sample_patterns": [
+    "###",
+    "####",
+    "##"
+   ],
+   "representative_pattern": "###",
+   "representative_pattern_count": 4501,
+   "corp_category": "주소",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ### (4,501/8,934); 선행 문맥 …AAAAAAA AA / …#### - 주소: / … AAAAAA AA",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "STREET",
+   "freq_full": 8766,
+   "share": 0.046276,
+   "distinct_values": 2604,
+   "pattern_kinds": 102,
+   "sample_patterns": [
+    "○○○",
+    "○○○○",
+    "○○○###○○"
+   ],
+   "representative_pattern": "○○○",
+   "representative_pattern_count": 2523,
+   "corp_category": "주소",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ○○○ (2,523/8,766); 선행 문맥 …#####에 위치한 / …#/##/####에 / …AAAAAAA AA",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "CREDITCARDNUMBER",
+   "freq_full": 7914,
+   "share": 0.041778,
+   "distinct_values": 6980,
+   "pattern_kinds": 8,
+   "sample_patterns": [
+    "################",
+    "###################",
+    "###############"
+   ],
+   "representative_pattern": "################",
+   "representative_pattern_count": 4637,
+   "corp_category": "카드번호",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ################ (4,637/7,914); 선행 문맥 …해 주시고, 결제는 / …참가비는 / … 결제는 신용카드(",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "ZIPCODE",
+   "freq_full": 7665,
+   "share": 0.040464,
+   "distinct_values": 1659,
+   "pattern_kinds": 1,
+   "sample_patterns": [
+    "#####"
+   ],
+   "representative_pattern": "#####",
+   "representative_pattern_count": 7665,
+   "corp_category": "주소",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ##### (7,665/7,665); 선행 문맥 …##번지, 우편번호 / …시이며, 우편번호는 / …#이며, 우편번호는",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "GENDER",
+   "freq_full": 5433,
+   "share": 0.028681,
+   "distinct_values": 4,
+   "pattern_kinds": 2,
+   "sample_patterns": [
+    "○○",
+    "○○○○○"
+   ],
+   "representative_pattern": "○○",
+   "representative_pattern_count": 4100,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 ○○ (4,100/5,433); 선행 문맥 …성 / 성 정체성: / …A / 성 정체성: / …이며, 성 정체성은",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "IDCARDNUM",
+   "freq_full": 5428,
+   "share": 0.028655,
+   "distinct_values": 4976,
+   "pattern_kinds": 690,
+   "sample_patterns": [
+    "AAAAAAAAAA",
+    "AAAAAA#AAA",
+    "#AAAAAAAAA"
+   ],
+   "representative_pattern": "AAAAAAAAAA",
+   "representative_pattern_count": 228,
+   "corp_category": "주민등록번호",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 AAAAAAAAAA (228/5,428); 선행 문맥 … 신분 확인을 위해 / …AA#######와 / …#. 주민등록번호:",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "SOCIALNUM",
+   "freq_full": 5130,
+   "share": 0.027081,
+   "distinct_values": 4716,
+   "pattern_kinds": 1,
+   "sample_patterns": [
+    "##########"
+   ],
+   "representative_pattern": "##########",
+   "representative_pattern_count": 5130,
+   "corp_category": "외국인등록번호",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ########## (5,130/5,130); 선행 문맥 …#-#######와 / …#. 사회보장번호: / …#-#######과",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "DRIVERLICENSENUM",
+   "freq_full": 5077,
+   "share": 0.026802,
+   "distinct_values": 4670,
+   "pattern_kinds": 703,
+   "sample_patterns": [
+    "AAAAAAAAAA",
+    "A#AAAAAAAA",
+    "AAAAAA#AAA"
+   ],
+   "representative_pattern": "AAAAAAAAAA",
+   "representative_pattern_count": 199,
+   "corp_category": "운전면허번호",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 AAAAAAAAAA (199/5,077); 선행 문맥 …AA#######와 / …, 운전면허 번호는 / …와 운전면허 번호(",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "TAXNUM",
+   "freq_full": 4962,
+   "share": 0.026195,
+   "distinct_values": 4556,
+   "pattern_kinds": 1,
+   "sample_patterns": [
+    "######-#######"
+   ],
+   "representative_pattern": "######-#######",
+   "representative_pattern_count": 4962,
+   "corp_category": "주민등록번호",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ######-####### (4,962/4,962); 선행 문맥 …#########와 / … 세금 식별 번호: / …######## 및",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "SEX",
+   "freq_full": 4551,
+   "share": 0.024025,
+   "distinct_values": 6,
+   "pattern_kinds": 2,
+   "sample_patterns": [
+    "A",
+    "○○"
+   ],
+   "representative_pattern": "A",
+   "representative_pattern_count": 2318,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 A (2,318/4,551); 선행 문맥 …: ##세, 성별: / …##세이며, 성별은 / … 현재 ##세이며,",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "PASSPORTNUM",
+   "freq_full": 4020,
+   "share": 0.021222,
+   "distinct_values": 3765,
+   "pattern_kinds": 1,
+   "sample_patterns": [
+    "AA#######"
+   ],
+   "representative_pattern": "AA#######",
+   "representative_pattern_count": 4020,
+   "corp_category": "여권번호",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 AA####### (4,020/4,020); 선행 문맥 …이며, 여권 번호는 / …# - 여권 번호: / …#-#######와",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "TIME",
+   "freq_full": 1964,
+   "share": 0.010368,
+   "distinct_values": 1707,
+   "pattern_kinds": 14,
+   "sample_patterns": [
+    "○○ #○ ##○",
+    "##:##",
+    "##:##:##"
+   ],
+   "representative_pattern": "○○ #○ ##○",
+   "representative_pattern_count": 421,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 ○○ #○ ##○ (421/1,964); 선행 문맥 … 공유하겠습니다.\"",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "ORGANISATION",
+   "freq_full": 51,
+   "share": 0.000269,
+   "distinct_values": 51,
+   "pattern_kinds": 18,
+   "sample_patterns": [
+    "○○○○",
+    "○○○○○",
+    "○○○"
+   ],
+   "representative_pattern": "○○○○",
+   "representative_pattern_count": 9,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 ○○○○ (9/51)",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "AMOUNT",
+   "freq_full": 47,
+   "share": 0.000248,
+   "distinct_values": 47,
+   "pattern_kinds": 18,
+   "sample_patterns": [
+    "######.##",
+    "######",
+    "###,###.##"
+   ],
+   "representative_pattern": "######.##",
+   "representative_pattern_count": 8,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 ######.## (8/47)",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "URL",
+   "freq_full": 46,
+   "share": 0.000243,
+   "distinct_values": 46,
+   "pattern_kinds": 43,
+   "sample_patterns": [
+    "AAAAA://AAAAAAAAAA.AA.AA",
+    "AAAA://AAAAAAAAAA.AA/AAAAA",
+    "AAAA://AAAA-AAAA.AA"
+   ],
+   "representative_pattern": "AAAAA://AAAAAAAAAA.AA.AA",
+   "representative_pattern_count": 2,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 AAAAA://AAAAAAAAAA.AA.AA (2/46)",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "COUNTRY",
+   "freq_full": 27,
+   "share": 0.000143,
+   "distinct_values": 2,
+   "pattern_kinds": 2,
+   "sample_patterns": [
+    "AAAAA AAAAA",
+    "AA"
+   ],
+   "representative_pattern": "AAAAA AAAAA",
+   "representative_pattern_count": 14,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 AAAAA AAAAA (14/27)",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "BANKNAME",
+   "freq_full": 20,
+   "share": 0.000106,
+   "distinct_values": 15,
+   "pattern_kinds": 6,
+   "sample_patterns": [
+    "○○○○",
+    "○○○○○○",
+    "○○○○○"
+   ],
+   "representative_pattern": "○○○○",
+   "representative_pattern_count": 11,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 ○○○○ (11/20)",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "CURRENCY",
+   "freq_full": 15,
+   "share": 7.9e-05,
+   "distinct_values": 6,
+   "pattern_kinds": 4,
+   "sample_patterns": [
+    "AAA",
+    "○○○○ ○",
+    "₩"
+   ],
+   "representative_pattern": "AAA",
+   "representative_pattern_count": 6,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 AAA (6/15)",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "ACCOUNTNUM",
+   "freq_full": 12,
+   "share": 6.3e-05,
+   "distinct_values": 12,
+   "pattern_kinds": 10,
+   "sample_patterns": [
+    "#############",
+    "##########",
+    "##############"
+   ],
+   "representative_pattern": "#############",
+   "representative_pattern_count": 2,
+   "corp_category": "계좌번호",
+   "corp_mapped": "대응",
+   "definition": "관측 형식 ############# (2/12)",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "USERNAME",
+   "freq_full": 8,
+   "share": 4.2e-05,
+   "distinct_values": 8,
+   "pattern_kinds": 5,
+   "sample_patterns": [
+    "○○○",
+    "○",
+    "A##"
+   ],
+   "representative_pattern": "○○○",
+   "representative_pattern_count": 3,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 ○○○ (3/8)",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "PASSWORD",
+   "freq_full": 5,
+   "share": 2.6e-05,
+   "distinct_values": 5,
+   "pattern_kinds": 5,
+   "sample_patterns": [
+    "A##A#A#|+",
+    "AA\"AA%#AAA<",
+    "A#A#A#$A#AA"
+   ],
+   "representative_pattern": "A##A#A#|+",
+   "representative_pattern_count": 1,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 형식 A##A#A#|+ (1/5)",
+   "evidence": "관측 충분"
+  },
+  {
+   "label": "TIMEZONE",
+   "freq_full": 4,
+   "share": 2.1e-05,
+   "distinct_values": 1,
+   "pattern_kinds": 1,
+   "sample_patterns": [
+    "AAAA/AAAAA"
+   ],
+   "representative_pattern": "AAAA/AAAAA",
+   "representative_pattern_count": 4,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 부족",
+   "evidence": "관측 부족"
+  },
+  {
+   "label": "JOBTITLE",
+   "freq_full": 4,
+   "share": 2.1e-05,
+   "distinct_values": 4,
+   "pattern_kinds": 4,
+   "sample_patterns": [
+    "○○ ○○○",
+    "○○○",
+    "○○ ○○○ ○○"
+   ],
+   "representative_pattern": "○○ ○○○",
+   "representative_pattern_count": 1,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 부족",
+   "evidence": "관측 부족"
+  },
+  {
+   "label": "SALARY",
+   "freq_full": 2,
+   "share": 1.1e-05,
+   "distinct_values": 2,
+   "pattern_kinds": 2,
+   "sample_patterns": [
+    "#####",
+    "######"
+   ],
+   "representative_pattern": "#####",
+   "representative_pattern_count": 1,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 부족",
+   "evidence": "관측 부족"
+  },
+  {
+   "label": "IPV4",
+   "freq_full": 2,
+   "share": 1.1e-05,
+   "distinct_values": 2,
+   "pattern_kinds": 2,
+   "sample_patterns": [
+    "###.###.##.###",
+    "###.##.###.###"
+   ],
+   "representative_pattern": "###.###.##.###",
+   "representative_pattern_count": 1,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 부족",
+   "evidence": "관측 부족"
+  },
+  {
+   "label": "HOSPITALNAME",
+   "freq_full": 1,
+   "share": 5e-06,
+   "distinct_values": 1,
+   "pattern_kinds": 1,
+   "sample_patterns": [
+    "○○○ ○○○○○○○○"
+   ],
+   "representative_pattern": "○○○ ○○○○○○○○",
+   "representative_pattern_count": 1,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 부족",
+   "evidence": "관측 부족"
+  },
+  {
+   "label": "HEIGHT",
+   "freq_full": 1,
+   "share": 5e-06,
+   "distinct_values": 1,
+   "pattern_kinds": 1,
+   "sample_patterns": [
+    "### AA"
+   ],
+   "representative_pattern": "### AA",
+   "representative_pattern_count": 1,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 부족",
+   "evidence": "관측 부족"
+  },
+  {
+   "label": "ALLERGIES",
+   "freq_full": 1,
+   "share": 5e-06,
+   "distinct_values": 1,
+   "pattern_kinds": 1,
+   "sample_patterns": [
+    "AAAAAAAAA"
+   ],
+   "representative_pattern": "AAAAAAAAA",
+   "representative_pattern_count": 1,
+   "corp_category": null,
+   "corp_mapped": "미대응",
+   "definition": "관측 부족",
+   "evidence": "관측 부족"
+  }
+ ]
+}

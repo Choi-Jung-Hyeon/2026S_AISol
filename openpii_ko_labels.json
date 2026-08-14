@@ -1,0 +1,2750 @@
+{
+  "dataset": "ai4privacy/pii-masking-openpii-1.5m",
+  "subset": "language='ko'",
+  "ko_rows": 26498,
+  "total_pii_items": 189429,
+  "label_count": 36,
+  "labels": {
+    "GIVENNAME": {
+      "count": 22725,
+      "row_count": 18123,
+      "share_of_items": 0.119966,
+      "distinct_values": 8118,
+      "value_len": {
+        "min": 1,
+        "median": 2,
+        "max": 26,
+        "mean": 4.1
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○",
+          "count": 12550
+        },
+        {
+          "pattern": "○○ ○○",
+          "count": 5277
+        },
+        {
+          "pattern": "AAAAAA",
+          "count": 705
+        },
+        {
+          "pattern": "AAAAA",
+          "count": 665
+        },
+        {
+          "pattern": "AAAAAAA",
+          "count": 537
+        },
+        {
+          "pattern": "AAAA",
+          "count": 300
+        },
+        {
+          "pattern": "AAAAAAAA",
+          "count": 279
+        },
+        {
+          "pattern": "AAAAAAAAA",
+          "count": 159
+        },
+        {
+          "pattern": "AAAAAAAAAA",
+          "count": 91
+        },
+        {
+          "pattern": "AAAAAA AAAAAA",
+          "count": 84
+        }
+      ],
+      "top_values": [
+        {
+          "value": "준기",
+          "count": 29
+        },
+        {
+          "value": "세윤",
+          "count": 28
+        },
+        {
+          "value": "정란",
+          "count": 26
+        },
+        {
+          "value": "미애",
+          "count": 25
+        },
+        {
+          "value": "규철",
+          "count": 24
+        },
+        {
+          "value": "동준",
+          "count": 24
+        },
+        {
+          "value": "근휘",
+          "count": 24
+        },
+        {
+          "value": "새롬",
+          "count": 24
+        },
+        {
+          "value": "근율",
+          "count": 24
+        },
+        {
+          "value": "도훈",
+          "count": 23
+        }
+      ],
+      "sample_values": [
+        "준기",
+        "세윤",
+        "정란",
+        "미애",
+        "규철"
+      ]
+    },
+    "DATE": {
+      "count": 21077,
+      "row_count": 17183,
+      "share_of_items": 0.111266,
+      "distinct_values": 12964,
+      "value_len": {
+        "min": 5,
+        "median": 10,
+        "max": 19,
+        "mean": 10.89
+      },
+      "top_patterns": [
+        {
+          "pattern": "##/##/####",
+          "count": 6947
+        },
+        {
+          "pattern": "####-##-##A##:##:##",
+          "count": 3569
+        },
+        {
+          "pattern": "#○/##",
+          "count": 2652
+        },
+        {
+          "pattern": "#○ ##, ####",
+          "count": 1915
+        },
+        {
+          "pattern": "## #○ ####",
+          "count": 1831
+        },
+        {
+          "pattern": "##○/##",
+          "count": 867
+        },
+        {
+          "pattern": "#○ #, ####",
+          "count": 757
+        },
+        {
+          "pattern": "# #○ ####",
+          "count": 732
+        },
+        {
+          "pattern": "##○ ##, ####",
+          "count": 630
+        },
+        {
+          "pattern": "## ##○ ####",
+          "count": 600
+        }
+      ],
+      "top_values": [
+        {
+          "value": "4월/59",
+          "count": 13
+        },
+        {
+          "value": "1월/94",
+          "count": 12
+        },
+        {
+          "value": "12월/92",
+          "count": 12
+        },
+        {
+          "value": "6월/24",
+          "count": 12
+        },
+        {
+          "value": "8월/95",
+          "count": 12
+        },
+        {
+          "value": "5월/44",
+          "count": 11
+        },
+        {
+          "value": "10월/22",
+          "count": 11
+        },
+        {
+          "value": "2월/53",
+          "count": 11
+        },
+        {
+          "value": "3월/62",
+          "count": 11
+        },
+        {
+          "value": "1월/75",
+          "count": 11
+        }
+      ],
+      "sample_values": [
+        "4월/59",
+        "1월/94",
+        "12월/92",
+        "6월/24",
+        "8월/95"
+      ]
+    },
+    "SURNAME": {
+      "count": 17062,
+      "row_count": 14831,
+      "share_of_items": 0.090071,
+      "distinct_values": 5886,
+      "value_len": {
+        "min": 1,
+        "median": 2,
+        "max": 38,
+        "mean": 3.77
+      },
+      "top_patterns": [
+        {
+          "pattern": "○",
+          "count": 8330
+        },
+        {
+          "pattern": "○ ○",
+          "count": 2030
+        },
+        {
+          "pattern": "○○",
+          "count": 1261
+        },
+        {
+          "pattern": "○ ○ ○",
+          "count": 932
+        },
+        {
+          "pattern": "AAAAAAA",
+          "count": 402
+        },
+        {
+          "pattern": "AAAAAA",
+          "count": 397
+        },
+        {
+          "pattern": "AAAAAAAA",
+          "count": 332
+        },
+        {
+          "pattern": "AAAAA",
+          "count": 300
+        },
+        {
+          "pattern": "○○ ○",
+          "count": 286
+        },
+        {
+          "pattern": "○ ○○",
+          "count": 280
+        }
+      ],
+      "top_values": [
+        {
+          "value": "허",
+          "count": 68
+        },
+        {
+          "value": "제",
+          "count": 64
+        },
+        {
+          "value": "이",
+          "count": 63
+        },
+        {
+          "value": "방",
+          "count": 63
+        },
+        {
+          "value": "왕",
+          "count": 63
+        },
+        {
+          "value": "난",
+          "count": 62
+        },
+        {
+          "value": "경",
+          "count": 61
+        },
+        {
+          "value": "망절",
+          "count": 60
+        },
+        {
+          "value": "명",
+          "count": 60
+        },
+        {
+          "value": "산",
+          "count": 59
+        }
+      ],
+      "sample_values": [
+        "허",
+        "제",
+        "이",
+        "방",
+        "왕"
+      ]
+    },
+    "EMAIL": {
+      "count": 13362,
+      "row_count": 12751,
+      "share_of_items": 0.070538,
+      "distinct_values": 9633,
+      "value_len": {
+        "min": 9,
+        "median": 15,
+        "max": 32,
+        "mean": 14.73
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○○@AAAAAAA.AAA",
+          "count": 765
+        },
+        {
+          "pattern": "○○○@AAAAA.AAA",
+          "count": 742
+        },
+        {
+          "pattern": "○@AAAAA.AAA",
+          "count": 652
+        },
+        {
+          "pattern": "○@AAAAAAA.AAA",
+          "count": 609
+        },
+        {
+          "pattern": "○○@AAAAAAA.AAA",
+          "count": 588
+        },
+        {
+          "pattern": "○○@AAAAA.AAA",
+          "count": 583
+        },
+        {
+          "pattern": "○○○@AAAAAAAAAA.AAA",
+          "count": 403
+        },
+        {
+          "pattern": "○○○@AAA.AAA",
+          "count": 387
+        },
+        {
+          "pattern": "○○○@AAAAAAAA.AAA",
+          "count": 372
+        },
+        {
+          "pattern": "○@AAAAAAAAAA.AAA",
+          "count": 320
+        }
+      ],
+      "top_values": [
+        {
+          "value": "성@tutanota.com",
+          "count": 14
+        },
+        {
+          "value": "S@tutanota.com",
+          "count": 13
+        },
+        {
+          "value": "M@yahoo.com",
+          "count": 12
+        },
+        {
+          "value": "P@hotmail.com",
+          "count": 11
+        },
+        {
+          "value": "A@gmail.com",
+          "count": 11
+        },
+        {
+          "value": "M@outlook.com",
+          "count": 10
+        },
+        {
+          "value": "명@tutanota.com",
+          "count": 10
+        },
+        {
+          "value": "성@outlook.com",
+          "count": 10
+        },
+        {
+          "value": "S@gmail.com",
+          "count": 10
+        },
+        {
+          "value": "광@protonmail.com",
+          "count": 9
+        }
+      ],
+      "sample_values": [
+        "성@tutanota.com",
+        "S@tutanota.com",
+        "M@yahoo.com",
+        "P@hotmail.com",
+        "A@gmail.com"
+      ]
+    },
+    "TITLE": {
+      "count": 12686,
+      "row_count": 11758,
+      "share_of_items": 0.06697,
+      "distinct_values": 30,
+      "value_len": {
+        "min": 1,
+        "median": 3,
+        "max": 16,
+        "mean": 2.63
+      },
+      "top_patterns": [
+        {
+          "pattern": "○",
+          "count": 5709
+        },
+        {
+          "pattern": "AAA",
+          "count": 3038
+        },
+        {
+          "pattern": "AAAA",
+          "count": 2849
+        },
+        {
+          "pattern": "○○○",
+          "count": 462
+        },
+        {
+          "pattern": "AAAAAAAAAA",
+          "count": 145
+        },
+        {
+          "pattern": "AAAAAAAA",
+          "count": 139
+        },
+        {
+          "pattern": "AAAAAAAAAAAA",
+          "count": 96
+        },
+        {
+          "pattern": "AAAAAAAAA",
+          "count": 85
+        },
+        {
+          "pattern": "○○○○",
+          "count": 57
+        },
+        {
+          "pattern": "AAAAAAAAAAAAAAAA",
+          "count": 53
+        }
+      ],
+      "top_values": [
+        {
+          "value": "gun",
+          "count": 2919
+        },
+        {
+          "value": "yang",
+          "count": 2849
+        },
+        {
+          "value": "군",
+          "count": 2817
+        },
+        {
+          "value": "양",
+          "count": 2799
+        },
+        {
+          "value": "nim",
+          "count": 73
+        },
+        {
+          "value": "선생님",
+          "count": 66
+        },
+        {
+          "value": "회장님",
+          "count": 65
+        },
+        {
+          "value": "gwajangnim",
+          "count": 57
+        },
+        {
+          "value": "변호사님",
+          "count": 57
+        },
+        {
+          "value": "wonjangnim",
+          "count": 55
+        }
+      ],
+      "sample_values": [
+        "gun",
+        "yang",
+        "군",
+        "양",
+        "nim"
+      ]
+    },
+    "CITY": {
+      "count": 12100,
+      "row_count": 11652,
+      "share_of_items": 0.063876,
+      "distinct_values": 693,
+      "value_len": {
+        "min": 3,
+        "median": 5,
+        "max": 29,
+        "mean": 7.19
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○○○○",
+          "count": 3462
+        },
+        {
+          "pattern": "○○○",
+          "count": 3136
+        },
+        {
+          "pattern": "○○○○○ ○○#○",
+          "count": 1545
+        },
+        {
+          "pattern": "○○○○○ ○○#○ ○○#○",
+          "count": 881
+        },
+        {
+          "pattern": "○○○○○ ○○○",
+          "count": 841
+        },
+        {
+          "pattern": "○○○○○○○",
+          "count": 639
+        },
+        {
+          "pattern": "○○○○○ ○○○ ○○○",
+          "count": 450
+        },
+        {
+          "pattern": "○○○○○ ○○○○○",
+          "count": 172
+        },
+        {
+          "pattern": "○○○○○ ○○",
+          "count": 138
+        },
+        {
+          "pattern": "○○○○○ ○○○○○ ○○○○○",
+          "count": 89
+        }
+      ],
+      "top_values": [
+        {
+          "value": "수원시",
+          "count": 857
+        },
+        {
+          "value": "창원시",
+          "count": 765
+        },
+        {
+          "value": "청주시",
+          "count": 701
+        },
+        {
+          "value": "울산광역시",
+          "count": 678
+        },
+        {
+          "value": "세종특별자치시",
+          "count": 639
+        },
+        {
+          "value": "대전광역시",
+          "count": 593
+        },
+        {
+          "value": "제주시",
+          "count": 573
+        },
+        {
+          "value": "광주광역시",
+          "count": 516
+        },
+        {
+          "value": "인천광역시",
+          "count": 444
+        },
+        {
+          "value": "서울특별시",
+          "count": 438
+        }
+      ],
+      "sample_values": [
+        "수원시",
+        "창원시",
+        "청주시",
+        "울산광역시",
+        "세종특별자치시"
+      ]
+    },
+    "TELEPHONENUM": {
+      "count": 10594,
+      "row_count": 10198,
+      "share_of_items": 0.055926,
+      "distinct_values": 8955,
+      "value_len": {
+        "min": 12,
+        "median": 15,
+        "max": 18,
+        "mean": 14.45
+      },
+      "top_patterns": [
+        {
+          "pattern": "+####### ####",
+          "count": 145
+        },
+        {
+          "pattern": "+#######-####",
+          "count": 133
+        },
+        {
+          "pattern": "+## #########",
+          "count": 131
+        },
+        {
+          "pattern": "+##.#########",
+          "count": 122
+        },
+        {
+          "pattern": "+#######.####",
+          "count": 113
+        },
+        {
+          "pattern": "###-####### ",
+          "count": 112
+        },
+        {
+          "pattern": "+##-#########",
+          "count": 110
+        },
+        {
+          "pattern": "#### ########",
+          "count": 107
+        },
+        {
+          "pattern": "#####.##### ",
+          "count": 103
+        },
+        {
+          "pattern": "### ####### ",
+          "count": 103
+        }
+      ],
+      "top_values": [
+        {
+          "value": "+82 72-607-3022",
+          "count": 4
+        },
+        {
+          "value": "01-1514 5442",
+          "count": 4
+        },
+        {
+          "value": "07.2948-6957",
+          "count": 4
+        },
+        {
+          "value": "3523-201-0082",
+          "count": 4
+        },
+        {
+          "value": "0082229-610.5385",
+          "count": 4
+        },
+        {
+          "value": "9707.421.1121",
+          "count": 4
+        },
+        {
+          "value": "00824 97-504-6233",
+          "count": 4
+        },
+        {
+          "value": "0906 78038087",
+          "count": 4
+        },
+        {
+          "value": "+82-93221.5680",
+          "count": 4
+        },
+        {
+          "value": "+82 154.474-4761",
+          "count": 4
+        }
+      ],
+      "sample_values": [
+        "+82 72-607-3022",
+        "01-1514 5442",
+        "07.2948-6957",
+        "3523-201-0082",
+        "0082229-610.5385"
+      ]
+    },
+    "AGE": {
+      "count": 9733,
+      "row_count": 9275,
+      "share_of_items": 0.051381,
+      "distinct_values": 90,
+      "value_len": {
+        "min": 1,
+        "median": 2,
+        "max": 2,
+        "mean": 1.89
+      },
+      "top_patterns": [
+        {
+          "pattern": "##",
+          "count": 8619
+        },
+        {
+          "pattern": "#",
+          "count": 1114
+        }
+      ],
+      "top_values": [
+        {
+          "value": "51",
+          "count": 136
+        },
+        {
+          "value": "77",
+          "count": 131
+        },
+        {
+          "value": "71",
+          "count": 129
+        },
+        {
+          "value": "7",
+          "count": 126
+        },
+        {
+          "value": "72",
+          "count": 125
+        },
+        {
+          "value": "86",
+          "count": 124
+        },
+        {
+          "value": "80",
+          "count": 124
+        },
+        {
+          "value": "75",
+          "count": 123
+        },
+        {
+          "value": "56",
+          "count": 122
+        },
+        {
+          "value": "6",
+          "count": 122
+        }
+      ],
+      "sample_values": [
+        "51",
+        "77",
+        "71",
+        "7",
+        "72"
+      ]
+    },
+    "BUILDINGNUM": {
+      "count": 8934,
+      "row_count": 8868,
+      "share_of_items": 0.047163,
+      "distinct_values": 2513,
+      "value_len": {
+        "min": 1,
+        "median": 3,
+        "max": 12,
+        "mean": 3.17
+      },
+      "top_patterns": [
+        {
+          "pattern": "###",
+          "count": 4501
+        },
+        {
+          "pattern": "####",
+          "count": 2724
+        },
+        {
+          "pattern": "##",
+          "count": 1253
+        },
+        {
+          "pattern": "#",
+          "count": 192
+        },
+        {
+          "pattern": "##-#",
+          "count": 85
+        },
+        {
+          "pattern": "##-##",
+          "count": 52
+        },
+        {
+          "pattern": "###-##",
+          "count": 43
+        },
+        {
+          "pattern": "#-#",
+          "count": 26
+        },
+        {
+          "pattern": "###-#",
+          "count": 26
+        },
+        {
+          "pattern": "#-##",
+          "count": 11
+        }
+      ],
+      "top_values": [
+        {
+          "value": "7",
+          "count": 45
+        },
+        {
+          "value": "3",
+          "count": 42
+        },
+        {
+          "value": "33",
+          "count": 30
+        },
+        {
+          "value": "28",
+          "count": 26
+        },
+        {
+          "value": "39",
+          "count": 25
+        },
+        {
+          "value": "24",
+          "count": 25
+        },
+        {
+          "value": "30",
+          "count": 24
+        },
+        {
+          "value": "102",
+          "count": 23
+        },
+        {
+          "value": "8",
+          "count": 23
+        },
+        {
+          "value": "20",
+          "count": 23
+        }
+      ],
+      "sample_values": [
+        "7",
+        "3",
+        "33",
+        "28",
+        "39"
+      ]
+    },
+    "STREET": {
+      "count": 8766,
+      "row_count": 8704,
+      "share_of_items": 0.046276,
+      "distinct_values": 2604,
+      "value_len": {
+        "min": 1,
+        "median": 5,
+        "max": 22,
+        "mean": 5.45
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○○",
+          "count": 2523
+        },
+        {
+          "pattern": "○○○○",
+          "count": 1351
+        },
+        {
+          "pattern": "○○○###○○",
+          "count": 791
+        },
+        {
+          "pattern": "○○○##○○",
+          "count": 617
+        },
+        {
+          "pattern": "○○○○○",
+          "count": 450
+        },
+        {
+          "pattern": "○○○○###○○",
+          "count": 367
+        },
+        {
+          "pattern": "○○○##○",
+          "count": 359
+        },
+        {
+          "pattern": "○○○#○",
+          "count": 239
+        },
+        {
+          "pattern": "○○#○",
+          "count": 225
+        },
+        {
+          "pattern": "○○○○##○○",
+          "count": 189
+        }
+      ],
+      "top_values": [
+        {
+          "value": "금강 자전거길",
+          "count": 39
+        },
+        {
+          "value": "대학로",
+          "count": 38
+        },
+        {
+          "value": "2순환로",
+          "count": 36
+        },
+        {
+          "value": "낙남정맥",
+          "count": 30
+        },
+        {
+          "value": "3순환로",
+          "count": 29
+        },
+        {
+          "value": "등산로",
+          "count": 29
+        },
+        {
+          "value": "1순환로",
+          "count": 25
+        },
+        {
+          "value": "경인로",
+          "count": 24
+        },
+        {
+          "value": "낙동정맥",
+          "count": 24
+        },
+        {
+          "value": "공단로",
+          "count": 24
+        }
+      ],
+      "sample_values": [
+        "금강 자전거길",
+        "대학로",
+        "2순환로",
+        "낙남정맥",
+        "3순환로"
+      ]
+    },
+    "CREDITCARDNUMBER": {
+      "count": 7914,
+      "row_count": 7576,
+      "share_of_items": 0.041778,
+      "distinct_values": 6980,
+      "value_len": {
+        "min": 12,
+        "median": 16,
+        "max": 19,
+        "mean": 16.01
+      },
+      "top_patterns": [
+        {
+          "pattern": "################",
+          "count": 4637
+        },
+        {
+          "pattern": "###################",
+          "count": 916
+        },
+        {
+          "pattern": "###############",
+          "count": 846
+        },
+        {
+          "pattern": "##############",
+          "count": 455
+        },
+        {
+          "pattern": "#############",
+          "count": 430
+        },
+        {
+          "pattern": "#################",
+          "count": 284
+        },
+        {
+          "pattern": "##################",
+          "count": 250
+        },
+        {
+          "pattern": "############",
+          "count": 96
+        }
+      ],
+      "top_values": [
+        {
+          "value": "2203592030922834",
+          "count": 4
+        },
+        {
+          "value": "2201598763102144",
+          "count": 4
+        },
+        {
+          "value": "373834907214807",
+          "count": 4
+        },
+        {
+          "value": "6263262669061966",
+          "count": 4
+        },
+        {
+          "value": "371016789804541",
+          "count": 3
+        },
+        {
+          "value": "5089124770166807",
+          "count": 3
+        },
+        {
+          "value": "3142935285013947299",
+          "count": 3
+        },
+        {
+          "value": "3544539375366588",
+          "count": 3
+        },
+        {
+          "value": "3584565927396292",
+          "count": 3
+        },
+        {
+          "value": "3173186731596860465",
+          "count": 3
+        }
+      ],
+      "sample_values": [
+        "2203592030922834",
+        "2201598763102144",
+        "373834907214807",
+        "6263262669061966",
+        "371016789804541"
+      ]
+    },
+    "ZIPCODE": {
+      "count": 7665,
+      "row_count": 7632,
+      "share_of_items": 0.040464,
+      "distinct_values": 1659,
+      "value_len": {
+        "min": 5,
+        "median": 5,
+        "max": 5,
+        "mean": 5.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "#####",
+          "count": 7665
+        }
+      ],
+      "top_values": [
+        {
+          "value": "28503",
+          "count": 36
+        },
+        {
+          "value": "28314",
+          "count": 34
+        },
+        {
+          "value": "30083",
+          "count": 32
+        },
+        {
+          "value": "51408",
+          "count": 30
+        },
+        {
+          "value": "44984",
+          "count": 29
+        },
+        {
+          "value": "35352",
+          "count": 27
+        },
+        {
+          "value": "51563",
+          "count": 26
+        },
+        {
+          "value": "28779",
+          "count": 26
+        },
+        {
+          "value": "30060",
+          "count": 25
+        },
+        {
+          "value": "30089",
+          "count": 25
+        }
+      ],
+      "sample_values": [
+        "28503",
+        "28314",
+        "30083",
+        "51408",
+        "44984"
+      ]
+    },
+    "GENDER": {
+      "count": 5433,
+      "row_count": 5381,
+      "share_of_items": 0.028681,
+      "distinct_values": 4,
+      "value_len": {
+        "min": 2,
+        "median": 2,
+        "max": 5,
+        "mean": 2.74
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○",
+          "count": 4100
+        },
+        {
+          "pattern": "○○○○○",
+          "count": 1333
+        }
+      ],
+      "top_values": [
+        {
+          "value": "여성",
+          "count": 1397
+        },
+        {
+          "value": "남성",
+          "count": 1356
+        },
+        {
+          "value": "기타",
+          "count": 1347
+        },
+        {
+          "value": "논바이너리",
+          "count": 1333
+        }
+      ],
+      "sample_values": [
+        "여성",
+        "남성",
+        "기타",
+        "논바이너리"
+      ]
+    },
+    "IDCARDNUM": {
+      "count": 5428,
+      "row_count": 5413,
+      "share_of_items": 0.028655,
+      "distinct_values": 4976,
+      "value_len": {
+        "min": 10,
+        "median": 10,
+        "max": 10,
+        "mean": 10.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "AAAAAAAAAA",
+          "count": 228
+        },
+        {
+          "pattern": "AAAAAA#AAA",
+          "count": 91
+        },
+        {
+          "pattern": "AAAA#AAAAA",
+          "count": 90
+        },
+        {
+          "pattern": "#AAAAAAAAA",
+          "count": 90
+        },
+        {
+          "pattern": "AAAAAAAA#A",
+          "count": 89
+        },
+        {
+          "pattern": "A#AAAAAAAA",
+          "count": 84
+        },
+        {
+          "pattern": "AAAAAAAAA#",
+          "count": 78
+        },
+        {
+          "pattern": "AAAAA#AAAA",
+          "count": 77
+        },
+        {
+          "pattern": "AAA#AAAAAA",
+          "count": 72
+        },
+        {
+          "pattern": "AAAAAAA#AA",
+          "count": 72
+        }
+      ],
+      "top_values": [
+        {
+          "value": "SMFTRK9YJH",
+          "count": 4
+        },
+        {
+          "value": "0WL8Z28YEL",
+          "count": 4
+        },
+        {
+          "value": "KAOKR8TWG1",
+          "count": 3
+        },
+        {
+          "value": "TZFWA7TBDI",
+          "count": 3
+        },
+        {
+          "value": "NJ49D7WTA0",
+          "count": 3
+        },
+        {
+          "value": "J8OKK90XA6",
+          "count": 3
+        },
+        {
+          "value": "QMOTN9DRMZ",
+          "count": 3
+        },
+        {
+          "value": "VL7IOGBY4F",
+          "count": 3
+        },
+        {
+          "value": "ED3K8Y24B7",
+          "count": 3
+        },
+        {
+          "value": "7JCEGMQ1ZY",
+          "count": 3
+        }
+      ],
+      "sample_values": [
+        "SMFTRK9YJH",
+        "0WL8Z28YEL",
+        "KAOKR8TWG1",
+        "TZFWA7TBDI",
+        "NJ49D7WTA0"
+      ]
+    },
+    "SOCIALNUM": {
+      "count": 5130,
+      "row_count": 5121,
+      "share_of_items": 0.027081,
+      "distinct_values": 4716,
+      "value_len": {
+        "min": 10,
+        "median": 10,
+        "max": 10,
+        "mean": 10.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "##########",
+          "count": 5130
+        }
+      ],
+      "top_values": [
+        {
+          "value": "2396587993",
+          "count": 4
+        },
+        {
+          "value": "3675928826",
+          "count": 3
+        },
+        {
+          "value": "1727458922",
+          "count": 3
+        },
+        {
+          "value": "5491060410",
+          "count": 3
+        },
+        {
+          "value": "1531120391",
+          "count": 3
+        },
+        {
+          "value": "1493127334",
+          "count": 3
+        },
+        {
+          "value": "2756902410",
+          "count": 3
+        },
+        {
+          "value": "8269933657",
+          "count": 3
+        },
+        {
+          "value": "7083703427",
+          "count": 3
+        },
+        {
+          "value": "0776281533",
+          "count": 3
+        }
+      ],
+      "sample_values": [
+        "2396587993",
+        "3675928826",
+        "1727458922",
+        "5491060410",
+        "1531120391"
+      ]
+    },
+    "DRIVERLICENSENUM": {
+      "count": 5077,
+      "row_count": 5062,
+      "share_of_items": 0.026802,
+      "distinct_values": 4670,
+      "value_len": {
+        "min": 10,
+        "median": 10,
+        "max": 10,
+        "mean": 10.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "AAAAAAAAAA",
+          "count": 199
+        },
+        {
+          "pattern": "A#AAAAAAAA",
+          "count": 98
+        },
+        {
+          "pattern": "AAAAAA#AAA",
+          "count": 82
+        },
+        {
+          "pattern": "AAA#AAAAAA",
+          "count": 81
+        },
+        {
+          "pattern": "AAAAAAAA#A",
+          "count": 81
+        },
+        {
+          "pattern": "#AAAAAAAAA",
+          "count": 77
+        },
+        {
+          "pattern": "AAAAAAA#AA",
+          "count": 75
+        },
+        {
+          "pattern": "AA#AAAAAAA",
+          "count": 75
+        },
+        {
+          "pattern": "AAAAA#AAAA",
+          "count": 73
+        },
+        {
+          "pattern": "AAAA#AAAAA",
+          "count": 69
+        }
+      ],
+      "top_values": [
+        {
+          "value": "ZB0JWQFATW",
+          "count": 3
+        },
+        {
+          "value": "VL3TVPRCJQ",
+          "count": 3
+        },
+        {
+          "value": "GS9ET4XDQ7",
+          "count": 3
+        },
+        {
+          "value": "OJRBZSFTLB",
+          "count": 3
+        },
+        {
+          "value": "B0IMOXRO00",
+          "count": 3
+        },
+        {
+          "value": "MWA7C0AFX0",
+          "count": 3
+        },
+        {
+          "value": "OWCYFVF1O4",
+          "count": 3
+        },
+        {
+          "value": "T4FQME1GTW",
+          "count": 3
+        },
+        {
+          "value": "0UAARA8F2S",
+          "count": 3
+        },
+        {
+          "value": "UTDVMCQ986",
+          "count": 3
+        }
+      ],
+      "sample_values": [
+        "ZB0JWQFATW",
+        "VL3TVPRCJQ",
+        "GS9ET4XDQ7",
+        "OJRBZSFTLB",
+        "B0IMOXRO00"
+      ]
+    },
+    "TAXNUM": {
+      "count": 4962,
+      "row_count": 4953,
+      "share_of_items": 0.026195,
+      "distinct_values": 4556,
+      "value_len": {
+        "min": 14,
+        "median": 14,
+        "max": 14,
+        "mean": 14.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "######-#######",
+          "count": 4962
+        }
+      ],
+      "top_values": [
+        {
+          "value": "931115-4268403",
+          "count": 4
+        },
+        {
+          "value": "660307-2380465",
+          "count": 3
+        },
+        {
+          "value": "991209-3260068",
+          "count": 3
+        },
+        {
+          "value": "030819-2869552",
+          "count": 3
+        },
+        {
+          "value": "710728-1844310",
+          "count": 3
+        },
+        {
+          "value": "190507-2423804",
+          "count": 3
+        },
+        {
+          "value": "700319-2891348",
+          "count": 3
+        },
+        {
+          "value": "010514-4942436",
+          "count": 3
+        },
+        {
+          "value": "790303-2692468",
+          "count": 3
+        },
+        {
+          "value": "240625-4373236",
+          "count": 3
+        }
+      ],
+      "sample_values": [
+        "931115-4268403",
+        "660307-2380465",
+        "991209-3260068",
+        "030819-2869552",
+        "710728-1844310"
+      ]
+    },
+    "SEX": {
+      "count": 4551,
+      "row_count": 4465,
+      "share_of_items": 0.024025,
+      "distinct_values": 6,
+      "value_len": {
+        "min": 1,
+        "median": 1,
+        "max": 2,
+        "mean": 1.49
+      },
+      "top_patterns": [
+        {
+          "pattern": "A",
+          "count": 2318
+        },
+        {
+          "pattern": "○○",
+          "count": 2233
+        }
+      ],
+      "top_values": [
+        {
+          "value": "F",
+          "count": 1043
+        },
+        {
+          "value": "M",
+          "count": 1015
+        },
+        {
+          "value": "남성",
+          "count": 1012
+        },
+        {
+          "value": "여성",
+          "count": 1008
+        },
+        {
+          "value": "O",
+          "count": 260
+        },
+        {
+          "value": "기타",
+          "count": 213
+        }
+      ],
+      "sample_values": [
+        "F",
+        "M",
+        "남성",
+        "여성",
+        "O"
+      ]
+    },
+    "PASSPORTNUM": {
+      "count": 4020,
+      "row_count": 4011,
+      "share_of_items": 0.021222,
+      "distinct_values": 3765,
+      "value_len": {
+        "min": 9,
+        "median": 9,
+        "max": 9,
+        "mean": 9.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "AA#######",
+          "count": 4020
+        }
+      ],
+      "top_values": [
+        {
+          "value": "OE2181486",
+          "count": 3
+        },
+        {
+          "value": "JK2232714",
+          "count": 3
+        },
+        {
+          "value": "OB4225806",
+          "count": 3
+        },
+        {
+          "value": "QI1592883",
+          "count": 3
+        },
+        {
+          "value": "LH3530127",
+          "count": 3
+        },
+        {
+          "value": "CU3093897",
+          "count": 3
+        },
+        {
+          "value": "OP1439812",
+          "count": 3
+        },
+        {
+          "value": "AG1223184",
+          "count": 3
+        },
+        {
+          "value": "JQ1895255",
+          "count": 3
+        },
+        {
+          "value": "AJ6337840",
+          "count": 3
+        }
+      ],
+      "sample_values": [
+        "OE2181486",
+        "JK2232714",
+        "OB4225806",
+        "QI1592883",
+        "LH3530127"
+      ]
+    },
+    "TIME": {
+      "count": 1964,
+      "row_count": 735,
+      "share_of_items": 0.010368,
+      "distinct_values": 1707,
+      "value_len": {
+        "min": 5,
+        "median": 8,
+        "max": 11,
+        "mean": 8.08
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○ #○ ##○",
+          "count": 421
+        },
+        {
+          "pattern": "##:##",
+          "count": 326
+        },
+        {
+          "pattern": "##:##:##",
+          "count": 326
+        },
+        {
+          "pattern": "#:## AA",
+          "count": 257
+        },
+        {
+          "pattern": "#:##:## AA",
+          "count": 231
+        },
+        {
+          "pattern": "○○ ##○ ##○",
+          "count": 134
+        },
+        {
+          "pattern": "○○ #○ #○",
+          "count": 83
+        },
+        {
+          "pattern": "##:##:## AA",
+          "count": 75
+        },
+        {
+          "pattern": "##:## AA",
+          "count": 63
+        },
+        {
+          "pattern": "○○ ##○ #○",
+          "count": 28
+        }
+      ],
+      "top_values": [
+        {
+          "value": "오후 3시 25분",
+          "count": 4
+        },
+        {
+          "value": "오전 2시 54분",
+          "count": 3
+        },
+        {
+          "value": "22:46",
+          "count": 3
+        },
+        {
+          "value": "오전 9시 반",
+          "count": 3
+        },
+        {
+          "value": "오후 9시 10분",
+          "count": 3
+        },
+        {
+          "value": "오후 1시 2분",
+          "count": 3
+        },
+        {
+          "value": "오후 10시 24분",
+          "count": 3
+        },
+        {
+          "value": "오후 9시 49분",
+          "count": 3
+        },
+        {
+          "value": "오전 5시 21분",
+          "count": 3
+        },
+        {
+          "value": "오후 9시 31분",
+          "count": 3
+        }
+      ],
+      "sample_values": [
+        "오후 3시 25분",
+        "오전 2시 54분",
+        "22:46",
+        "오전 9시 반",
+        "오후 9시 10분"
+      ]
+    },
+    "ORGANISATION": {
+      "count": 51,
+      "row_count": 42,
+      "share_of_items": 0.000269,
+      "distinct_values": 51,
+      "value_len": {
+        "min": 2,
+        "median": 5,
+        "max": 11,
+        "mean": 5.69
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○○○",
+          "count": 9
+        },
+        {
+          "pattern": "○○○○○",
+          "count": 9
+        },
+        {
+          "pattern": "○○○",
+          "count": 8
+        },
+        {
+          "pattern": "○○○○○○○○",
+          "count": 5
+        },
+        {
+          "pattern": "○○○○○○○",
+          "count": 3
+        },
+        {
+          "pattern": "○○○○○○○○○",
+          "count": 2
+        },
+        {
+          "pattern": "○○○○○ ○○○○",
+          "count": 2
+        },
+        {
+          "pattern": "○○ (○○)",
+          "count": 2
+        },
+        {
+          "pattern": "○○○○○○",
+          "count": 2
+        },
+        {
+          "pattern": "○○○○ ○○○",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "주식회사 트이다",
+          "count": 1
+        },
+        {
+          "value": "하이브미디어코프",
+          "count": 1
+        },
+        {
+          "value": "코오롱ENP",
+          "count": 1
+        },
+        {
+          "value": "패밀리 프로덕션",
+          "count": 1
+        },
+        {
+          "value": "에뛰드",
+          "count": 1
+        },
+        {
+          "value": "인크루트",
+          "count": 1
+        },
+        {
+          "value": "포스코그룹",
+          "count": 1
+        },
+        {
+          "value": "한국음악교육공학회",
+          "count": 1
+        },
+        {
+          "value": "디아이",
+          "count": 1
+        },
+        {
+          "value": "팬더웨일컴퍼니",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "주식회사 트이다",
+        "하이브미디어코프",
+        "코오롱ENP",
+        "패밀리 프로덕션",
+        "에뛰드"
+      ]
+    },
+    "AMOUNT": {
+      "count": 47,
+      "row_count": 40,
+      "share_of_items": 0.000248,
+      "distinct_values": 47,
+      "value_len": {
+        "min": 6,
+        "median": 9,
+        "max": 13,
+        "mean": 8.98
+      },
+      "top_patterns": [
+        {
+          "pattern": "######.##",
+          "count": 8
+        },
+        {
+          "pattern": "######",
+          "count": 6
+        },
+        {
+          "pattern": "###,###.##",
+          "count": 4
+        },
+        {
+          "pattern": "#.####A",
+          "count": 3
+        },
+        {
+          "pattern": "###.#######A",
+          "count": 3
+        },
+        {
+          "pattern": "#.###A",
+          "count": 3
+        },
+        {
+          "pattern": "###.#####A",
+          "count": 3
+        },
+        {
+          "pattern": "###.######A",
+          "count": 2
+        },
+        {
+          "pattern": "#.#####A",
+          "count": 2
+        },
+        {
+          "pattern": "#.########A",
+          "count": 2
+        }
+      ],
+      "top_values": [
+        {
+          "value": "491.099800k",
+          "count": 1
+        },
+        {
+          "value": "0.71659m",
+          "count": 1
+        },
+        {
+          "value": "0.72516672m",
+          "count": 1
+        },
+        {
+          "value": "69.86065b",
+          "count": 1
+        },
+        {
+          "value": "21.979217b",
+          "count": 1
+        },
+        {
+          "value": "16.060030b",
+          "count": 1
+        },
+        {
+          "value": "5.053300k",
+          "count": 1
+        },
+        {
+          "value": "0.3995m",
+          "count": 1
+        },
+        {
+          "value": "210.0408600k",
+          "count": 1
+        },
+        {
+          "value": "0.564m",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "491.099800k",
+        "0.71659m",
+        "0.72516672m",
+        "69.86065b",
+        "21.979217b"
+      ]
+    },
+    "URL": {
+      "count": 46,
+      "row_count": 46,
+      "share_of_items": 0.000243,
+      "distinct_values": 46,
+      "value_len": {
+        "min": 17,
+        "median": 25,
+        "max": 36,
+        "mean": 25.74
+      },
+      "top_patterns": [
+        {
+          "pattern": "AAAA://AAAAAAAAAA.AA/AAAAA",
+          "count": 2
+        },
+        {
+          "pattern": "AAAA://AAAA-AAAA.AA",
+          "count": 2
+        },
+        {
+          "pattern": "AAAAA://AAAAAAAAAA.AA.AA",
+          "count": 2
+        },
+        {
+          "pattern": "AAAAA://AAA-AAAA.AA/AAAA/AAAA",
+          "count": 1
+        },
+        {
+          "pattern": "AAAA://AAAAAAAAAA.AA/AAAAA/AAA",
+          "count": 1
+        },
+        {
+          "pattern": "AAAAA://AAAAAAAA.AA/AAAAA",
+          "count": 1
+        },
+        {
+          "pattern": "AAAA://AAAAAAAAAAA.AA",
+          "count": 1
+        },
+        {
+          "pattern": "AAAA://AAAAA-AAAA.AA/AAAA/AAAA",
+          "count": 1
+        },
+        {
+          "pattern": "AAAAA://AAAAA-AAAA.AAA/AAAAA",
+          "count": 1
+        },
+        {
+          "pattern": "AAAAA://AAAA-AAAAA.AA/AAAA/AAAA",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "http://mediaabout.ng/world",
+          "count": 1
+        },
+        {
+          "value": "http://blog-base.ru",
+          "count": 1
+        },
+        {
+          "value": "https://app-shop.bg/data/code",
+          "count": 1
+        },
+        {
+          "value": "http://cloudabout.is/world/max",
+          "count": 1
+        },
+        {
+          "value": "https://flowcode.at/smart",
+          "count": 1
+        },
+        {
+          "value": "http://newsdigital.lt",
+          "count": 1
+        },
+        {
+          "value": "http://space-sync.ug/base/tech",
+          "count": 1
+        },
+        {
+          "value": "https://spark-flow.org/smart",
+          "count": 1
+        },
+        {
+          "value": "https://labs-spark.jp/home/link",
+          "count": 1
+        },
+        {
+          "value": "https://webspace.pe/studio/net",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "http://mediaabout.ng/world",
+        "http://blog-base.ru",
+        "https://app-shop.bg/data/code",
+        "http://cloudabout.is/world/max",
+        "https://flowcode.at/smart"
+      ]
+    },
+    "COUNTRY": {
+      "count": 27,
+      "row_count": 22,
+      "share_of_items": 0.000143,
+      "distinct_values": 2,
+      "value_len": {
+        "min": 2,
+        "median": 11,
+        "max": 11,
+        "mean": 6.67
+      },
+      "top_patterns": [
+        {
+          "pattern": "AAAAA AAAAA",
+          "count": 14
+        },
+        {
+          "pattern": "AA",
+          "count": 13
+        }
+      ],
+      "top_values": [
+        {
+          "value": "South Korea",
+          "count": 14
+        },
+        {
+          "value": "KR",
+          "count": 13
+        }
+      ],
+      "sample_values": [
+        "South Korea",
+        "KR"
+      ]
+    },
+    "BANKNAME": {
+      "count": 20,
+      "row_count": 20,
+      "share_of_items": 0.000106,
+      "distinct_values": 15,
+      "value_len": {
+        "min": 4,
+        "median": 4,
+        "max": 8,
+        "mean": 4.8
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○○○",
+          "count": 11
+        },
+        {
+          "pattern": "○○○○○○",
+          "count": 3
+        },
+        {
+          "pattern": "AA○○○○",
+          "count": 2
+        },
+        {
+          "pattern": "○○○○○",
+          "count": 2
+        },
+        {
+          "pattern": "○○○○○○○○",
+          "count": 1
+        },
+        {
+          "pattern": "AA○○",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "신한은행",
+          "count": 3
+        },
+        {
+          "value": "우리은행",
+          "count": 2
+        },
+        {
+          "value": "토스뱅크",
+          "count": 2
+        },
+        {
+          "value": "카카오뱅크",
+          "count": 2
+        },
+        {
+          "value": "한국산업은행",
+          "count": 1
+        },
+        {
+          "value": "OK저축은행",
+          "count": 1
+        },
+        {
+          "value": "동화은행",
+          "count": 1
+        },
+        {
+          "value": "신민상호저축은행",
+          "count": 1
+        },
+        {
+          "value": "우리금융그룹",
+          "count": 1
+        },
+        {
+          "value": "국민은행",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "신한은행",
+        "우리은행",
+        "토스뱅크",
+        "카카오뱅크",
+        "한국산업은행"
+      ]
+    },
+    "CURRENCY": {
+      "count": 15,
+      "row_count": 14,
+      "share_of_items": 7.9e-05,
+      "distinct_values": 6,
+      "value_len": {
+        "min": 1,
+        "median": 3,
+        "max": 6,
+        "mean": 3.33
+      },
+      "top_patterns": [
+        {
+          "pattern": "AAA",
+          "count": 6
+        },
+        {
+          "pattern": "○○○○ ○",
+          "count": 4
+        },
+        {
+          "pattern": "₩",
+          "count": 4
+        },
+        {
+          "pattern": "AAAA",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "KRW",
+          "count": 4
+        },
+        {
+          "value": "대한민국 원",
+          "count": 4
+        },
+        {
+          "value": "₩",
+          "count": 4
+        },
+        {
+          "value": "USD",
+          "count": 1
+        },
+        {
+          "value": "Euro",
+          "count": 1
+        },
+        {
+          "value": "GBP",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "KRW",
+        "대한민국 원",
+        "₩",
+        "USD",
+        "Euro"
+      ]
+    },
+    "ACCOUNTNUM": {
+      "count": 12,
+      "row_count": 12,
+      "share_of_items": 6.3e-05,
+      "distinct_values": 12,
+      "value_len": {
+        "min": 9,
+        "median": 16,
+        "max": 24,
+        "mean": 15.67
+      },
+      "top_patterns": [
+        {
+          "pattern": "#############",
+          "count": 2
+        },
+        {
+          "pattern": "##########",
+          "count": 2
+        },
+        {
+          "pattern": "#######################",
+          "count": 1
+        },
+        {
+          "pattern": "####################",
+          "count": 1
+        },
+        {
+          "pattern": "########################",
+          "count": 1
+        },
+        {
+          "pattern": "#########",
+          "count": 1
+        },
+        {
+          "pattern": "##############",
+          "count": 1
+        },
+        {
+          "pattern": "###################",
+          "count": 1
+        },
+        {
+          "pattern": "#################",
+          "count": 1
+        },
+        {
+          "pattern": "################",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "13082403196837501681981",
+          "count": 1
+        },
+        {
+          "value": "2387872183634",
+          "count": 1
+        },
+        {
+          "value": "08972604804234262483",
+          "count": 1
+        },
+        {
+          "value": "6130049932",
+          "count": 1
+        },
+        {
+          "value": "2880749447",
+          "count": 1
+        },
+        {
+          "value": "1392867465536",
+          "count": 1
+        },
+        {
+          "value": "862935985051581052888573",
+          "count": 1
+        },
+        {
+          "value": "482392283",
+          "count": 1
+        },
+        {
+          "value": "13382996020932",
+          "count": 1
+        },
+        {
+          "value": "9422161647775268713",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "13082403196837501681981",
+        "2387872183634",
+        "08972604804234262483",
+        "6130049932",
+        "2880749447"
+      ]
+    },
+    "USERNAME": {
+      "count": 8,
+      "row_count": 2,
+      "share_of_items": 4.2e-05,
+      "distinct_values": 8,
+      "value_len": {
+        "min": 1,
+        "median": 3,
+        "max": 11,
+        "mean": 3.5
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○○",
+          "count": 3
+        },
+        {
+          "pattern": "○",
+          "count": 2
+        },
+        {
+          "pattern": "A##",
+          "count": 1
+        },
+        {
+          "pattern": "AAAAAAAAAAA",
+          "count": 1
+        },
+        {
+          "pattern": "##A",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "용",
+          "count": 1
+        },
+        {
+          "value": "삼규창",
+          "count": 1
+        },
+        {
+          "value": "기소실",
+          "count": 1
+        },
+        {
+          "value": "순이낭",
+          "count": 1
+        },
+        {
+          "value": "G82",
+          "count": 1
+        },
+        {
+          "value": "화",
+          "count": 1
+        },
+        {
+          "value": "jeyartrahan",
+          "count": 1
+        },
+        {
+          "value": "34Y",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "용",
+        "삼규창",
+        "기소실",
+        "순이낭",
+        "G82"
+      ]
+    },
+    "PASSWORD": {
+      "count": 5,
+      "row_count": 5,
+      "share_of_items": 2.6e-05,
+      "distinct_values": 5,
+      "value_len": {
+        "min": 4,
+        "median": 9,
+        "max": 11,
+        "mean": 8.8
+      },
+      "top_patterns": [
+        {
+          "pattern": "A##A#A#|+",
+          "count": 1
+        },
+        {
+          "pattern": "#A^A",
+          "count": 1
+        },
+        {
+          "pattern": "A#A#A#$A#AA",
+          "count": 1
+        },
+        {
+          "pattern": "AA\"AA%#AAA<",
+          "count": 1
+        },
+        {
+          "pattern": "A'!#~{#\"A",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "o9#Q6c6|+",
+          "count": 1
+        },
+        {
+          "value": "3u^N",
+          "count": 1
+        },
+        {
+          "value": "v9P2d0$N3Tg",
+          "count": 1
+        },
+        {
+          "value": "FH\"eo%1HBg<",
+          "count": 1
+        },
+        {
+          "value": "B'!3~{6\"i",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "o9#Q6c6|+",
+        "3u^N",
+        "v9P2d0$N3Tg",
+        "FH\"eo%1HBg<",
+        "B'!3~{6\"i"
+      ]
+    },
+    "TIMEZONE": {
+      "count": 4,
+      "row_count": 4,
+      "share_of_items": 2.1e-05,
+      "distinct_values": 1,
+      "value_len": {
+        "min": 10,
+        "median": 10,
+        "max": 10,
+        "mean": 10.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "AAAA/AAAAA",
+          "count": 4
+        }
+      ],
+      "top_values": [
+        {
+          "value": "Asia/Seoul",
+          "count": 4
+        }
+      ],
+      "sample_values": [
+        "Asia/Seoul"
+      ]
+    },
+    "JOBTITLE": {
+      "count": 4,
+      "row_count": 3,
+      "share_of_items": 2.1e-05,
+      "distinct_values": 4,
+      "value_len": {
+        "min": 3,
+        "median": 7,
+        "max": 9,
+        "mean": 6.25
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○○",
+          "count": 1
+        },
+        {
+          "pattern": "○○ ○○○ ○○",
+          "count": 1
+        },
+        {
+          "pattern": "○○ ○ ○○",
+          "count": 1
+        },
+        {
+          "pattern": "○○ ○○○",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "간학자",
+          "count": 1
+        },
+        {
+          "value": "종합 격투기 선수",
+          "count": 1
+        },
+        {
+          "value": "셰프 드 퀴진",
+          "count": 1
+        },
+        {
+          "value": "굴뚝 청소부",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "간학자",
+        "종합 격투기 선수",
+        "셰프 드 퀴진",
+        "굴뚝 청소부"
+      ]
+    },
+    "SALARY": {
+      "count": 2,
+      "row_count": 2,
+      "share_of_items": 1.1e-05,
+      "distinct_values": 2,
+      "value_len": {
+        "min": 5,
+        "median": 6,
+        "max": 6,
+        "mean": 5.5
+      },
+      "top_patterns": [
+        {
+          "pattern": "#####",
+          "count": 1
+        },
+        {
+          "pattern": "######",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "70237",
+          "count": 1
+        },
+        {
+          "value": "140251",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "70237",
+        "140251"
+      ]
+    },
+    "IPV4": {
+      "count": 2,
+      "row_count": 2,
+      "share_of_items": 1.1e-05,
+      "distinct_values": 2,
+      "value_len": {
+        "min": 14,
+        "median": 14,
+        "max": 14,
+        "mean": 14.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "###.##.###.###",
+          "count": 1
+        },
+        {
+          "pattern": "###.###.##.###",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "206.96.138.118",
+          "count": 1
+        },
+        {
+          "value": "227.175.51.155",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "206.96.138.118",
+        "227.175.51.155"
+      ]
+    },
+    "HOSPITALNAME": {
+      "count": 1,
+      "row_count": 1,
+      "share_of_items": 5e-06,
+      "distinct_values": 1,
+      "value_len": {
+        "min": 12,
+        "median": 12,
+        "max": 12,
+        "mean": 12.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "○○○ ○○○○○○○○",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "연세봄 내과소아청소년과",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "연세봄 내과소아청소년과"
+      ]
+    },
+    "ALLERGIES": {
+      "count": 1,
+      "row_count": 1,
+      "share_of_items": 5e-06,
+      "distinct_values": 1,
+      "value_len": {
+        "min": 9,
+        "median": 9,
+        "max": 9,
+        "mean": 9.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "AAAAAAAAA",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "Ibuprofen",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "Ibuprofen"
+      ]
+    },
+    "HEIGHT": {
+      "count": 1,
+      "row_count": 1,
+      "share_of_items": 5e-06,
+      "distinct_values": 1,
+      "value_len": {
+        "min": 6,
+        "median": 6,
+        "max": 6,
+        "mean": 6.0
+      },
+      "top_patterns": [
+        {
+          "pattern": "### AA",
+          "count": 1
+        }
+      ],
+      "top_values": [
+        {
+          "value": "187 cm",
+          "count": 1
+        }
+      ],
+      "sample_values": [
+        "187 cm"
+      ]
+    }
+  }
+}

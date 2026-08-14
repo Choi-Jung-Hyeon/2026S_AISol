@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.egg-info/
+.idea/
+uv.lock
+local_scripts/
+.DS_Store
+web_exports.jsonl
