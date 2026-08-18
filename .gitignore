@@ -1,3 +1,6 @@
 .DS_Store
 .claude/settings.local.json
 .venv/
+
+# 재생성 가능한 실행 산출물 (rule_layer.py 등)
+과제2-1/results/*.jsonl
