@@ -1,32 +1,83 @@
-# 2주차 OPF 평가 실행 순서 (모델 반입 후 실행)
-# 실행 위치: 과제2-1/
-# MODEL 경로는 반입 후 실제 경로로 교체
+# 2주차 OPF 평가 실행 순서 (모델 반입 후 실행). 실행 위치: 과제2-1/
+# device=mps 확정 (Apple M4 Pro, cuda 불가). opf 기본값이 cuda 라 매 명령에 명시.
+# 파이썬은 리포 루트 .venv 사용: source ../.venv/bin/activate
+
+# results/ 파일명 규칙
+#   단계_모드_종류.확장자  예) baseline_typed_metrics.json
+#   종류: metrics(지표) / preds(예측스팬) / timings(소요시간)
+#   단계: smoke / baseline / probe / rerun / vit-<조건명>
 
 export MODEL=/path/to/opf-model
+export DEV=mps
+source ../.venv/bin/activate
 
-# [0] 스모크 테스트 50건 - 하니스 기동과 스키마 호환 확인
-opf eval --model $MODEL --data data/smoke_opf_50.jsonl --metrics-out results/smoke_typed.json --predictions-out results/smoke_typed_preds.jsonl
+# ============================================================
+# [0] 환경 확인
+# est: ___
+# ------------------------------------------------------------
+opf --help
+python -c "import torch; print(torch.__version__, torch.backends.mps.is_available())"
+ls -la $MODEL
 
-# [1] typed 모드 전체 3000건 - OPF 5라벨 by_class.*.span 산출
-opf eval --model $MODEL --data data/eval_opf_labels.jsonl --metrics-out results/metrics_typed.json --predictions-out results/preds_typed.jsonl
+# ============================================================
+# [1] 스모크 50건 - 하니스 기동 확인 및 3,000건 소요시간 역산
+# est: ___
+# ------------------------------------------------------------
+opf eval --model $MODEL --device $DEV --data data/smoke_opf_50.jsonl --eval-mode typed --metrics-out results/smoke_typed_metrics.json --predictions-out results/smoke_typed_preds.jsonl --timings-out results/smoke_typed_timings.json
+opf eval --model $MODEL --device $DEV --data data/smoke_corp_50.jsonl --eval-mode untyped --metrics-out results/smoke_untyped_metrics.json --predictions-out results/smoke_untyped_preds.jsonl --timings-out results/smoke_untyped_timings.json
 
-# [2] untyped 모드 전체 3000건 - 사내 11항목 ground_truth_label_recall 산출
-opf eval --model $MODEL --data data/eval_corp_labels.jsonl --untyped --metrics-out results/metrics_untyped.json --predictions-out results/preds_untyped.jsonl
+# 50건 소요시간 x 60 = 3,000건 예상치. 위 est 칸을 여기서 채운다.
+python -c "import json;d=json.load(open('results/smoke_typed_timings.json'));print(d)"
 
-# [3] Viterbi 운영점 3종 스윕 - baseline / recall_up / precision_up
-opf eval --model $MODEL --data data/eval_opf_labels.jsonl --operating-point configs/viterbi_baseline.json --metrics-out results/metrics_vit_baseline.json --predictions-out results/preds_vit_baseline.jsonl
-opf eval --model $MODEL --data data/eval_opf_labels.jsonl --operating-point configs/viterbi_recall_up.json --metrics-out results/metrics_vit_recall_up.json --predictions-out results/preds_vit_recall_up.jsonl
-opf eval --model $MODEL --data data/eval_opf_labels.jsonl --operating-point configs/viterbi_precision_up.json --metrics-out results/metrics_vit_precision_up.json --predictions-out results/preds_vit_precision_up.jsonl
+# ============================================================
+# [2] 기준선 3,000건
+# est: ___
+# ------------------------------------------------------------
+opf eval --model $MODEL --device $DEV --data data/eval_opf_labels.jsonl --eval-mode typed --per-class --label-counts --metrics-out results/baseline_typed_metrics.json --predictions-out results/baseline_typed_preds.jsonl --timings-out results/baseline_typed_timings.json
+opf eval --model $MODEL --device $DEV --data data/eval_corp_labels.jsonl --eval-mode untyped --metrics-out results/baseline_untyped_metrics.json --predictions-out results/baseline_untyped_preds.jsonl --timings-out results/baseline_untyped_timings.json
 
-# [4] 재현율 집계 - 11항목 재현율 / 5라벨 span 지표 / 고유식별정보 4종 미탐 건수
-python3 scripts/aggregate_recall.py --typed results/metrics_typed.json --untyped results/metrics_untyped.json --gold data/ss_pii_testset_ko_v1.json
+# ============================================================
+# [3] 집계 3종
+# est: ___
+# ------------------------------------------------------------
+python scripts/aggregate_recall.py --typed results/baseline_typed_metrics.json --untyped results/baseline_untyped_metrics.json --gold data/ss_pii_testset_ko_v1.json
+python scripts/doc_level_miss.py --gold data/ss_pii_testset_ko_v1.json --predictions results/baseline_untyped_preds.jsonl --sample 50
+python scripts/fp_breakdown.py --gold data/ss_pii_testset_ko_v1.json --predictions results/baseline_untyped_preds.jsonl --sample 10
 
-# [5] 문서 단위 미탐율 - 조인 실패 0건 확인 필수
-python3 scripts/doc_level_miss.py --gold data/ss_pii_testset_ko_v1.json --predictions results/preds_untyped.jsonl
+# ============================================================
+# [4] 프로브셋 300건 - 부분 발화 P1/P2/P3
+# est: ___
+# ------------------------------------------------------------
+opf eval --model $MODEL --device $DEV --data data/probe_partial_utterance.jsonl --eval-mode typed --per-class --label-counts --metrics-out results/probe_typed_metrics.json --predictions-out results/probe_typed_preds.jsonl --timings-out results/probe_typed_timings.json
+opf eval --model $MODEL --device $DEV --data data/probe_partial_utterance_corp.jsonl --eval-mode untyped --metrics-out results/probe_untyped_metrics.json --predictions-out results/probe_untyped_preds.jsonl --timings-out results/probe_untyped_timings.json
 
-# [6] 과탐 3분해 - B2 업무영향 과탐 우선 확인
-python3 scripts/fp_breakdown.py --gold data/ss_pii_testset_ko_v1.json --predictions results/preds_untyped.jsonl
+# 규칙 레이어는 프로브셋에서 2/75 로 붕괴. OPF 가 이 구간을 잡는지가 관건.
+python scripts/rule_layer.py --jsonl data/probe_partial_utterance_corp.jsonl --out results/probe_rule_preds.jsonl
 
-# [7] 운영점별 재현율 비교 - recall_up 이 고유식별정보 미탐을 줄이는지 대조
-python3 scripts/doc_level_miss.py --gold data/ss_pii_testset_ko_v1.json --predictions results/preds_vit_recall_up.jsonl
-python3 scripts/fp_breakdown.py --gold data/ss_pii_testset_ko_v1.json --predictions results/preds_vit_recall_up.jsonl
+# ============================================================
+# [5] 하이브리드 - OPF 단독 / 규칙 단독 / 합집합 3단 비교
+# est: ___
+# ------------------------------------------------------------
+python scripts/rule_layer.py --gold data/ss_pii_testset_ko_v1.json --out results/rule_predictions.jsonl
+python scripts/hybrid_merge.py --gold data/ss_pii_testset_ko_v1.json --opf results/baseline_untyped_preds.jsonl --rule results/rule_predictions.jsonl --focus 고유식별정보
+
+# ============================================================
+# [6] 재현성 검증 - [2] typed 를 동일 인자로 1회 재실행
+# est: ___
+# ------------------------------------------------------------
+opf eval --model $MODEL --device $DEV --data data/eval_opf_labels.jsonl --eval-mode typed --per-class --label-counts --metrics-out results/rerun_typed_metrics.json --predictions-out results/rerun_typed_preds.jsonl --timings-out results/rerun_typed_timings.json
+
+# 두 predictions 의 SHA256 이 같아야 재현성 확보. 다르면 원인 규명 전까지 지표 신뢰 불가.
+shasum -a 256 results/baseline_typed_preds.jsonl results/rerun_typed_preds.jsonl
+
+# ============================================================
+# [7] Viterbi 운영점 3조건
+# est: ___
+# ------------------------------------------------------------
+opf eval --model $MODEL --device $DEV --data data/eval_opf_labels.jsonl --eval-mode typed --per-class --label-counts --viterbi-calibration-path configs/viterbi_baseline.json --metrics-out results/vit-baseline_typed_metrics.json --predictions-out results/vit-baseline_typed_preds.jsonl --timings-out results/vit-baseline_typed_timings.json
+opf eval --model $MODEL --device $DEV --data data/eval_opf_labels.jsonl --eval-mode typed --per-class --label-counts --viterbi-calibration-path configs/viterbi_recall_up.json --metrics-out results/vit-recall-up_typed_metrics.json --predictions-out results/vit-recall-up_typed_preds.jsonl --timings-out results/vit-recall-up_typed_timings.json
+opf eval --model $MODEL --device $DEV --data data/eval_opf_labels.jsonl --eval-mode typed --per-class --label-counts --viterbi-calibration-path configs/viterbi_precision_up.json --metrics-out results/vit-precision-up_typed_metrics.json --predictions-out results/vit-precision-up_typed_preds.jsonl --timings-out results/vit-precision-up_typed_timings.json
+
+# 운영점별 미탐 대조. recall_up 이 고유식별정보 미탐을 줄이는지 확인.
+python scripts/doc_level_miss.py --gold data/ss_pii_testset_ko_v1.json --predictions results/vit-recall-up_typed_preds.jsonl --sample 50
+python scripts/fp_breakdown.py --gold data/ss_pii_testset_ko_v1.json --predictions results/vit-recall-up_typed_preds.jsonl --sample 10
