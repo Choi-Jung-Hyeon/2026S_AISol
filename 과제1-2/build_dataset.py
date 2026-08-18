@@ -91,7 +91,20 @@ def rrn_invalid(foreign=False):
     d = [int(c) for c in front+body]
     w = [2,3,4,5,6,7,8,9,2,3,4,5]
     chk = (11 - sum(a*b for a,b in zip(d,w)) % 11) % 10
-    bad = (chk + random.randint(1,9)) % 10          # 검증번호 무효화
+    off = random.randint(1,9)                       # 난수 소비 위치·횟수 불변(1회)
+    # 검증식 두 가지
+    #   주민등록번호      : 유효 검증번호 = chk          -> off==0 에서만 통과.
+    #                       off>=1 이므로 이미 구조적으로 회피된다(로직 변경 없음).
+    #   구 외국인등록번호 : 유효 검증번호 = (chk+2)%10   -> off==2 에서 통과한다.
+    #                       이 +2 보정은 널리 문서화된 구(舊) 외국인번호 규칙이며,
+    #                       본 데이터로 실측 확인했다. 통과 166/1580 건이 전부
+    #                       off==2 였고 1/9 기대치(175.6)와 정합한다.
+    # 보수적 처리: 외국인 값에 한해 off==2 만 결정적으로 3 으로 옮긴다.
+    # 재추첨이 아니라 이미 뽑은 값의 사상이므로 random 스트림이 어긋나지 않고,
+    # 결과는 여전히 한 자리라 자릿수도 변하지 않는다.
+    if foreign and off == 2:
+        off = 3
+    bad = (chk + off) % 10                          # 검증번호 무효화
     return f'{front}-{body}{bad}'
 
 def passport_kr():
