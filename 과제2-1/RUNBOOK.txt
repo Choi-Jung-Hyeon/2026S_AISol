@@ -1,0 +1,32 @@
+# 2주차 OPF 평가 실행 순서 (모델 반입 후 실행)
+# 실행 위치: 과제2-1/
+# MODEL 경로는 반입 후 실제 경로로 교체
+
+export MODEL=/path/to/opf-model
+
+# [0] 스모크 테스트 50건 - 하니스 기동과 스키마 호환 확인
+opf eval --model $MODEL --data data/smoke_opf_50.jsonl --metrics-out results/smoke_typed.json --predictions-out results/smoke_typed_preds.jsonl
+
+# [1] typed 모드 전체 3000건 - OPF 5라벨 by_class.*.span 산출
+opf eval --model $MODEL --data data/eval_opf_labels.jsonl --metrics-out results/metrics_typed.json --predictions-out results/preds_typed.jsonl
+
+# [2] untyped 모드 전체 3000건 - 사내 11항목 ground_truth_label_recall 산출
+opf eval --model $MODEL --data data/eval_corp_labels.jsonl --untyped --metrics-out results/metrics_untyped.json --predictions-out results/preds_untyped.jsonl
+
+# [3] Viterbi 운영점 3종 스윕 - baseline / recall_up / precision_up
+opf eval --model $MODEL --data data/eval_opf_labels.jsonl --operating-point configs/viterbi_baseline.json --metrics-out results/metrics_vit_baseline.json --predictions-out results/preds_vit_baseline.jsonl
+opf eval --model $MODEL --data data/eval_opf_labels.jsonl --operating-point configs/viterbi_recall_up.json --metrics-out results/metrics_vit_recall_up.json --predictions-out results/preds_vit_recall_up.jsonl
+opf eval --model $MODEL --data data/eval_opf_labels.jsonl --operating-point configs/viterbi_precision_up.json --metrics-out results/metrics_vit_precision_up.json --predictions-out results/preds_vit_precision_up.jsonl
+
+# [4] 재현율 집계 - 11항목 재현율 / 5라벨 span 지표 / 고유식별정보 4종 미탐 건수
+python3 scripts/aggregate_recall.py --typed results/metrics_typed.json --untyped results/metrics_untyped.json --gold data/ss_pii_testset_ko_v1.json
+
+# [5] 문서 단위 미탐율 - 조인 실패 0건 확인 필수
+python3 scripts/doc_level_miss.py --gold data/ss_pii_testset_ko_v1.json --predictions results/preds_untyped.jsonl
+
+# [6] 과탐 3분해 - B2 업무영향 과탐 우선 확인
+python3 scripts/fp_breakdown.py --gold data/ss_pii_testset_ko_v1.json --predictions results/preds_untyped.jsonl
+
+# [7] 운영점별 재현율 비교 - recall_up 이 고유식별정보 미탐을 줄이는지 대조
+python3 scripts/doc_level_miss.py --gold data/ss_pii_testset_ko_v1.json --predictions results/preds_vit_recall_up.jsonl
+python3 scripts/fp_breakdown.py --gold data/ss_pii_testset_ko_v1.json --predictions results/preds_vit_recall_up.jsonl
