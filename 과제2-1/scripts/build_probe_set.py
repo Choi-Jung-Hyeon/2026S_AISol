@@ -131,10 +131,14 @@ def build_value_banks(gold_docs, pool, rng):
             cat = sp.get("corp_category")
             if cat in NUMERIC_CATS or cat == "이메일 주소":
                 seen.setdefault(cat, set()).add(sp.get("value", ""))
-    dropped = {}
+    # 표본 단계 제외는 더 이상 하지 않는다.
+    # 정본이 주민식·구 외국인식 양쪽에서 무효화되도록 수정되면서
+    # (구 외국인등록번호 검증식 통과 166/1580 건 해소) 걸러낼 값이 없어졌다.
+    # 다만 회귀를 놓치지 않도록 "검증식을 통과하는 정본 값" 건수는 계속 센다.
+    residual = {}
     for cat, vals in seen.items():
-        keep = sorted(v for v in vals if v and value_is_invalidated(cat, v))
-        dropped[cat] = len(vals) - len(keep)
+        keep = sorted(v for v in vals if v)
+        residual[cat] = sum(1 for v in keep if not value_is_invalidated(cat, v))
         rng.shuffle(keep)
         banks[cat] = keep
 
@@ -156,7 +160,7 @@ def build_value_banks(gold_docs, pool, rng):
                 addr.append("%s %s %s" % (sido, gugun, road))
     rng.shuffle(addr)
     banks["주소"] = addr
-    return banks, dropped
+    return banks, residual
 
 
 # ---------- 변형 ----------
@@ -341,7 +345,7 @@ def main():
             die("정본에서 '%s' 의 opf_label 매핑을 찾을 수 없습니다" % c)
 
     rng = random.Random(SEED)
-    banks, dropped = build_value_banks(docs, pool, rng)
+    banks, residual = build_value_banks(docs, pool, rng)
 
     records, idx = [], 1
     cursor = {}
@@ -431,12 +435,12 @@ def main():
     print("  외국인등록번호   %d/%d  (주민식·구 +2식 둘 다 검사)" % (frn_pass, frn_n))
     print("  카드번호 Luhn    %d/%d" % (luhn_pass, card_n))
     print("")
-    print("표본 추출 시 검증식 통과로 제외한 정본 값")
-    for cat in sorted(dropped):
-        if dropped[cat]:
-            print("  %-14s %d건 제외" % (cat, dropped[cat]))
-    if not any(dropped.values()):
-        print("  없음")
+    print("정본 값 중 검증식을 통과하는 잔여 건수 (0이어야 정상, 표본 제외는 하지 않음)")
+    for cat in sorted(residual):
+        if residual[cat]:
+            print("  %-14s %d건  *** 회귀: 정본 무효화 누락 ***" % (cat, residual[cat]))
+    if not any(residual.values()):
+        print("  없음 (정본이 두 검증식 모두에서 무효화됨)")
     print("")
     print("표면값 재생성 횟수 (검증식 통과 또는 자릿수 부족)")
     if any(regen.values()):

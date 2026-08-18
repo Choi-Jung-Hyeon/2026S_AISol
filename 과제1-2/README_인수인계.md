@@ -52,7 +52,13 @@
 | `openpii_ko_labels.json` | 라벨 빈도·값 패턴 요약 |
 | `openpii_ko_full.jsonl` | ko 전체 26,498행 (용량 큼, 선택) |
 
-> `openpii_ko_*.jsonl` 3종은 용량 문제로 zip에 포함하지 않았습니다. 상위 폴더에 있습니다.
+> `openpii_ko_*.jsonl` 3종은 용량 문제로 zip에 포함하지 않았습니다.
+> 리포 정리 시 상위 폴더에서 `archive/` 로 이동했으므로, `build_dataset.py` 를
+> 재실행할 때는 `SS_SRC` 로 경로를 지정해야 합니다 (기본값은 상위 폴더를 가리킵니다).
+>
+> ```bash
+> SS_SRC="$PWD/archive/openpii_ko_sample.jsonl" python3 과제1-2/build_dataset.py
+> ```
 
 ---
 
@@ -108,9 +114,16 @@
 ## 5. 재현 절차
 
 ```bash
-# 입력: openpii_ko_sample.jsonl (상위 폴더), pseudonym_pool.json (같은 폴더)
+# 입력: openpii_ko_sample.jsonl (archive/), pseudonym_pool.json (같은 폴더)
 # 출력: ss_pii_testset_ko_v1.json, ss_pii_testset_ko_v1_opf.jsonl, pseudonym_pool.json
-python3 build_dataset.py
+# 리포 루트에서 실행. SS_SRC 미지정 시 기본값이 상위 폴더를 가리켜 실패합니다.
+SS_SRC="$PWD/archive/openpii_ko_sample.jsonl" python3 과제1-2/build_dataset.py
+
+# 하니스 스키마(JSONL) 변환 — 2주차 평가 입력
+python3 과제1-2/convert_schema.py --gold 과제1-2/ss_pii_testset_ko_v1.json \
+  --label opf  --out 과제1-2/eval_opf_labels.jsonl
+python3 과제1-2/convert_schema.py --gold 과제1-2/ss_pii_testset_ko_v1.json \
+  --label corp --out 과제1-2/eval_corp_labels.jsonl
 ```
 
 - 시드 고정(`random.seed(20260814)`)이므로 동일 입력에 대해 동일 산출물이 재현됨
@@ -128,7 +141,8 @@ python3 build_dataset.py
 원인을 먼저 확인하십시오. (Nemotron 반입 재실행에서 전 항목 일치 확인 완료)
 
 문서 3,000 / 스팬 28,420 / 11개 항목별 빈도 / 오프셋 28,420건 전건 일치 /
-주민·외국인등록번호 검증번호 통과 0건 / 카드 Luhn 통과 0건
+주민등록번호 검증번호 통과 0건 / 외국인등록번호 주민식·구 외국인식 양쪽 통과 0건 /
+카드 Luhn 통과 0건
 
 ---
 
@@ -140,14 +154,36 @@ python3 build_dataset.py
 | PII 스팬 | 28,420 (주입 2,048 포함) |
 | 사내 11개 항목 커버 | 11/11 |
 | 오프셋 정합 (`text[start:end] == value`) | 28,420/28,420 |
-| 주민·외국인등록번호 검증번호 통과 | 0/4,900 |
+| 주민등록번호 검증번호 통과 | 0/3,320 |
+| 외국인등록번호 검증번호 통과 (주민식) | 0/1,580 |
+| 외국인등록번호 검증번호 통과 (구 외국인식, `+2` 보정) | 0/1,580 |
 | 카드번호 Luhn 통과 | 0/1,788 |
 | 금융 문맥 문서 | 1,569/3,000 |
 
-마지막 두 줄이 Step 3의 핵심 근거 — 형식은 유효하되 실재할 수 없는 값임을 확인.
+검증번호·Luhn 관련 네 줄이 Step 3의 핵심 근거 — 형식은 유효하되 실재할 수 없는 값임을 확인.
 
 위 수치는 Nemotron 실측 풀 반입 후 재실행에서 전 항목 동일하게 재현되었습니다.
 성명 값만 5,806/5,807건이 교체되었고, 스팬 구조·오프셋·무효화 검증은 불변입니다.
+
+### 6-0. 외국인등록번호 무효화 보완 (2026-08-18)
+
+초기 산출물은 검증번호 무효화를 **주민등록번호 검증식 기준으로만** 적용했습니다.
+구 외국인등록번호 검증식은 유효 검증번호가 주민식 `+2`라, 무효화 오프셋이 우연히
+2가 되면 그 검증식에서는 통과합니다. 실측 결과 1,580건 중 **166건**이 해당했습니다.
+
+값은 전량 합성이라 실질 위험은 없었으나 "검증번호 통과 0건"이라는 주장이
+부정확해지므로, 어느 검증식이 유효하든 통과하지 않도록 보수적으로 보완했습니다.
+
+`build_dataset.py`의 `rrn_invalid()`에서 외국인 값에 한해 오프셋 2를 결정적으로
+3으로 옮깁니다. 이미 뽑은 난수의 사상이라 **`random` 호출이 추가되지 않고**
+(재추첨을 넣으면 성명·주소 등 무관한 값까지 전부 달라집니다), 결과가 한 자리라
+**자릿수도 변하지 않습니다**(후속 스팬 오프셋 보존).
+
+재생성 결과 — 변경 166건 전부 외국인등록번호, 그 외 항목 0건.
+문서 166건의 `char_len` 변화량 0. 문서 수·스팬 총계·11항목 빈도·OPF 5라벨 빈도·
+오프셋 정합·금융 문맥·난이도 분포는 전건 불변입니다.
+
+정본 SHA256이 `1b7a0086…3bc9` → `fb1e22d2…` 로 변경되었습니다.
 
 ### 6-1. 원본 ko 서브셋 기준 통계 (전수 26,498행)
 
