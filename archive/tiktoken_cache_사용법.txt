@@ -1,0 +1,50 @@
+tiktoken 캐시 — 업무망 복원 절차
+생성일 2026-08-19 / tiktoken 0.14.0 으로 받음
+
+[이 파일이 필요한 경우]
+업무망에서 tiktoken 이 사전 파일을 못 내려받을 때만 씁니다.
+OPF 가 그냥 돌면 이 캐시는 쓰지 않아도 됩니다. 보험입니다.
+
+증상 예시:
+  requests.exceptions.ConnectionError
+  ... openaipublic.blob.core.windows.net ...
+
+[복원]
+  mkdir -p ~/tiktoken_cache && unzip tiktoken_cache_20260819.zip -d ~/tiktoken_cache
+  export TIKTOKEN_CACHE_DIR=~/tiktoken_cache
+
+zip 안에 폴더가 없고 파일 6개가 바로 들어 있습니다.
+풀고 나면 ~/tiktoken_cache/ 밑에 40자 이름의 파일 6개가 보여야 합니다.
+~/tiktoken_cache/tiktoken_cache/ 처럼 두 겹이면 잘못된 것입니다.
+
+[확인]
+  python3 -c "
+  import tiktoken
+  e = tiktoken.get_encoding('o200k_base')
+  print('vocab', e.n_vocab)
+  print('토큰수', len(e.encode('계좌번호는 977-18-990201-98입니다')))"
+
+  기대값: vocab 200019 / 토큰수 14
+
+[주의]
+- TIKTOKEN_CACHE_DIR 는 OPF 를 실제로 띄우는 셸에서 export 해야 합니다.
+  서비스나 다른 계정으로 돌면 그쪽 환경에도 넣어야 합니다.
+- tiktoken 패키지 자체는 이 zip 에 없습니다. pip install tiktoken 은 따로 필요합니다.
+  캐시는 "사전 파일"만 대신합니다.
+- 파일 이름은 다운로드 URL 의 sha1 이라 폴더 위치는 무관합니다.
+
+[포함된 인코딩 7종 — 전부 오프라인 로드 검증 완료]
+  o200k_base     vocab 200019   샘플 14토큰
+  o200k_harmony  vocab 201088   샘플 14토큰
+  cl100k_base    vocab 100277   샘플 17토큰
+  p50k_base      vocab  50281   샘플 31토큰
+  p50k_edit      vocab  50284   샘플 31토큰
+  r50k_base      vocab  50257   샘플 31토큰
+  gpt2           vocab  50257   샘플 31토큰
+
+  샘플 = "계좌번호는 977-18-990201-98입니다"
+  검증 방법: 압축본을 새 경로에 푼 뒤 프록시를 죽은 주소로 강제해
+  네트워크를 막고(ProxyError 확인) 7종 전부 로드되는지 확인함.
+
+zip SHA256
+  b6976a3d81f324096e532db9bf84e2840fa79724559d3f19e5c785f9eb7e9601
