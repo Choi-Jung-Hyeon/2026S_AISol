@@ -6,3 +6,6 @@
 과제2-1/results/*.jsonl
 과제2-1/results/*.csv
 과제2-1/results/review_criteria.txt
+
+# 로컬 전용 작업 규칙 (원격 리포에 올리지 않음)
+CLAUDE.md
