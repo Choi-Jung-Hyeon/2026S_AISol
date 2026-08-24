@@ -5,11 +5,21 @@
 하니스가 만드는 metrics JSON 이 없어 aggregate_recall.py 가 무력화된다.
 이 스크립트는 "정본 + 예측 스팬 목록" 두 개만으로 모든 지표를 다시 만든다.
 
-스팬 매칭은 기존 스크립트와 동일한 비대칭 규칙을 그대로 쓴다.
-  재현율 축(doc_level_miss.py) : 정답 ⊆ 예측  — 정답 스팬을 통째로 덮는 예측이 있는가
-  정밀도 축(fp_breakdown.py)   : 예측 ⊆ 정답  — 예측 스팬이 정답 안에 들어가는가
-두 축은 모집단이 다르고 TP 개수도 다르다. 하나로 합치지 않으며
-FN 과 FP 를 더한 값도 만들지 않는다.
+주지표는 표준 스팬 매칭이다. 정답↔예측을 겹침 문자 수 내림차순 그리디로
+1:1 배정해 TP 를 단일 값으로 만들고, 남은 정답이 FN, 남은 예측이 FP 다.
+Recall = TP/(TP+FN), Precision = TP/(TP+FP) 로 분자가 같으므로 조화평균인
+F1·F2 가 정의상 성립한다. 3기준을 같은 표에 병기한다.
+  strict  : 오프셋 완전 일치 + 라벨 일치
+  partial : 1자 이상 겹침 + 라벨 일치      ← 정본
+  type    : 1자 이상 겹침, 라벨 무관       ← 상한 참고
+겹침 기준은 경계 과확장을 TP 로 인정하므로 정밀도 바로 아래에 과잉 마스킹
+문자 수를 항상 병기한다.
+
+이전 판의 비대칭 두 축은 삭제하지 않고 이름을 바꿔 [3-1R] 에 보존한다.
+  정답 피복률 (정답 ⊆ 예측) — 구 재현율 축, doc_level_miss.py 와 같은 규칙
+  예측 귀속률 (예측 ⊆ 정답) — 구 정밀도 축, fp_breakdown.py 와 같은 규칙
+두 값은 분자도 모집단도 달라 조화평균이 정의되지 않는다. 이 두 값으로는
+F1·F2 를 산출하지 않으며, 서로 합산하지도 않는다.
 
 노출 3분류는 위 재현율 축과 별개의 축이다(문자 피복 기준).
   완전 피복 : 예측들의 합집합이 정답 스팬 전체를 덮음
@@ -270,6 +280,71 @@ def covered_len(gs, ge, pspans):
     return sum(b - a for a, b in merged), [(a, b) for a, b in merged]
 
 
+# ── 표준 스팬 매칭 (TP 단일 정의) ────────────────────────────
+# 기존 두 축(정답⊆예측 / 예측⊆정답)은 분자가 서로 달라 F1·F2 의 조화평균이
+# 정의되지 않는다. 여기서는 정답↔예측을 1:1 로 배정해 TP 를 한 값으로 만든다.
+CRITERIA = ("strict", "partial", "type")
+CRIT_NAME = {
+    "strict": "strict  (오프셋 완전일치+라벨)",
+    "partial": "partial (겹침+라벨) ← 정본",
+    "type": "type    (겹침, 라벨무관) ← 상한",
+}
+
+
+def label_match(lb, g):
+    """라벨 일치 판정.
+
+    EM 의 --em-require-label 이 쓰는 판정(L: lb in (cat, opf))과 같은 규칙이다.
+    예측 라벨이 정답의 corp_category 또는 opf_label 과 같으면 일치로 본다.
+    """
+    return lb in ((g.get("corp_category") or "(미분류)"),
+                  (g.get("opf_label") or "(무라벨)"))
+
+
+def match_standard(pairs, criterion):
+    """겹침 문자 수 내림차순 그리디 1:1 배정으로 TP 를 센다.
+
+    후보 생성 : 정답·예측이 1자 이상 겹치고(strict 는 오프셋 완전 일치)
+                라벨이 일치하면 후보 쌍. type 기준은 라벨을 보지 않는다.
+    배정      : 겹침 문자 수 내림차순 그리디. 동점이면
+                (doc_id, gold.start, pred.start) 오름차순으로 결정적 처리.
+    결과      : TP = 배정된 쌍의 수(단일 값), FN = 미배정 정답, FP = 미배정 예측.
+                Recall = TP/(TP+FN), Precision = TP/(TP+FP) 로 분자가 같다.
+    """
+    cands = []
+    for di, (doc, pspans) in enumerate(pairs):
+        did = str(doc.get("id"))
+        golds = doc.get("spans", [])
+        for gi, g in enumerate(golds):
+            gs, ge = int(g["start"]), int(g["end"])
+            for pi, (ps, pe, lb) in enumerate(pspans):
+                ov = min(ge, pe) - max(gs, ps)
+                if ov <= 0:                       # 1자도 안 겹치면 후보 아님
+                    continue
+                if criterion == "strict" and not (ps == gs and pe == ge):
+                    continue
+                if criterion != "type" and not label_match(lb, g):
+                    continue
+                # 정렬 키: 겹침 내림차순 → doc_id → gold.start → pred.start
+                cands.append((-ov, did, gs, ps, di, gi, pi))
+    cands.sort()
+    gold_matched, pred_matched, assign = set(), set(), {}
+    for nov, did, gs, ps, di, gi, pi in cands:
+        if (di, gi) in gold_matched or (di, pi) in pred_matched:
+            continue
+        gold_matched.add((di, gi))
+        pred_matched.add((di, pi))
+        assign[(di, pi)] = gi
+    return {"tp": len(gold_matched), "gold_matched": gold_matched,
+            "pred_matched": pred_matched, "assign": assign}
+
+
+def fracpct(n, d):
+    """분수와 백분율을 병기한다 — 예: 24,489 / 28,420 (86.17%)"""
+    pct = "n/a" if not d else "%.2f%%" % (100.0 * n / d)
+    return "{:,} / {:,} ({})".format(n, d, pct)
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="OPF 하니스 없이 예측 스팬만으로 전 지표를 산출",
@@ -310,6 +385,7 @@ def main():
     print("예측 형식      : %s%s" % (fmt, " (auto 판별)" if args.pred_format == "auto" else " (지정)"))
     print("감지된 키      : %s" % ", ".join(pkeys))
     print("EM 라벨 조건   : %s" % ("라벨 일치 요구" if args.em_require_label else "오프셋만 비교"))
+    print("측정 단위      : 스팬 (문자 오프셋 [start, end))")
     print("사내 항목 수   : %d" % len(corp_cats))
     print("정본 OPF 라벨  : %d종 (%s)" % (len(opf_labels), ", ".join(opf_labels)))
 
@@ -355,9 +431,18 @@ def main():
         raise SystemExit(1)
     print("조인 실패 0건 — 계속 진행")
 
+    # ── 표준 매칭 (3기준) ────────────────────────────────────
+    # 문서 루프보다 먼저 배정을 끝낸다. 루프 안에서는 배정 결과만 참조한다.
+    std = {c: match_standard(pairs, c) for c in CRITERIA}
+    std_gold_matched = std["partial"]["gold_matched"]
+    std_pred_matched = std["partial"]["pred_matched"]
+
     # ── 핵심 계산 ────────────────────────────────────────────
     def zero():
-        return {"gold": 0, "rtp": 0, "em": 0, "ptp": 0, "pred": 0,
+        # tp/fp : 표준 매칭(partial 기준) 단일 TP 와 미배정 예측
+        # rtp/ptp : 보존용 비대칭 두 축 (정답 피복률 / 예측 귀속률)
+        return {"gold": 0, "tp": 0, "fp": 0,
+                "rtp": 0, "em": 0, "ptp": 0, "pred": 0,
                 "full": 0, "partial": 0, "none": 0, "split": 0,
                 "exposed_chars": 0, "over_chars": 0}
 
@@ -381,7 +466,7 @@ def main():
     for t in ("T1(짧음)", "T2(중간)", "T3(긺)"):
         by_tier[t] = zero()
 
-    for doc, pspans in pairs:
+    for di, (doc, pspans) in enumerate(pairs):
         text = doc.get("text", "")
         golds = doc.get("spans", [])
         md = doc.get("meta") or {}
@@ -398,7 +483,7 @@ def main():
 
         # ---- 재현율 축 + 노출 3분류 + EM (정답 스팬 기준) ----
         doc_missed_cats = []
-        for g in golds:
+        for gi, g in enumerate(golds):
             gs, ge, cat = g["start"], g["end"], g.get("corp_category") or "(미분류)"
             opf = g.get("opf_label") or "(무라벨)"
             cb = by_cat.setdefault(cat, zero())
@@ -414,6 +499,11 @@ def main():
                     t["rtp"] += 1
             else:
                 doc_missed_cats.append(cat)
+
+            # 표준 TP (partial 배정 결과) — 재현율·정밀도가 공유하는 단일 TP
+            if (di, gi) in std_gold_matched:
+                for t in targets:
+                    t["tp"] += 1
 
             # Exact Match: start·end 완전 일치 (옵션에 따라 라벨까지)
             em = False
@@ -461,7 +551,7 @@ def main():
             docs_clean += 1
 
         # ---- 정밀도 축 (예측 스팬 기준) ----
-        for ps, pe, lb in pspans:
+        for pi, (ps, pe, lb) in enumerate(pspans):
             tot["pred"] += 1
             for t in buckets_doc:
                 t["pred"] += 1
@@ -497,6 +587,14 @@ def main():
                 for t in buckets_doc:
                     t["ptp"] += 1
 
+            # 표준 FP: partial 배정에서 짝을 못 찾은 예측
+            if (di, pi) not in std_pred_matched:
+                tot["fp"] += 1
+                by_cat[cat]["fp"] += 1
+                by_opf[opf]["fp"] += 1
+                for t in buckets_doc:
+                    t["fp"] += 1
+
         # ---- 과잉 마스킹: 예측 합집합 - 정답 합집합 ----
         claimed = set()
         for ps, pe, lb in sorted(pspans):
@@ -519,52 +617,125 @@ def main():
                 t["over_chars"] += len(outside)
 
     G, P = tot["gold"], tot["pred"]
-    R = ratio(tot["rtp"], G)
-    PR = ratio(tot["ptp"], P)
 
-    # ── [3-1] 전체 ───────────────────────────────────────────
-    section("[3-1] 전체 지표 (스팬 기준)")
-    print("재현율  (정답 ⊆ 예측)  : %s" % frac(tot["rtp"], G))
-    print("정밀도  (예측 ⊆ 정답)  : %s" % frac(tot["ptp"], P))
-    print("F1                     : %.4f" % fbeta(PR, R, 1))
-    print("F2 (종합지표)          : %.4f" % fbeta(PR, R, 2))
+    # ── [3-1] 표준 지표 ─────────────────────────────────────
+    section("[3-1] 표준 지표 — strict / partial / type 3기준 병기")
+    print("측정 단위: 스팬 (문자 오프셋 [start, end))")
     print("")
-    print("TP 는 축별로 분리 표기한다 — 두 값은 모집단이 달라 개수가 다르다.")
-    print("  재현율 축 TP : %s  (모집단 = 정답 스팬 %d)" % (frac(tot["rtp"], G), G))
-    print("  정밀도 축 TP : %s  (모집단 = 예측 스팬 %d)" % (frac(tot["ptp"], P), P))
-    print("  미탐 FN      : %s" % frac(G - tot["rtp"], G))
-    print("  과탐 FP      : %s" % frac(P - tot["ptp"], P))
-    print("  FN 과 FP 는 모집단이 달라 합산하지 않는다.")
+    print("TP 는 기준마다 단일 값이다. 정답↔예측을 겹침 문자 수 내림차순 그리디로")
+    print("1:1 배정하고, 배정된 쌍이 TP, 남은 정답이 FN, 남은 예측이 FP 다.")
+    print("따라서 Recall = TP/(TP+FN) 과 Precision = TP/(TP+FP) 의 분자가 같은 값이며,")
+    print("조화평균인 F1·F2 가 정의상 성립한다.")
+    print("동점 배정 순서 : (doc_id, gold.start, pred.start) 오름차순 — 재실행 시 동일")
+    print("라벨 일치 규칙 : 예측 라벨이 정답의 corp_category 또는 opf_label 과 같음")
+    print("                 (--em-require-label 이 쓰는 판정과 같은 규칙)")
+    print("")
+    srows = []
+    for c in CRITERIA:
+        tp = std[c]["tp"]
+        fn, fp = G - tp, P - tp
+        r, pr = ratio(tp, tp + fn), ratio(tp, tp + fp)
+        srows.append([CRIT_NAME[c], "{:,}".format(tp), "{:,}".format(fn),
+                      "{:,}".format(fp), "%.4f" % r, "%.4f" % pr,
+                      "%.4f" % fbeta(pr, r, 1), "%.4f" % fbeta(pr, r, 2)])
+    print(table(["기준", "TP", "FN", "FP", "R", "P", "F1", "F2"],
+                [30, 9, 9, 9, 7, 7, 7, 7], srows,
+                [False, True, True, True, True, True, True, True]))
+
+    TP = std["partial"]["tp"]
+    FN, FP = G - TP, P - TP
+    R, PR = ratio(TP, TP + FN), ratio(TP, TP + FP)
+    print("")
+    print("정본 기준 = partial (1자 이상 겹침 + 라벨 일치)")
+    print("  TP        : {:,} (Recall·Precision 이 공유하는 단일 분자)".format(TP))
+    print("  재현율 R  : TP/(TP+FN) = %s = %.4f" % (fracpct(TP, TP + FN), R))
+    print("  정밀도 P  : TP/(TP+FP) = %s = %.4f" % (fracpct(TP, TP + FP), PR))
+    print("  └ 과잉 마스킹 : {:,}자 — 예측이 정답 밖까지 덮은 문자 수. 겹침 기준은".format(
+        tot["over_chars"]))
+    print("                  경계 과확장을 TP 로 인정하므로, 이 보정 없이 정밀도만 보면")
+    print("                  과대 해석된다. 항목별 분포는 [3-8] 에 있다.")
+    print("  F1        : %.4f" % fbeta(PR, R, 1))
+    print("  F2        : %.4f  (미탐이 치명적이므로 F2 를 우선한다)" % fbeta(PR, R, 2))
+    print("")
+    print("불변식 검증")
+    print("  TP + FN = {:,} + {:,} = {:,} / 정답 스팬 {:,} → {}".format(
+        TP, FN, TP + FN, G, "일치" if TP + FN == G else "*** 불일치 ***"))
+    print("  TP + FP = {:,} + {:,} = {:,} / 예측 스팬 {:,} → {}".format(
+        TP, FP, TP + FP, P, "일치" if TP + FP == P else "*** 불일치 ***"))
+    print("  TP(strict) {:,} ≤ TP(partial) {:,} ≤ TP(type) {:,} → {}".format(
+        std["strict"]["tp"], std["partial"]["tp"], std["type"]["tp"],
+        "성립" if std["strict"]["tp"] <= std["partial"]["tp"] <= std["type"]["tp"]
+        else "*** 위배 ***"))
+
+    # ── [3-1R] 보존한 비대칭 두 축 ──────────────────────────
+    section("[3-1R] 참고 — 비대칭 두 축 (F1·F2 를 만들지 않는다)")
+    print("이전 판의 두 축을 이름만 바꿔 보존한다. 분자가 서로 달라 조화평균이")
+    print("정의되지 않으므로 이 두 값으로는 F1·F2 를 산출하지 않는다.")
+    print("")
+    print("정답 피복률 (정답이 예측에 포함) : %s" % fracpct(tot["rtp"], G))
+    print("  └ 미피복 정답                  : %s" % fracpct(G - tot["rtp"], G))
+    print("예측 귀속률 (예측이 정답에 포함) : %s" % fracpct(tot["ptp"], P))
+    print("  └ 미귀속 예측                  : %s" % fracpct(P - tot["ptp"], P))
+    print("")
+    print("두 축은 모집단이 달라 합산하지 않는다.")
+    print("표준 TP(partial) {:,} 와 피복 {:,} 이 다를 수 있는 이유:".format(
+        TP, tot["rtp"]))
+    print("  - 피복은 1:1 배정을 하지 않아 예측 1건이 정답 여러 건을 동시에 인정받는다")
+    print("  - 피복은 라벨을 보지 않는다")
 
     # ── [3-2] 사내 11항목별 ─────────────────────────────────
+    HDR_STD = ["항목", "정답스팬", "TP", "FN", "FP", "R", "P", "F1", "F2"]
+    WID_STD = [16, 9, 8, 8, 8, 7, 7, 7, 7]
+    ALN_STD = [False, True, True, True, True, True, True, True, True]
+
     def metric_rows(keys, store):
+        """partial 기준 단일 TP 로 항목별 지표를 만든다."""
         rows = []
         for k in keys:
             s = store.get(k)
             if not s or (s["gold"] == 0 and s["pred"] == 0):
                 continue
-            r = ratio(s["rtp"], s["gold"])
-            p = ratio(s["ptp"], s["pred"])
-            rows.append([k, str(s["gold"]), frac(s["rtp"], s["gold"]),
-                         frac(s["ptp"], s["pred"]), "%.4f" % fbeta(p, r, 1),
-                         "%.4f" % fbeta(p, r, 2), str(s["gold"] - s["rtp"])])
+            tp, fn, fp = s["tp"], s["gold"] - s["tp"], s["fp"]
+            r = ratio(tp, tp + fn)
+            p = ratio(tp, tp + fp)
+            rows.append([k, "{:,}".format(s["gold"]), "{:,}".format(tp),
+                         "{:,}".format(fn), "{:,}".format(fp),
+                         "%.4f" % r, "%.4f" % p,
+                         "%.4f" % fbeta(p, r, 1), "%.4f" % fbeta(p, r, 2)])
         return rows
 
-    section("[3-2] 사내 11항목별")
-    hdr = ["항목", "정답스팬", "재현율", "정밀도", "F1", "F2", "미탐"]
-    wid = [16, 8, 13, 13, 7, 7, 6]
+    def legacy_rows(keys, store):
+        """보존한 두 축(피복률/귀속률). F1·F2 는 만들지 않는다."""
+        rows = []
+        for k in keys:
+            s = store.get(k)
+            if not s or (s["gold"] == 0 and s["pred"] == 0):
+                continue
+            rows.append([k, fracpct(s["rtp"], s["gold"]),
+                         fracpct(s["ptp"], s["pred"])])
+        return rows
+
+    section("[3-2] 사내 11항목별 (partial 기준 단일 TP)")
+    print("측정 단위: 스팬 (문자 오프셋 [start, end))")
+    print("TP 는 정답의 항목으로, FP 는 귀속 규칙으로 집계한다 — 항목별 P 의 분모는 TP+FP 다.")
+    print("")
     order = sorted([c for c in by_cat if c != UNATTRIB],
                    key=lambda c: (SENS_RANK.get(c, 9), c))
     rows = metric_rows(order, by_cat)
     rows.append(None)
-    rows.append(["합계", str(G), frac(tot["rtp"], G), frac(tot["ptp"], P),
-                 "%.4f" % fbeta(PR, R, 1), "%.4f" % fbeta(PR, R, 2),
-                 str(G - tot["rtp"])])
-    print(table(hdr, wid, rows))
+    rows.append(["합계", "{:,}".format(G), "{:,}".format(TP), "{:,}".format(FN),
+                 "{:,}".format(FP), "%.4f" % R, "%.4f" % PR,
+                 "%.4f" % fbeta(PR, R, 1), "%.4f" % fbeta(PR, R, 2)])
+    print(table(HDR_STD, WID_STD, rows, ALN_STD))
     print("")
-    print("정밀도 분모는 항목에 귀속된 예측 수다. 귀속 규칙은")
-    print("포함하는 정답 > 최대 겹침 정답 > 라벨 사상 순이며,")
-    print("어디에도 못 붙인 예측 %s 는 %s 로 뺐다." % (frac(unattrib_pred, P), UNATTRIB))
+    print("FP 귀속 규칙은 포함하는 정답 > 최대 겹침 정답 > 라벨 사상 순이며,")
+    print("어디에도 못 붙인 예측 %s 는 %s 로 뺐다." % (fracpct(unattrib_pred, P), UNATTRIB))
+    print("")
+    print("참고 — 보존한 비대칭 두 축(항목별). 조화평균을 만들지 않는다.")
+    lrows = legacy_rows(order, by_cat)
+    lrows += [None, ["합계", fracpct(tot["rtp"], G), fracpct(tot["ptp"], P)]]
+    print(table(["항목", "정답 피복률(정답⊆예측)", "예측 귀속률(예측⊆정답)"],
+                [16, 26, 26], lrows))
 
     # ── [3-3] OPF 라벨별 ────────────────────────────────────
     section("[3-3] OPF 라벨별")
@@ -578,8 +749,14 @@ def main():
         print("  재현율·EM·미탐은 정답의 opf_label 기준이라 그대로 유효하다.")
     okeys = sorted([k for k in by_opf if k != UNATTRIB])
     print("")
-    print(table(["OPF 라벨", "정답스팬", "재현율", "정밀도", "F1", "F2", "미탐"],
-                [18, 8, 13, 13, 7, 7, 6], metric_rows(okeys, by_opf)))
+    print("partial 기준 단일 TP. 측정 단위: 스팬 (문자 오프셋 [start, end))")
+    print("")
+    print(table(["OPF 라벨"] + HDR_STD[1:], [18] + WID_STD[1:],
+                metric_rows(okeys, by_opf), ALN_STD))
+    print("")
+    print("참고 — 보존한 비대칭 두 축(OPF 라벨별). 조화평균을 만들지 않는다.")
+    print(table(["OPF 라벨", "정답 피복률(정답⊆예측)", "예측 귀속률(예측⊆정답)"],
+                [18, 26, 26], legacy_rows(okeys, by_opf)))
 
     # ── [3-4] 문서 단위 ─────────────────────────────────────
     section("[3-4] 문서 단위")
@@ -606,27 +783,40 @@ def main():
     section("[3-5] 고유식별정보 4종 합산")
     ug = sum(by_cat.get(c, zero())["gold"] for c in UNIQUE_ID_CATS)
     uh = sum(by_cat.get(c, zero())["rtp"] for c in UNIQUE_ID_CATS)
-    rows = [[c, frac(by_cat.get(c, zero())["rtp"], by_cat.get(c, zero())["gold"]),
-             str(by_cat.get(c, zero())["gold"] - by_cat.get(c, zero())["rtp"])]
-            for c in UNIQUE_ID_CATS]
+    ut = sum(by_cat.get(c, zero())["tp"] for c in UNIQUE_ID_CATS)
+    rows = []
+    for c in UNIQUE_ID_CATS:
+        b = by_cat.get(c, zero())
+        rows.append([c, fracpct(b["tp"], b["gold"]), str(b["gold"] - b["tp"]),
+                     fracpct(b["rtp"], b["gold"]), str(b["gold"] - b["rtp"])])
     rows.append(None)
-    rows.append(["합계", frac(uh, ug), str(ug - uh)])
-    print(table(["항목", "재현율(정답 ⊆ 예측)", "미탐"], [16, 20, 8], rows))
+    rows.append(["합계", fracpct(ut, ug), str(ug - ut),
+                 fracpct(uh, ug), str(ug - uh)])
+    print(table(["항목", "재현율(표준 TP/partial)", "FN",
+                 "정답 피복률(보존)", "미피복"], [16, 26, 7, 26, 8], rows))
     print("")
-    umiss = ug - uh
+    umiss = ug - ut
+    umiss_legacy = ug - uh
     print("허용 기준          : 미탐 %d건 이하" % UNIQUE_ID_ALLOWANCE)
-    print("실측 미탐          : %d건" % umiss)
-    print("충족 여부          : %s" % ("충족" if umiss <= UNIQUE_ID_ALLOWANCE else "미충족"))
+    print("실측 FN (표준)     : %d건 → %s"
+          % (umiss, "충족" if umiss <= UNIQUE_ID_ALLOWANCE else "미충족"))
+    print("실측 미피복 (보존) : %d건 → %s"
+          % (umiss_legacy,
+             "충족" if umiss_legacy <= UNIQUE_ID_ALLOWANCE else "미충족"))
+    print("두 값은 정의가 다르다 — 표준 FN 은 1:1 배정+라벨 일치, 피복은 정답⊆예측 이다.")
 
     # ── [3-6] Exact Match ───────────────────────────────────
     section("[3-6] Exact Match (start·end 완전 일치)")
     print("라벨 일치 조건 : %s (--em-require-label)"
           % ("켬 — 예측 라벨이 항목명 또는 opf_label 과 같아야 인정"
              if args.em_require_label else "끔 — 오프셋만 비교"))
-    print("전체 EM        : %s" % frac(tot["em"], G))
-    print("전체 재현율    : %s" % frac(tot["rtp"], G))
-    print("EM ≤ 재현율    : %s (완전 일치는 포함의 특수 경우이므로 성립해야 한다)"
+    print("전체 EM          : %s" % fracpct(tot["em"], G))
+    print("정답 피복률(보존): %s" % fracpct(tot["rtp"], G))
+    print("EM ≤ 정답 피복률 : %s (완전 일치는 포함의 특수 경우이므로 성립해야 한다)"
           % ("성립" if tot["em"] <= tot["rtp"] else "*** 위배 ***"))
+    print("표준 TP(partial) : %s — EM 은 그 부분집합이다: %s"
+          % (fracpct(std["partial"]["tp"], G),
+             "성립" if tot["em"] <= std["partial"]["tp"] else "*** 위배 ***"))
     print("")
     print(table(["항목", "정답스팬", "EM"], [16, 10, 14],
                 [[c, str(by_cat[c]["gold"]), frac(by_cat[c]["em"], by_cat[c]["gold"])]
@@ -636,7 +826,7 @@ def main():
     # ── [3-7] 부분 노출 ─────────────────────────────────────
     section("[3-7] 부분 노출 (발표 핵심 보조지표)")
     print("정답 스팬을 예측 합집합의 문자 피복으로 3분류한다.")
-    print("이 축은 재현율 축(단일 예측 포함)과 별개다.")
+    print("이 축은 정답 피복률 축(단일 예측 포함)과도, 표준 TP 축과도 별개다.")
     print("")
     print("완전 피복 (전부 덮임)      : %s" % frac(tot["full"], G))
     print("부분 노출 (일부만 덮임)    : %s" % frac(tot["partial"], G))
@@ -648,8 +838,8 @@ def main():
     print("노출된 문자 수 합계        : %d자 (부분 노출 스팬에서 안 덮인 문자)"
           % tot["exposed_chars"])
     print("")
-    print("재현율 축과의 대사:")
-    print("  재현율 FN            : %s" % frac(G - tot["rtp"], G))
+    print("정답 피복률 축과의 대사:")
+    print("  미피복 정답          : %s" % frac(G - tot["rtp"], G))
     print("  = 완전 미탐 %d + 부분 노출 %d + 분할 피복 %d = %d"
           % (tot["none"], tot["partial"], tot["split"],
              tot["none"] + tot["partial"] + tot["split"]))
@@ -696,13 +886,18 @@ def main():
         s = by_case[c]
         if s["gold"] == 0 and s["pred"] == 0:
             continue
-        r = ratio(s["rtp"], s["gold"])
-        p = ratio(s["ptp"], s["pred"])
-        crows.append([c, str(s["gold"]), frac(s["rtp"], s["gold"]),
-                      frac(s["ptp"], s["pred"]), "%.4f" % fbeta(p, r, 2),
+        tp, fn, fp = s["tp"], s["gold"] - s["tp"], s["fp"]
+        r = ratio(tp, tp + fn)
+        p = ratio(tp, tp + fp)
+        crows.append([c, "{:,}".format(s["gold"]), "{:,}".format(tp),
+                      "{:,}".format(fn), "{:,}".format(fp),
+                      "%.4f" % r, "%.4f" % p, "%.4f" % fbeta(p, r, 2),
                       frac(s["em"], s["gold"])])
-    print(table(["난이도 케이스", "정답스팬", "재현율", "정밀도", "F2", "EM"],
-                [14, 9, 13, 13, 7, 13], crows))
+    print("partial 기준 단일 TP. 측정 단위: 스팬 (문자 오프셋 [start, end))")
+    print("")
+    print(table(["난이도 케이스", "정답스팬", "TP", "FN", "FP", "R", "P", "F2", "EM"],
+                [14, 9, 8, 8, 8, 7, 7, 7, 13], crows,
+                [False, True, True, True, True, True, True, True, False]))
 
     # ── [3-10] 문서 길이 계층별 ─────────────────────────────
     section("[3-10] 문서 길이 계층별 (char_len 3분위)")
@@ -714,7 +909,8 @@ def main():
         trows.append([t, str(s["gold"]), frac(s["rtp"], s["gold"]),
                       frac(s["em"], s["gold"])])
     trows += [None, ["합계", str(G), frac(tot["rtp"], G), frac(tot["em"], G)]]
-    print(table(["계층", "정답스팬", "재현율", "EM"], [12, 10, 14, 14], trows))
+    print(table(["계층", "정답스팬", "정답 피복률(보존)", "EM"],
+                [12, 10, 20, 14], trows))
 
     # ── 부록 ────────────────────────────────────────────────
     section("[부록] Accuracy (배경 토큰 지배로 과대평가 — 주지표 아님)")
@@ -737,13 +933,18 @@ def main():
     # ── JSON 저장 ───────────────────────────────────────────
     if args.out_json:
         def blk(s):
-            r, p = ratio(s["rtp"], s["gold"]), ratio(s["ptp"], s["pred"])
+            # 표준 매칭(partial) — Recall·Precision 이 같은 TP 를 분자로 쓴다
+            tp, fn, fp = s["tp"], s["gold"] - s["tp"], s["fp"]
+            r, p = ratio(tp, tp + fn), ratio(tp, tp + fp)
             return {
                 "gold_spans": s["gold"], "pred_spans": s["pred"],
-                "recall": {"num": s["rtp"], "den": s["gold"]},
-                "precision": {"num": s["ptp"], "den": s["pred"]},
+                "tp": tp, "fn": fn, "fp": fp,
+                "recall": {"num": tp, "den": tp + fn},
+                "precision": {"num": tp, "den": tp + fp},
                 "f1": round(fbeta(p, r, 1), 6), "f2": round(fbeta(p, r, 2), 6),
-                "fn": s["gold"] - s["rtp"], "fp": s["pred"] - s["ptp"],
+                # 보존한 비대칭 두 축 — 조화평균을 만들지 않는다
+                "gold_coverage": {"num": s["rtp"], "den": s["gold"]},
+                "pred_attribution": {"num": s["ptp"], "den": s["pred"]},
                 "em": {"num": s["em"], "den": s["gold"]},
                 "full_cover": s["full"], "partial_expose": s["partial"],
                 "no_cover": s["none"], "split_cover": s["split"],
@@ -757,6 +958,23 @@ def main():
             "join": {"key": join_key, "ok": len(pairs), "fail": len(join_fail),
                      "total": len(docs)},
             "em_require_label": args.em_require_label,
+            "span_unit": "span [start, end) char offsets",
+            "match_rule": {
+                "assignment": "greedy 1:1 by overlap chars desc",
+                "tie_break": "(doc_id, gold.start, pred.start) asc",
+                "label_rule": "pred label == gold.corp_category or gold.opf_label",
+                "primary_criterion": "partial",
+            },
+            "standard_criteria": {
+                c: {"tp": std[c]["tp"], "fn": G - std[c]["tp"],
+                    "fp": P - std[c]["tp"],
+                    "recall": {"num": std[c]["tp"], "den": G},
+                    "precision": {"num": std[c]["tp"], "den": P},
+                    "f1": round(fbeta(ratio(std[c]["tp"], P),
+                                      ratio(std[c]["tp"], G), 1), 6),
+                    "f2": round(fbeta(ratio(std[c]["tp"], P),
+                                      ratio(std[c]["tp"], G), 2), 6)}
+                for c in CRITERIA},
             "overall": blk(tot),
             "by_corp_category": {c: blk(by_cat[c]) for c in by_cat},
             "by_opf_label": {c: blk(by_opf[c]) for c in by_opf},
@@ -766,9 +984,11 @@ def main():
             "doc_level": {"total": nd, "fully_masked": docs_clean,
                           "with_miss": docs_missed,
                           "miss_by_top_sensitive_category": cnt},
-            "unique_id_4": {"recall": {"num": uh, "den": ug}, "fn": ug - uh,
+            "unique_id_4": {"recall": {"num": ut, "den": ug}, "fn": ug - ut,
+                            "gold_coverage": {"num": uh, "den": ug},
+                            "uncovered": ug - uh,
                             "allowance": UNIQUE_ID_ALLOWANCE,
-                            "meets": (ug - uh) <= UNIQUE_ID_ALLOWANCE},
+                            "meets": (ug - ut) <= UNIQUE_ID_ALLOWANCE},
             "over_masked_by_category": over_by_cat,
             "unattributed_pred_spans": unattrib_pred,
             "partial_samples": partial_samples[:args.partial_sample],
