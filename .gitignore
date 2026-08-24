@@ -7,5 +7,10 @@
 과제2-1/results/*.csv
 과제2-1/results/review_criteria.txt
 
+# run_all.py 가 실행 때마다 만드는 산출물
+과제2-1/results/REPORT_*.txt
+과제2-1/results/_metrics_*.json
+과제2-1/results/_smoke_gold_*.json
+
 # 로컬 전용 작업 규칙 (원격 리포에 올리지 않음)
 CLAUDE.md
