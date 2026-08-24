@@ -14,5 +14,8 @@ __pycache__/
 과제2-1/results/_metrics_*.json
 과제2-1/results/_smoke_gold_*.json
 
+# 복원 스크립트가 --write 없이 만드는 대조용 산출물 (원본과 동일)
+*.json.new
+
 # 로컬 전용 작업 규칙 (원격 리포에 올리지 않음)
 CLAUDE.md
