@@ -94,7 +94,6 @@ def show_doc(doc, tokenizer, backend, id2label, note=""):
 
 def main():
     ap = argparse.ArgumentParser(prog="opf_probe.py")
-    ap.add_argument("--backend", default="local", choices=["local", "vllm"])
     ap.add_argument("--ckpt", default=opf_local.DEFAULT_CKPT)
     ap.add_argument("--device", default=None, help="local 백엔드 device (기본 자동)")
     ap.add_argument("--text", default=None)
@@ -106,7 +105,7 @@ def main():
 
     t0 = time.time()
     tokenizer, backend, id2label = opf_local.build(
-        args.backend, args.ckpt, args.device)
+        "local", args.ckpt, args.device)
     load_s = time.time() - t0
     dev = getattr(backend, "device", "-")
     print("백엔드 %s / device %s / 모델 로드 %.1f초" % (backend.name, dev, load_s))
