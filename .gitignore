@@ -5,14 +5,14 @@ __pycache__/
 .venv/
 
 # 재생성 가능한 실행 산출물 (rule_layer.py / build_review_sheet.py 등)
-과제2-1/results/*.jsonl
-과제2-1/results/*.csv
-과제2-1/results/review_criteria.txt
+eval/results/*.jsonl
+eval/results/*.csv
+eval/results/review_criteria.txt
 
 # run_all.py 가 실행 때마다 만드는 산출물
-과제2-1/results/REPORT_*.txt
-과제2-1/results/_metrics_*.json
-과제2-1/results/_smoke_gold_*.json
+eval/results/REPORT_*.txt
+eval/results/_metrics_*.json
+eval/results/_smoke_gold_*.json
 
 # 복원 스크립트가 --write 없이 만드는 대조용 산출물 (원본과 동일)
 *.json.new

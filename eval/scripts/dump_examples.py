@@ -386,14 +386,14 @@ def main():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ap.add_argument("--gold", default=os.path.join(root, "data",
                                                    "ss_pii_testset_ko_v1.json"),
-                    help="정본 JSON (기본: 과제2-1/data/ss_pii_testset_ko_v1.json)")
+                    help="정본 JSON (기본: eval/data/ss_pii_testset_ko_v1.json)")
     # required=True 로 두면 argparse 가 exit 2 로 끝나는데, exit 2 는 조인 실패
     # 전용 코드다. 인자 부재는 입력 오류이므로 직접 검사해 exit 1 로 맞춘다.
     ap.add_argument("--pred", default=None,
                     help="OPF 예측 JSONL (필수)")
     ap.add_argument("--rule", default=os.path.join(root, "results",
                                                    "rule_predictions.jsonl"),
-                    help="규칙 예측 JSONL (기본: 과제2-1/results/rule_predictions.jsonl)")
+                    help="규칙 예측 JSONL (기본: eval/results/rule_predictions.jsonl)")
     ap.add_argument("--probe-gold", default=None,
                     help="프로브 정본 JSONL (버킷 E, 선택)")
     ap.add_argument("--probe-pred", default=None,

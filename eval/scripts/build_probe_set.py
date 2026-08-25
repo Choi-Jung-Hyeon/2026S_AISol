@@ -7,7 +7,7 @@
 사내 요구사항이다.
 
 값의 출처
-  - 국문/영문 성명, 주소 : 과제1-2/pseudonym_pool.json 의 가명값 풀 조합
+  - 국문/영문 성명, 주소 : dataset/pseudonym_pool.json 의 가명값 풀 조합
   - 이메일, 숫자형 7종   : 정본 테스트셋의 기존 가명값을 재사용(읽기 전용)
     풀에 숫자형 PII 값이 없기 때문이며, 실존 가능한 값을 새로 만들지 않기
     위해 이미 무효화된 가명값을 그대로 가져온다.
@@ -322,7 +322,7 @@ def main():
                                                    "ss_pii_testset_ko_v1.json"),
                     help="정본 JSON 경로 (숫자형 가명값 재사용, 읽기 전용)")
     ap.add_argument("--pool", default=os.path.join(
-        os.path.dirname(root), "과제1-2", "pseudonym_pool.json"),
+        os.path.dirname(root), "dataset", "pseudonym_pool.json"),
         help="가명값 풀 경로 (성명/주소)")
     ap.add_argument("--out-dir", default=os.path.join(root, "data"),
                     help="출력 디렉토리")
