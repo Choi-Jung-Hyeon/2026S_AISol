@@ -369,6 +369,10 @@ def classify(dec, gold_by, rule_by_text):
             # H1_RULE — 고유식별 4종 중 OPF 예측과 3자 이상 겹치지 못한 것
             if item in RULE_ITEMS and gi not in m:
                 tags.append("H1_RULE")
+            # H2_OPF_ONLY — 규칙 레이어가 예측을 내지 못하는 항목(4종 이외) 중
+            #               Viterbi OPF 가 완전 피복한 것. 규칙만으로는 못 잡는다.
+            if item not in RULE_ITEMS and cv == n:
+                tags.append("H2_OPF_ONLY")
             # V1_DECODE — argmax 에서 TP 가 아니었는데 Viterbi 에서 TP 가 된 정답 스팬
             if gi in m and gi not in m_arg:
                 tags.append("V1_DECODE")
@@ -395,7 +399,11 @@ def classify(dec, gold_by, rule_by_text):
                         r["n_item"] = len(vs)
 
         # S1_STRONG — 정답 스팬이 전건 완전 피복된 문서
+        nr = [g for g in gold if g[2] not in RULE_ITEMS]          # 규칙 불가 항목
+        nr_full = sum(1 for gs, ge, it, _ in nr
+                      if set(range(gs, ge)) <= pc_v)
         drows.append({"doc_id": did, "strong": all_tp, "n_span": len(gold),
+                      "n_norule": len(nr), "n_norule_full": nr_full,
                       "text": text, "gold": gold, "pred": sp_v,
                       "pred_arg": sp_a, "rule": rule})
 
@@ -475,12 +483,14 @@ def emit(dec, gold_by, rule_by_text, out_path):
         "F6_OVERRUN": "경계 과확장 & 초과분에 경칭/직함",
         "F7_INCONSIST": "동일 항목 2+ 중 일부만 피복·일부 완전미탐",
         "H1_RULE": "고유식별 4종 중 OPF 예측과 3자 미달",
+        "H2_OPF_ONLY": "규칙 불가 항목 중 OPF 가 완전 피복",
         "V1_DECODE": "argmax 非TP -> Viterbi TP",
     }
     print("    %-14s %-10s %8s   %s" % ("축", "모집단축", "건수", "정의"))
     print("    " + "-" * 78)
     for t in ("F1_ORPHAN", "F2_FORM", "F3_NARR", "F5_MISLABEL",
-              "F6_OVERRUN", "F7_INCONSIST", "H1_RULE", "V1_DECODE"):
+              "F6_OVERRUN", "F7_INCONSIST", "H1_RULE", "H2_OPF_ONLY",
+              "V1_DECODE"):
         print("    %-14s %-10s %8d   %s" % (t, "정답스팬", gt.get(t, 0), DESC[t]))
     print("    %-14s %-10s %8d   %s"
           % ("D_UNLABELED", "예측스팬", pt.get("D_UNLABELED", 0),
@@ -557,6 +567,18 @@ def emit(dec, gold_by, rule_by_text, out_path):
             "OPF 가 %s %d자를 완전히 덮지 못함(%s) — 규칙 레이어 경계 %s"
             % (r["item"], r["n_gold"], r["verdict"],
                "정확" if r["rule_exact"] else "불일치"),
+            d, extra=True))
+
+    # H2_OPF_ONLY — 규칙 불가 항목을 많이 가졌고 그것을 전부 완전 피복한 문서
+    #               문서당 1건, 규칙불가 정답 스팬 수 내림차순
+    h2_docs = [d for d in drows
+               if d["n_norule"] > 0 and d["n_norule_full"] == d["n_norule"]]
+    h2_docs.sort(key=lambda d: (-d["n_norule"], d["doc_id"]))
+    for d in h2_docs[:TOP_N]:
+        recs.append(build_record(
+            "H2_OPF_ONLY", "(규칙 불가 항목)",
+            "규칙 레이어가 못 잡는 항목 %d개를 OPF 가 전부 완전 피복 "
+            "(규칙 예측 %d건)" % (d["n_norule"], len(d["rule"])),
             d, extra=True))
 
     outdir = os.path.dirname(os.path.abspath(out_path))
