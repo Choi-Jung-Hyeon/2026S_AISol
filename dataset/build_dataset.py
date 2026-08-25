@@ -11,7 +11,7 @@ from collections import Counter, defaultdict
 
 random.seed(20260814)
 BASE = Path(__file__).resolve().parent
-SRC = Path(os.environ.get('SS_SRC', BASE.parent / 'openpii_ko_sample.jsonl'))
+SRC = Path(os.environ.get('SS_SRC', BASE / 'source' / 'openpii_ko_sample.jsonl'))
 OUT = Path(os.environ.get('SS_OUT', BASE))
 OUT.mkdir(parents=True, exist_ok=True)
 POOL_PATH = Path(os.environ.get('SS_POOL', BASE / 'pseudonym_pool.json'))

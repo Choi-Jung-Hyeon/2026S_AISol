@@ -3,25 +3,26 @@
 OpenAI Privacy Filter(OPF)를 사내 도입할 수 있는지 판단하기 위해,
 한국어 PII 테스트셋을 만들고 그것으로 모델을 평가하는 과제입니다.
 
-- **1주차** — 평가할 데이터를 만든다 (`과제1-1`, `과제1-2`)
-- **2주차** — 그 데이터로 모델을 평가한다 (`과제2-1`)
+- **`dataset/`** — 평가할 데이터를 만든다 (1주차)
+- **`eval/`** — 그 데이터로 모델을 평가한다 (2주차)
 
 모델 체크포인트는 아직 반입 전이라, 현재 리포에는 **모델 없이 준비 가능한 것**까지
-들어 있습니다. 반입 후에는 `과제2-1/RUNBOOK.txt`만 따라 실행하면 됩니다.
+들어 있습니다. 반입 후에는 `eval/RUNBOOK.txt`만 따라 실행하면 됩니다.
 
 ---
 
 ## 디렉토리
 
 ```
-과제1-1/    1주차 초안 — 테스트셋 첫 산출물과 발표자료
-과제1-2/    1주차 최종 — 정본 테스트셋, 생성기, 인수인계 문서
-과제2-1/    2주차 — 평가 하니스 입력·집계 스크립트·운영점·실행 절차
-archive/    원천 데이터 (openpii 원본, train/valid/test, 모델카드)
-privacy-filter-main/   OPF 공개 저장소 사본 (참고용, 수정하지 않음)
+dataset/    정본 테스트셋, 생성기, 가명값 풀, 원천 입력(source/)
+eval/       평가 파이프라인 — 진입점·집계 스크립트·운영점·실행 절차
+reference/  참고 자료 — OPF 공개 저장소 사본(opf/), KDPII 실물(kdpii/),
+            모델카드(model-card/), tiktoken 캐시(tiktoken-cache/)
+reports/    전달 문서 — 인수인계 2종, 문의회신·실행가이드, 발표자료(slides/)
+archive/    미사용·폐기 예정 — 1주차 초안(week1-draft/), 반입 zip(packaging/)
 ```
 
-### 과제1-2 (정본)
+### dataset/ (정본)
 
 | 파일 | 내용 |
 | --- | --- |
@@ -32,16 +33,21 @@ privacy-filter-main/   OPF 공개 저장소 사본 (참고용, 수정하지 않�
 | `build_dataset.py` | 정본 생성기 (seed 20260814) |
 | `convert_schema.py` | 정본 → 하니스 스키마 변환기 |
 | `pseudonym_pool.json` | 가명값 풀 (성명·주소·이메일 도메인) |
-| `README_인수인계.md` | 1주차 상세 인수인계 |
+| `nemotron_names.json` | Nemotron 5만 건 추출 성명 원자료 |
+| `build_nemotron_names.py` | parquet → `nemotron_names.json` |
+| `build_pseudonym_pool.py` | `nemotron_names.json` → 가명값 풀 |
+| `source/` | openpii 원천 (`build_dataset.py` 의 기본 입력) |
 
-### 과제2-1 (평가)
+1주차 상세 인수인계는 `reports/README_인수인계.md` 로 옮겼습니다.
+
+### eval/ (평가)
 
 ```
 data/       정본·eval 라벨·스모크 미니셋·부분 발화 프로브셋
-scripts/    집계 스크립트 6종
+scripts/    집계 스크립트 9종
 configs/    Viterbi 운영점 3종
 results/    실행 결과 (예측 JSONL 등은 재생성 가능하므로 추적하지 않음)
-RUNBOOK.txt 내일 실행할 순서 [0]~[7]
+RUNBOOK.txt 실행 순서 [0]~[7]
 ```
 
 | 스크립트 | 하는 일 |
@@ -52,6 +58,12 @@ RUNBOOK.txt 내일 실행할 순서 [0]~[7]
 | `build_probe_set.py` | 부분 발화 프로브셋 300건 생성 (seed 20260818) |
 | `rule_layer.py` | 고유식별정보 4종 정규식 탐지 |
 | `hybrid_merge.py` | OPF 단독 / 규칙 단독 / 합집합 3단 비교 |
+| `standalone_metrics.py` | 하니스 없이 예측 스팬만으로 전 지표 산출 |
+| `dump_examples.py` | 미탐·과탐 실사례를 6버킷(A~F)으로 추출 |
+| `build_review_sheet.py` | 사람 검수용 CSV 300건 표집 |
+
+단일 진입점은 `eval/run_all.py` 이며 위 중 5종을 순서대로 호출합니다.
+`run_opf.py`(개발망 전용)는 `eval/` 바로 아래에 놓으면 됩니다.
 
 ---
 
@@ -115,17 +127,17 @@ Accuracy는 배경 토큰 비중 때문에 과대평가되어 주지표에서 �
 ## 재현
 
 ```bash
-# 정본 재생성 (openpii 원본이 archive/ 로 이동해 SS_SRC 지정 필요)
-SS_SRC="$PWD/archive/openpii_ko_sample.jsonl" python3 과제1-2/build_dataset.py
+# 정본 재생성 (입력 기본값이 dataset/source/ 를 가리킴)
+python3 dataset/build_dataset.py
 
 # 하니스 스키마 변환
-python3 과제1-2/convert_schema.py --gold 과제1-2/ss_pii_testset_ko_v1.json \
-  --label opf  --out 과제1-2/eval_opf_labels.jsonl
-python3 과제1-2/convert_schema.py --gold 과제1-2/ss_pii_testset_ko_v1.json \
-  --label corp --out 과제1-2/eval_corp_labels.jsonl
+python3 dataset/convert_schema.py --gold dataset/ss_pii_testset_ko_v1.json \
+  --label opf  --out dataset/eval_opf_labels.jsonl
+python3 dataset/convert_schema.py --gold dataset/ss_pii_testset_ko_v1.json \
+  --label corp --out dataset/eval_corp_labels.jsonl
 
 # 프로브셋 재생성
-python3 과제2-1/scripts/build_probe_set.py
+python3 eval/scripts/build_probe_set.py
 ```
 
 시드가 고정되어 있어 재실행 시 바이트 동일한 산출물이 나옵니다.
@@ -142,7 +154,7 @@ python3 과제2-1/scripts/build_probe_set.py
 | device | **mps** — cuda 불가 |
 
 `opf eval`의 기본 device는 cuda라 매 명령에 `--device mps`를 명시해야 합니다.
-집계 스크립트 6종은 표준 라이브러리만 쓰므로 torch 없이 동작합니다.
+집계 스크립트 9종은 표준 라이브러리만 쓰므로 torch 없이 동작합니다.
 
 ```bash
 source .venv/bin/activate
@@ -152,6 +164,6 @@ source .venv/bin/activate
 
 ## 모델 반입 후
 
-`과제2-1/RUNBOOK.txt`에서 `$MODEL`만 실제 경로로 바꾸고 `[0]`부터 순서대로
+`eval/RUNBOOK.txt`에서 `$MODEL`만 실제 경로로 바꾸고 `[0]`부터 순서대로
 실행합니다. `[1]` 스모크 50건 결과로 각 단계의 `# est: ___`를 채운 뒤
 `[2]` 기준선 3,000건으로 넘어가는 흐름입니다.

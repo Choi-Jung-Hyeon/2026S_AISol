@@ -85,11 +85,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="--write 없이 실행하면 원본을 건드리지 않고 .new 로만 쓴다.")
     ap.add_argument("--names", default=os.path.join(HERE, "nemotron_names.json"),
-                    help="입력 nemotron_names.json (기본: 과제1-2/nemotron_names.json)")
+                    help="입력 nemotron_names.json (기본: dataset/nemotron_names.json)")
     ap.add_argument("--base", default=os.path.join(HERE, "pseudonym_pool.json"),
                     help="비Nemotron 키 5종을 승계할 기존 pseudonym_pool.json")
     ap.add_argument("--out", default=os.path.join(HERE, "pseudonym_pool.json.new"),
-                    help="출력 경로 (기본: 과제1-2/pseudonym_pool.json.new)")
+                    help="출력 경로 (기본: dataset/pseudonym_pool.json.new)")
     ap.add_argument("--write", action="store_true",
                     help="이 플래그가 있을 때만 --base 원본을 덮어쓴다")
     args = ap.parse_args()
