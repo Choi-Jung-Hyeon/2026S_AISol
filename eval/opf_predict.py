@@ -28,6 +28,8 @@ def main():
     ap.add_argument("--limit", type=int, default=0, help="앞 N건만 (0=전량)")
     ap.add_argument("--device", default=None)
     ap.add_argument("--ckpt", default=opf_local.DEFAULT_CKPT)
+    ap.add_argument("--dtype", default="bfloat16", choices=["bfloat16", "float32"],
+                    help="정본은 bfloat16 — config.json 이 선언한 체크포인트 원본 정밀도다.")
     args = ap.parse_args()
 
     if not os.path.isfile(args.gold):
@@ -38,9 +40,14 @@ def main():
     if args.limit:
         docs = docs[: args.limit]
 
-    tokenizer, backend, id2label = opf_local.build(
-        "local", args.ckpt, args.device)
-    print("device %s / 문서 %d건" % (getattr(backend, "device", "-"), len(docs)))
+    import torch
+    tokenizer = opf_local.load_tokenizer(args.ckpt)
+    id2label = opf_local.load_id2label(args.ckpt)
+    backend = opf_local.LocalBackend(
+        args.ckpt, args.device,
+        torch.bfloat16 if args.dtype == "bfloat16" else torch.float32)
+    print("device %s / dtype %s / 문서 %d건"
+          % (getattr(backend, "device", "-"), args.dtype, len(docs)))
 
     outdir = os.path.dirname(os.path.abspath(args.out))
     if outdir and not os.path.isdir(outdir):
