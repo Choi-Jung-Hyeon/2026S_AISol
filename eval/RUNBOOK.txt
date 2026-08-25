@@ -1,4 +1,4 @@
-# 2주차 OPF 평가 실행 순서 (모델 반입 후 실행). 실행 위치: 과제2-1/
+# 2주차 OPF 평가 실행 순서 (모델 반입 후 실행). 실행 위치: eval/
 # device=mps 확정 (Apple M4 Pro, cuda 불가). opf 기본값이 cuda 라 매 명령에 명시.
 # 파이썬은 리포 루트 .venv 사용: source ../.venv/bin/activate
 
