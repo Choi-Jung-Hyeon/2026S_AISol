@@ -50,6 +50,7 @@ opf_predict.py   정본 전량 추론 -> 예측 스팬 JSONL
 cache_logits.py  로짓 [T,33] + 오프셋 캐시 (추론 1회, 이후 재추론 없음)
 viterbi.py       제약 Viterbi 디코더 (BIOES 전이 제약) — 정본 디코딩 경로
 decode_compare.py argmax vs Viterbi 비교 + 축별 대표 케이스 선별
+build_report_html.py 좌우 비교 HTML 보고서 생성 (자기완결형)
 postproc.py      group_spans / mask_text (원본 전사, 수정 금지)
 data/          정본·eval 라벨·스모크 미니셋·부분 발화 프로브셋
 scripts/       집계 스크립트 9종
@@ -230,12 +231,48 @@ argmax 57건 / **Viterbi 30건** (주소 29, 영문 성명 1).
 | F5_MISLABEL | 2,277 | 오프셋 완전일치인데 라벨 불일치 |
 | F6_OVERRUN | 2,079 | 경계 과확장 & 초과분에 경칭·직함 |
 | F7_INCONSIST | 2,279 | 동일 항목 2개 이상 중 일부만 피복·일부 완전미탐 |
-| H1_RULE | 30 | 고유식별 4종 중 OPF 예측과 3자 미달 |
+| H1_RULE | 30 | 고유식별 4종 중 OPF 예측과 3자 미달 — 규칙이 구제 |
+| H2_OPF_ONLY | 18,222 | 규칙 불가 항목 중 OPF 가 완전 피복 — 규칙으론 못 잡음 |
 | V1_DECODE | 56 | argmax 非TP → Viterbi TP |
 | D_UNLABELED | 3,768 | 순수오탐 & 예측 라벨 `private_date` |
 | S1_STRONG | 1,516 | 정답 스팬 전건 TP 인 문서 |
 
 미탐 축(정답 스팬 28,420)과 과탐 축(순수오탐 5,498)은 **모집단이 달라 합산하지 않습니다.**
+
+### 좌우 비교 HTML 보고서
+
+`eval/results/opf_showcase.html` — 자기완결형 단일 파일(246KB, 11축 55카드).
+외부 요청 0건이라 파일만 열면 됩니다.
+
+```bash
+python3 eval/build_report_html.py \
+  --showcase eval/results/showcase.jsonl --out eval/results/opf_showcase.html
+```
+
+원문과 마스킹 결과를 좌우로 놓고 오프셋 기준으로 칠합니다.
+
+| 색 | 위치 | 뜻 |
+| --- | --- | --- |
+| 파랑 | 원문 | 정답 PII 구간 |
+| **빨강** | 원문 | **미탐 — 안 가려진 곳** |
+| 회색 | 마스킹 | 덮인 구간 |
+| 노랑 | 마스킹 | 과확장 — 정답 밖까지 덮임 |
+
+`H1_RULE`·`H2_OPF_ONLY` 는 규칙 레이어 칸을 더해 3~4단으로, `V1_DECODE`·`F1_ORPHAN`
+은 argmax/Viterbi 를 나란히 놓아 3단으로 보여줍니다. 마스킹이 문자 수를 보존하므로
+좌우 칸이 같은 위치에서 줄바꿈됩니다.
+
+### 규칙 레이어와 OPF 는 서로를 대체하지 않는다
+
+| | 커버 범위 | OPF 단독 미탐 | 규칙 단독 |
+| --- | --- | --- | --- |
+| 고유식별 4종 | 7,689 스팬 | 30건 | **전건 탐지, 오탐 0** |
+| 나머지 6항목 | 20,731 스팬 | — | **예측 0건** |
+
+규칙은 형식이 법으로 고정된 4종만 잡습니다. 성명·주소·이메일·연락처·계좌·카드는
+정규식으로 잡히지 않아 **OPF 가 아니면 가릴 방법이 없습니다**(`H2_OPF_ONLY` 18,222건).
+반대로 OPF 가 놓친 4종 30건은 규칙이 전부 구제합니다(`H1_RULE`). 둘을 병용해야
+완전 미탐 0 이 됩니다.
 
 ### 부분 노출의 원인은 토크나이저가 아니라 태그 시퀀스
 
