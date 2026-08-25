@@ -53,11 +53,11 @@
 | `openpii_ko_full.jsonl` | ko 전체 26,498행 (용량 큼, 선택) |
 
 > `openpii_ko_*.jsonl` 3종은 용량 문제로 zip에 포함하지 않았습니다.
-> 리포 정리 시 상위 폴더에서 `archive/` 로 이동했으므로, `build_dataset.py` 를
-> 재실행할 때는 `SS_SRC` 로 경로를 지정해야 합니다 (기본값은 상위 폴더를 가리킵니다).
+> 리포 재편으로 `dataset/source/` 아래로 옮겼고 `build_dataset.py` 기본값이
+> 이 경로를 가리킵니다. 다른 입력을 쓸 때만 `SS_SRC` 를 지정하십시오.
 >
 > ```bash
-> SS_SRC="$PWD/archive/openpii_ko_sample.jsonl" python3 과제1-2/build_dataset.py
+> python3 dataset/build_dataset.py
 > ```
 
 ---
@@ -114,16 +114,16 @@
 ## 5. 재현 절차
 
 ```bash
-# 입력: openpii_ko_sample.jsonl (archive/), pseudonym_pool.json (같은 폴더)
+# 입력: dataset/source/openpii_ko_sample.jsonl, dataset/pseudonym_pool.json
 # 출력: ss_pii_testset_ko_v1.json, ss_pii_testset_ko_v1_opf.jsonl, pseudonym_pool.json
-# 리포 루트에서 실행. SS_SRC 미지정 시 기본값이 상위 폴더를 가리켜 실패합니다.
-SS_SRC="$PWD/archive/openpii_ko_sample.jsonl" python3 과제1-2/build_dataset.py
+# 리포 루트에서 실행. 기본값이 dataset/source/ 를 가리키므로 SS_SRC 불필요.
+python3 dataset/build_dataset.py
 
 # 하니스 스키마(JSONL) 변환 — 2주차 평가 입력
-python3 과제1-2/convert_schema.py --gold 과제1-2/ss_pii_testset_ko_v1.json \
-  --label opf  --out 과제1-2/eval_opf_labels.jsonl
-python3 과제1-2/convert_schema.py --gold 과제1-2/ss_pii_testset_ko_v1.json \
-  --label corp --out 과제1-2/eval_corp_labels.jsonl
+python3 dataset/convert_schema.py --gold dataset/ss_pii_testset_ko_v1.json \
+  --label opf  --out dataset/eval_opf_labels.jsonl
+python3 dataset/convert_schema.py --gold dataset/ss_pii_testset_ko_v1.json \
+  --label corp --out dataset/eval_corp_labels.jsonl
 ```
 
 - 시드 고정(`random.seed(20260814)`)이므로 동일 입력에 대해 동일 산출물이 재현됨

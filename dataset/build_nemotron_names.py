@@ -97,13 +97,13 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="--write 없이 실행하면 원본을 건드리지 않고 .new 로만 쓴다.")
     ap.add_argument("--parquet",
-                    default=os.path.join(ROOT, "archive",
+                    default=os.path.join(HERE, "source",
                                          "train-00000-of-00009.parquet"),
-                    help="입력 parquet (기본: archive/train-00000-of-00009.parquet)")
+                    help="입력 parquet (기본: dataset/source/train-00000-of-00009.parquet)")
     ap.add_argument("--out", default=os.path.join(HERE, "nemotron_names.json.new"),
-                    help="출력 경로 (기본: 과제1-2/nemotron_names.json.new)")
+                    help="출력 경로 (기본: dataset/nemotron_names.json.new)")
     ap.add_argument("--write", action="store_true",
-                    help="이 플래그가 있을 때만 과제1-2/nemotron_names.json 을 덮어쓴다")
+                    help="이 플래그가 있을 때만 dataset/nemotron_names.json 을 덮어쓴다")
     args = ap.parse_args()
 
     if not os.path.isfile(args.parquet):
