@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OPF 한국어 PII 마스킹 — 원문/마스킹 좌우 비교</title><style>
 :root{--blue:#dbeafe;--red:#fecaca;--gray:#e5e7eb;--yellow:#fef08a;
---line:#e5e7eb;--muted:#6b7280;--ink:#111827}
+--purple:#e9d5ff;--line:#e5e7eb;--muted:#6b7280;--ink:#111827}
 *{box-sizing:border-box}
 body{margin:0;background:#fff;color:var(--ink);
 font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
@@ -21,6 +21,17 @@ vertical-align:-2px;margin-right:5px}
 .toc a{color:#1d4ed8;text-decoration:none;font-size:13px;margin-right:14px;
 display:inline-block;padding:2px 0}
 .toc a:hover{text-decoration:underline}
+.toc .row{margin:6px 0}
+.toc .cn{display:inline-block;min-width:120px;font-weight:700;font-size:13px}
+.chap{margin:46px 0 20px;padding:0 0 8px;border-bottom:2px solid var(--ink);
+scroll-margin-top:12px}
+.chap:first-of-type{margin-top:26px}
+.chap .rn{font-size:13px;color:var(--muted);letter-spacing:.06em}
+.chap h2{font-size:21px;margin:2px 0 0;font-weight:700}
+.shead{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.shead h2{margin:8px 0 4px}
+.cap{padding:8px 14px;border-bottom:1px solid var(--line);background:#fafafa;
+font-size:12px;color:var(--muted)}
 section{margin:0 0 42px;scroll-margin-top:12px}
 .tag{display:inline-block;font-size:11px;color:var(--muted);
 border:1px solid var(--line);border-radius:4px;padding:1px 6px;
@@ -40,6 +51,7 @@ pre{margin:0;white-space:pre-wrap;word-break:break-all;overflow-wrap:anywhere;
 font-family:"SFMono-Regular",Menlo,Consolas,"D2Coding","Nanum Gothic Coding",monospace;
 font-size:12.5px;line-height:1.85;tab-size:2}
 .gold{background:var(--blue)}
+.diff{background:var(--purple)}
 .leak{background:var(--red);font-weight:700}
 .mask{background:var(--gray)}
 .over{background:var(--yellow)}
@@ -53,8 +65,9 @@ color:#374151;background:#fafafa}
 @media print{body{font-size:11px}.wrap{max-width:none;padding:0}
 .case{break-inside:avoid;page-break-inside:avoid}
 section{break-inside:auto}.toc{display:none}
+.chap{break-after:avoid;page-break-after:avoid}
 a{color:inherit;text-decoration:none}}
-</style></head><body><div class="wrap"><h1>OPF 한국어 PII 마스킹 — 원문 / 마스킹 좌우 비교</h1><p class="sub">생성 2026-08-25 · 정본 3,000문서 / 28,420스팬 · 제약 Viterbi 디코딩 · 마스킹은 덮인 문자 1개당 * 1개</p><div class="cards"><div class="card"><div class="big">0.9166 &nbsp;/&nbsp; 0.8686</div><div class="lab">재현율 / F1 (제약 Viterbi, 3자 기준·라벨 무관)</div></div><div class="card"><div class="big">3,889 &rarr; 1,326자</div><div class="lab">부분 노출 문자 (argmax → Viterbi)</div></div><div class="card"><div class="big">8,745 &rarr; 0건</div><div class="lab">BIOES 금지 전이 (argmax → Viterbi)</div></div><div class="card"><div class="big">30 &rarr; 0건</div><div class="lab">고유식별 4종 완전 미탐 (OPF 단독 → 규칙 병용)</div></div></div><div class="legend"><b>범례</b><span><i class="sw" style="background:var(--blue)"></i>정답 PII 구간</span><span><i class="sw" style="background:var(--red)"></i>미탐 — 안 가려진 곳</span><span><i class="sw" style="background:var(--gray)"></i>마스킹된 구간</span><span><i class="sw" style="background:var(--yellow)"></i>과확장 — 정답 밖까지 덮임</span></div><div class="toc"><b>축 목차</b><br><a href="#S1_STRONG">형식이 고정된 항목은 통째로 정확히 덮는</a> <a href="#F1_ORPHAN">한두 글자만 덮여 나머지가 그대로 노출된</a> <a href="#V1_DECODE">argmax 가 놓친 것을 제약 Vite</a> <a href="#F2_FORM">양식 칸이나 서명부에 적힌 성명을 놓친다</a> <a href="#F3_NARR">'주소' 라는 단서가 없으면 서술문 속 </a> <a href="#F7_INCONSIST">같은 문서 같은 항목인데 일부만 가려진다</a> <a href="#F6_OVERRUN">경칭과 직함까지 함께 삼킨다</a> <a href="#F5_MISLABEL">라벨은 틀렸지만 문자는 정확히 덮는다</a> <a href="#D_UNLABELED">정답에 없는 날짜를 탐지한다 — 오탐이지</a> <a href="#H1_RULE">OPF 가 놓친 고유식별번호를 규칙 레이</a> <a href="#H2_OPF_ONLY">규칙으로는 손댈 수 없는 항목을 OPF </a></div><section id="S1_STRONG"><span class="tag">S1_STRONG</span><h2>형식이 고정된 항목은 통째로 정확히 덮는다</h2><p class="scale">3,000 문서 중 1,516개 문서 · 대표 5건</p><p class="desc">이메일·계좌번호·주민등록번호처럼 자릿수와 구분자가 정해진 값은 경계까지 정확히 잡아낸다. 아래는 한 문서의 정답 스팬을 하나도 빠짐없이 덮은 사례다.</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>회의록: 2024년 이사회 시각화 스킬 점검 회의
+</style></head><body><div class="wrap"><h1>OPF 한국어 PII 마스킹 — 원문 / 마스킹 좌우 비교</h1><p class="sub">생성 2026-08-26 · 정본 3,000문서 / 28,420스팬 · 제약 Viterbi 디코딩 · 마스킹은 덮인 문자 1개당 * 1개</p><div class="cards"><div class="card"><div class="big">0.9166 &nbsp;/&nbsp; 0.8686</div><div class="lab">재현율 / F1 (제약 Viterbi, 3자 기준·라벨 무관)</div></div><div class="card"><div class="big">3,889 &rarr; 1,326자</div><div class="lab">부분 노출 문자 (argmax → Viterbi)</div></div><div class="card"><div class="big">8,745 &rarr; 0건</div><div class="lab">BIOES 금지 전이 (argmax → Viterbi)</div></div><div class="card"><div class="big">30 &rarr; 0건</div><div class="lab">고유식별 4종 완전 미탐 (OPF 단독 → 규칙 병용)</div></div></div><div class="legend"><b>범례</b><span><i class="sw" style="background:var(--blue)"></i>정답 PII 구간</span><span><i class="sw" style="background:var(--red)"></i>미탐 — 안 가려진 곳</span><span><i class="sw" style="background:var(--gray)"></i>마스킹된 구간</span><span><i class="sw" style="background:var(--yellow)"></i>과확장 — 정답 밖까지 덮임</span><span><i class="sw" style="background:var(--purple)"></i>argmax 와 Viterbi 가 다른 문자</span></div><div class="toc"><b>목차</b><div class="row"><span class="cn"><a href="#ch1">Ⅰ. 잘하는 것</a></span><a href="#S1_STRONG">번호는 통째로 지웁니다</a></div><div class="row"><span class="cn"><a href="#ch2">Ⅱ. 못하는 것</a></span><a href="#F2_FORM">표 안의 이름은 못 찾습니다</a> <a href="#F3_NARR">'주소'라는 말이 없으면 주소를 못 봅니다</a> <a href="#F7_INCONSIST">같은 문서, 같은 이름, 다른 결과</a> <a href="#F1_ORPHAN">절반만 가려진 마스킹</a></div><div class="row"><span class="cn"><a href="#ch3">Ⅲ. 오탐이지만 문제되지 않는 것</a></span><a href="#F6_OVERRUN">직함까지 삼켜버립니다</a> <a href="#F5_MISLABEL">이름을 주소로 착각해도 결과는 같습니다</a> <a href="#D_UNLABELED">정답에 없는 날짜까지 찾아냅니다</a></div><div class="row"><span class="cn"><a href="#ch4">Ⅳ. 그래서 이렇게 덮습니다</a></span><a href="#V1_DECODE">디코딩만 바꿔도 살아나는 것들</a> <a href="#V2_REGRESS">사라진 것은 성공이 아니라 착시였습니다</a> <a href="#H1_RULE">마지막 30건은 규칙이 메웁니다</a> <a href="#H2_OPF_ONLY">그런데 규칙만으로는 안 됩니다</a></div></div><div class="chap" id="ch1"><div class="rn">Ⅰ</div><h2>잘하는 것</h2></div><section id="S1_STRONG"><div class="shead"><h2>번호는 통째로 지웁니다</h2><span class="tag">S1_STRONG</span></div><p class="scale">3,000 문서 중 1,516개 문서 · 대표 5건</p><p class="desc">형식이 정해진 항목은 재현율 0.99~1.00</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>회의록: 2024년 이사회 시각화 스킬 점검 회의
 
 일시: 07/04/2025 오전 10시(4:00 PM)
 장소: <span class="leak">경기도 성남시 분당구 반포대로 </span><span class="gold">100</span>시 <span class="gold">충청남도 천안시 서북구 여의대로 59</span> 회의실
@@ -265,303 +278,7 @@ Rapid Prototyping 팀 리더
 <span class="mask">***</span>
 Rapid Prototyping 팀 리더
 <span class="mask">************************</span>
-<span class="mask">***********</span></pre></div></div><div class="note">SS-KO-00320 · <b>(문서 전건)</b> · 정답 스팬 18개 전건 TP</div></div></section><section id="F1_ORPHAN"><span class="tag">F1_ORPHAN</span><h2>한두 글자만 덮여 나머지가 그대로 노출된다</h2><p class="scale">28,420 스팬 중 214건 · 대표 5건</p><p class="desc">모델이 구간 대부분을 배경으로 찍고 한 토큰에만 라벨을 붙이면 그 글자만 가려진다. argmax 는 이런 고아 태그를 스팬으로 인정해 1글자 마스킹을 만들지만, 제약 Viterbi 는 구조적으로 차단한다.</p><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>안녕하세요, <span class="gold">SEUNGU LEE</span>님. 저희 빅토리아 시대 예절 수업에 관심을 보여주셔서 진심으로 감사드립니다. 수업은 매주 31/03/2009에 <span class="leak">부산광역시 해운대구 한강대로 </span><span class="gold">4</span>의 <span class="gold">인천광역시 연수구 중앙로 240</span>번지, <span class="gold">충청남도 천안시 서북구 올림픽로 14</span>에서 진행되며, 정장 복장은 필수이니 논바이너리과 27에 맞는 옷차림을 준비해 주시기 바랍니다. 
-
-수강 신청서는 아래와 같이 작성해 주시고, 서명 후 <span class="gold">myeongsun.jung50@gmail.com</span>으로 회신해 주시면 됩니다.
-
----
-10/05/1984: __________
-남성: __________
-<span class="gold">02-337-6319</span>: __________
-<span class="gold">671228-3790370</span>: __________
-<span class="gold">11-80-527388-64</span>: __________
-<span class="gold">780704-2690466</span>: __________
----
-
-수강료는 <span class="gold">4441-4109-4724-9459</span>로 결제 가능하며, 결제 확인 후 최종 안내 메일을 보내드립니다. 결제 과정에서 문제가 발생하면 언제든지 <span class="gold">01070358888</span>로 연락해 주시기 바랍니다. 
-
-수업 첫날에는 빅토리아 여왕 시대의 인사말, 좌석 예절, 식탁 매너, 서신 작성법 등을 실습하게 되며, 강사의 상세한 설명과 실시간 피드백을 통해 실력을 키우실 수 있습니다. 마지막으로, 모든 참가자는 수업 종료 후 <span class="gold">M26501413</span>에 기재된 인증서를 받게 되며, 이는 향후 사회적 활동에 큰 도움이 될 것입니다. 궁금한 점이 있으면 언제든지 <span class="gold">seongjun.kim85@gmail.com</span>로 문의해 주세요. 감사합니다.
-증권계좌번호는 <span class="gold">444-74-240940-71</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>안녕하세요,************. 저희 빅토리아 시대 예절 수업에 관심을 보여주셔서 진심으로 감사드립니다. 수업은 매주 **********에 부산광역시 해운대구 한************************************************에서 진행되며, 정장 복장은 필수이니 논바이너리과 27에 맞는 옷차림을 준비해 주시기 바랍니다. 
-
-수강 신청서는 아래와 같이 작성해 주시고, 서명 후***************************으로 회신해 주시면 됩니다.
-
----
-**********: __________
-남성: __________
-***********: __________
-**************: __________
-***************: __________
-**************: __________
----
-
-수강료는 *******************로 결제 가능하며, 결제 확인 후 최종 안내 메일을 보내드립니다. 결제 과정에서 문제가 발생하면 언제든지 ***********로 연락해 주시기 바랍니다. 
-
-수업 첫날에는 빅토리아 여왕 시대의 인사말, 좌석 예절, 식탁 매너, 서신 작성법 등을 실습하게 되며, 강사의 상세한 설명과 실시간 피드백을 통해 실력을 키우실 수 있습니다. 마지막으로, 모든 참가자는******************에 기재된 인증서를 받게 되며, 이는 향후 사회적 활동에 큰 도움이 될 것입니다. 궁금한 점이 있으면 언제든지*************************로 문의해 주세요. 감사합니다.
-증권계좌번호는 ****************이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>안녕하세요,<span class="over">*</span><span class="mask">**********</span><span class="over">*</span>. 저희 빅토리아 시대 예절 수업에 관심을 보여주셔서 진심으로 감사드립니다. 수업은 매주 <span class="over">**********</span>에 부산광역시 해운대구 한강대로 <span class="mask">*</span><span class="over">**</span><span class="mask">*****************</span><span class="over">****</span><span class="mask">********************</span>에서 진행되며, 정장 복장은 필수이니 논바이너리과 27에 맞는 옷차림을 준비해 주시기 바랍니다. 
-
-수강 신청서는 아래와 같이 작성해 주시고, 서명 후<span class="over">*</span><span class="mask">**************************</span>으로 회신해 주시면 됩니다.
-
----
-<span class="over">**********</span>: __________
-남성: __________
-<span class="mask">***********</span>: __________
-<span class="mask">**************</span>: __________
-<span class="mask">***************</span>: __________
-<span class="mask">**************</span>: __________
----
-
-수강료는 <span class="mask">*******************</span>로 결제 가능하며, 결제 확인 후 최종 안내 메일을 보내드립니다. 결제 과정에서 문제가 발생하면 언제든지 <span class="mask">***********</span>로 연락해 주시기 바랍니다. 
-
-수업 첫날에는 빅토리아 여왕 시대의 인사말, 좌석 예절, 식탁 매너, 서신 작성법 등을 실습하게 되며, 강사의 상세한 설명과 실시간 피드백을 통해 실력을 키우실 수 있습니다. 마지막으로, 모든 참가자는<span class="over">*********</span><span class="mask">*********</span>에 기재된 인증서를 받게 되며, 이는 향후 사회적 활동에 큰 도움이 될 것입니다. 궁금한 점이 있으면 언제든지<span class="over">*</span><span class="mask">************************</span>로 문의해 주세요. 감사합니다.
-증권계좌번호는 <span class="mask">****************</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div></div><div class="note">SS-KO-01623 · <b>주소</b> · 정답 17자 중 1자만 덮임 — 16자 노출</div></div><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>Short Form – Greenway Trail Volunteer Application
-
-1. Name: <span class="gold">YUGYEONG KIM</span>
-2. Title (if any): <span class="gold">JEONGHO MOON</span>
-3. Date of Birth: 26 9월 1963
-4. Gender: 남성
-5. Contact Email: <span class="gold">yeongjun.kim92@gmail.com</span>
-6. Phone Number: <span class="gold">02-831-9604</span>
-7. Address: <span class="gold">강원특별자치도 원주시 올림픽로 25</span>
-8. Tax ID (for reimbursements): <span class="gold">790725-4963338</span>
-9. Preferred Volunteer Role (e.g., Trail Maintenance, Event Coordination, Safety Officer): ______________________
-10. Any medical conditions or allergies we should be aware of? ______________________
-
-Please return this form to volunteer@greenwaytrails.kr by 20 12월 1950.
-담당 PB <span class="leak">신은</span><span class="gold">미</span> 수석(EUNMI SHIN)이 응대하였습니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>Short Form – Greenway Trail Volunteer Application
-
-1. Name:*************
-2. Title (if any):*************
-3. Date of Birth: **********
-4. Gender: 남성
-5. Contact Email:*************************
-6. Phone Number: ***********
-7. Address:********************
-8. Tax ID (for reimbursements): **************
-9. Preferred Volunteer Role (e.g., Trail Maintenance, Event Coordination, Safety Officer): ______________________
-10. Any medical conditions or allergies we should be aware of? ______________________
-
-Please return this form to volunteer****************** by ***********.
-담당 PB**은***************)이 응대하였습니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>Short Form – Greenway Trail Volunteer Application
-
-1. Name:<span class="over">*</span><span class="mask">************</span>
-2. Title (if any):<span class="over">*</span><span class="mask">************</span>
-3. Date of Birth: <span class="over">**********</span>
-4. Gender: 남성
-5. Contact Email:<span class="over">*</span><span class="mask">************************</span>
-6. Phone Number: <span class="mask">***********</span>
-7. Address:<span class="over">*</span><span class="mask">*******************</span>
-8. Tax ID (for reimbursements): <span class="mask">**************</span>
-9. Preferred Volunteer Role (e.g., Trail Maintenance, Event Coordination, Safety Officer): ______________________
-10. Any medical conditions or allergies we should be aware of? ______________________
-
-Please return this form to volunteer<span class="over">******************</span> by <span class="over">***********</span>.
-담당 PB 신은<span class="mask">*</span><span class="over">**************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-01063 · <b>국문 성명</b> · 정답 3자 중 1자만 덮임 — 2자 노출</div></div><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre><span class="leak">이은</span><span class="gold">아</span>님께,
-
-5월 21, 1958에 발송되는 이번 메일은 2024년 제3분기 목표 설정에 관한 안내입니다. 각 팀은 이번 주 안에 <span class="gold">서울특별시 송파구 효령로 263</span> 사무실에 위치한 전략기획팀(<span class="gold">02-205-7698</span>)에 목표 초안을 제출해야 하며, 제출 형식은 첨부된 양식(<span class="gold">서울특별시 서초구 불정로 32</span>)에 따라야 합니다. 목표는 SMART 원칙(구체적, 측정 가능, 달성 가능, 관련성, 시한)을 충족해야 하고, 개인 목표와 팀 목표를 명확히 구분해 기록해야 합니다.
-
-또한, 목표 달성에 필요한 예산 요청은 <span class="gold">5879-0443-5481-8193</span> 형태로 마스킹된 카드 번호와 함께 <span class="gold">sanghui.kim29@hanmail.net</span> 로 송부해 주시길 바랍니다. 질문이 있으면 언제든지 <span class="gold">12-61-884265-89</span> 혹은 <span class="gold">640904-8232309</span> 로 연락 주세요.
-
-감사합니다.
-<span class="leak">SEONOK LIM</span>
-인사부장
-<span class="gold">세종특별자치시 한솔동 디지털로 206</span> ZIP: <span class="gold">세종특별자치시 한솔동 중앙로 269</span></pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>이은***,
-
-***********에 발송되는 이번 메일은 2024년 제3분기 목표 설정에 관한 안내입니다. 각 팀은 이번 주 안에********************************팀(***********)에 목표 초안을 제출해야 하며, 제출 형식은 첨부된 양식(****************)에 따라야 합니다. 목표는 SMART 원칙(구체적, 측정 가능, 달성 가능, 관련성, 시한)을 충족해야 하고, 개인 목표와 팀 목표를 명확히 구분해 기록해야 합니다.
-
-또한, 목표 달성에 필요한 예산 요청은 ******************* 형태로 마스킹된 카드 번호와 함께************************** 로 송부해 주시길 바랍니다. 질문이 있으면 언제든지 *************** 혹은 ************** 로 연락 주세요.
-
-감사합니다.
-SEONOK LIM
-인사부장
-*종*******************************************</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>이은<span class="mask">*</span><span class="over">**</span>,
-
-<span class="over">***********</span>에 발송되는 이번 메일은 2024년 제3분기 목표 설정에 관한 안내입니다. 각 팀은 이번 주 안에<span class="over">*</span><span class="mask">*****************</span><span class="over">****************</span><span class="mask">***********</span>)에 목표 초안을 제출해야 하며, 제출 형식은 첨부된 양식(<span class="mask">****************</span><span class="over">**</span> 따라야 합니다. 목표는 SMART 원칙(구체적, 측정 가능, 달성 가능, 관련성, 시한)을 충족해야 하고, 개인 목표와 팀 목표를 명확히 구분해 기록해야 합니다.
-
-또한, 목표 달성에 필요한 예산 요청은 <span class="mask">*******************</span> 형태로 마스킹된 카드 번호와 함께<span class="over">*</span><span class="mask">*************************</span> 로 송부해 주시길 바랍니다. 질문이 있으면 언제든지 <span class="mask">***************</span> 혹은 <span class="mask">**************</span> 로 연락 주세요.
-
-감사합니다.
-SEONOK LIM
-인사부장
-<span class="mask">********************</span><span class="over">******</span><span class="mask">*******************</span></pre></div></div><div class="note">SS-KO-01650 · <b>국문 성명</b> · 정답 3자 중 1자만 덮임 — 2자 노출</div></div><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>본 계약서는 <span class="leak">윤성</span><span class="gold">우</span>께서 <span class="gold">SEUNGU KWON</span>에게 제공하는 서비스에 대한 상세한 조항들을 규정합니다. 계약 체결일은 1976-07-17T00:00:00이며, 양 당사자는 각자의 1월 12, 1993과 87을 확인하였습니다. 계약에 의한 의무 이행을 위해 <span class="gold">860206-1956328</span>과 <span class="gold">19-86-680927-55</span>을 사전 검증하고, 필요한 경우 <span class="gold">771012-5799084</span>과 <span class="gold">831216-3354209</span>을 제공하도록 요구합니다. 또한, 본 계약에 명시된 기밀 유지 조항은 <span class="gold">부산광역시 부산진구 한강대로 115</span> 소재 <span class="gold">충청북도 청주시 흥덕구 효령로 164</span> 사무실에서 진행되는 모든 업무에 적용되며, 위반 시 <span class="gold">4289-3374-8868-9542</span>을 통한 손해 배상이 이루어집니다. 마지막으로, 계약 해지 통보는 최소 51일 전에 서면(<span class="gold">hyeonjun.lee19@hanmail.net</span>) 또는 전자우편(<span class="gold">010-9468-2698</span>)으로 전달되어야 하며, 계약 종료 후 <span class="gold">인천광역시 미추홀구 여의대로 89</span> 지역 내에서 발생하는 모든 법적 분쟁은 <span class="gold">부산광역시 부산진구 한강대로 115</span> 관할 법원에서 해결됩니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>본 계약서는 윤****************에게 제공하는 서비스에 대한 상세한 조항들을 규정합니다. 계약 체결일은 *******************이며, 양 당사자는 각자의 ***********과 87을 확인하였습니다. 계약에 의한 의무 이행을 위해 **************과 ***************을 사전 검증하고, 필요한 경우 **************과 **************을 제공하도록 요구합니다. 또한, 본 계약에 명시된 기밀 유지 조항은************************************************에서 진행되는 모든 업무에 적용되며, 위반 시 *******************을 통한 손해 배상이 이루어집니다. 마지막으로, 계약 해지 통보는 최소 **일 전에 서면***************************) 또는 전***(**************으로 전달되어야 하며,********************************에서 발생하는 모든 법************************* 관할 법*에서 해결됩니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>본 계약서는 윤성<span class="mask">*</span><span class="over">***</span><span class="mask">***********</span>에게 제공하는 서비스에 대한 상세한 조항들을 규정합니다. 계약 체결일은 <span class="over">*******************</span>이며, 양 당사자는 각자의 <span class="over">***********</span>과 87을 확인하였습니다. 계약에 의한 의무 이행을 위해 <span class="mask">**************</span>과 <span class="mask">***************</span>을 사전 검증하고, 필요한 경우 <span class="mask">**************</span>과 <span class="mask">**************</span>을 제공하도록 요구합니다. 또한, 본 계약에 명시된 기밀 유지 조항은<span class="over">*</span><span class="mask">*******************</span><span class="over">****</span><span class="mask">********************</span><span class="over">****</span>에서 진행되는 모든 업무에 적용되며, 위반 시 <span class="mask">*******************</span>을 통한 손해 배상이 이루어집니다. 마지막으로, 계약 해지 통보는 최소 51일 전에 서면<span class="over">*</span><span class="mask">**************************</span>) 또는 전자우편(<span class="mask">*************</span><span class="over">*</span>으로 전달되어야 하며,<span class="over">*********</span><span class="mask">******************</span><span class="over">*****</span>에서 발생하는 모든<span class="over">********</span><span class="mask">*******************</span> 관할 법원에서 해결됩니다.</pre></div></div><div class="note">SS-KO-02366 · <b>국문 성명</b> · 정답 3자 중 1자만 덮임 — 2자 노출</div></div><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>온보딩 체크리스트 (짧게):
-19/06/1962: 입사일
-<span class="gold">대구광역시 수성구 한강대로 236</span> 사무실 위치
-<span class="gold">경기도 용인시 기흥구 시청로 42</span> 우편번호
-
-필수 서류:
-- <span class="gold">960711-4535432</span> 사본
-- <span class="gold">13-47-772861-58</span> (선택 사항)
-- <span class="gold">910919-5026235</span> 제공
-
-연락처:
-- 담당자: <span class="gold">EUNGYEONG LEE</span> (<span class="gold">김</span><span class="leak">은미</span>)
-- 전화: <span class="gold">02-926-4343</span>
-- 이메일: <span class="gold">sangjun.jung75@gmail.com</span></pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>온보딩 체크리스트 (짧게):
-**********:****
-*************************************************
-
-필수 서류:
-- *****************
-- *************** (선택 사항)
-- *****************
-
-연락처:
-- 담당자:************** (*은미)
-- 전화: ***********
-- 이메일:*************************</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>온보딩 체크리스트 (짧게):
-<span class="over">**********</span>:<span class="over">****</span>
-<span class="mask">******************</span><span class="over">********</span><span class="mask">******************</span><span class="over">*****</span>
-
-필수 서류:
-- <span class="mask">**************</span><span class="over">***</span>
-- <span class="mask">***************</span> (선택 사항)
-- <span class="mask">**************</span><span class="over">***</span>
-
-연락처:
-- 담당자:<span class="over">*</span><span class="mask">*************</span> (<span class="mask">*</span>은미)
-- 전화: <span class="mask">***********</span>
-- 이메일:<span class="over">*</span><span class="mask">************************</span></pre></div></div><div class="note">SS-KO-02421 · <b>국문 성명</b> · 정답 3자 중 1자만 덮임 — 2자 노출 (직전 문자 '(')</div></div></section><section id="V1_DECODE"><span class="tag">V1_DECODE</span><h2>argmax 가 놓친 것을 제약 Viterbi 가 살려낸다</h2><p class="scale">28,420 스팬 중 56건 · 대표 5건</p><p class="desc">BIOES 전이 제약을 걸면 끊겼던 태그 시퀀스가 이어져 스팬이 온전히 복원된다. 같은 로짓을 디코딩 방식만 바꿔 얻은 차이다.</p><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>1976-12-23T00:00:00에 발행된 내부 메모
-
-<span class="gold">GYEONGHO LEE</span>님께,
-
-저희는 최근 고객 피드백을 기반으로 한 경쟁우위 전략을 구체화하고자 합니다. 이번 전략의 핵심은 <span class="leak">강원특별자치도 춘천시 여의대로 232</span>에 위치한 주요 고객군의 84세 평균 연령과 기타 비율을 정밀 분석하고, 이를 토대로 제품 로드맵을 조정하는 것입니다. 특히, 1월 16, 2007에 태어난 고객들의 구매 패턴을 추적한 결과, <span class="leak">충청북도 청주시 흥덕구 불정로 259</span> 지역에서 <span class="leak">강원특별자치도 원주시 한강대로 </span><span class="gold">126</span>번지 인근 매장 방문 빈도가 23% 상승한 점이 눈에 띕니다.
-
-이를 지원하기 위해 아래와 같은 정보를 사내 데이터베이스에 업데이트해 주시기 바랍니다:
-- 고객 식별 번호: <span class="gold">660807-4373852</span>
-- 운전면허 번호: <span class="gold">26-95-257051-94</span>
-- 외국인등록번호: <span class="gold">780321-6381573</span>
-- 주민등록번호: <span class="gold">690415-3791913</span>
-- 여권 번호: <span class="gold">M97893776</span>
-- 연락 가능한 전화번호: <span class="gold">010-8288-9145</span>
-- 공식 이메일 주소: <span class="gold">jiyun.no32@hanmail.net</span>
-- 결제용 카드 번호(마스킹): <span class="gold">5182-9654-8266-9054</span>
-
-위 데이터가 정확히 반영되면, 마케팅 팀은 2005-12-21T00:00:00까지 맞춤형 캠페인을 기획하고, 영업 팀은 10월 2, 1984에 파일럿 프로그램을 런칭할 수 있습니다. 최종 보고서는 23 9월 1952에 제출하도록 하며, 필요 시 추가적인 현장 조사와 인터뷰를 진행할 예정입니다.
-
-감사합니다.
-
-<span class="gold">YEONGHUN KIM</span>
-전략 기획팀</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>*******************에 발행된 내부 메모
-
-*************께,
-
-저희는 최근 고객 피드백을 기반으로 한 경쟁우위 전략을 구체화하고자 합니다. 이번 전략의 핵심은 강원특별자치도 춘천시 여의대로 232에 위치한 주요 고객군의 84세 평균 연령과 기타 비율을 정밀 분석하고, 이를 토대로 제품 로드맵을 조정하는 것입니다. 특히, 1월 16, 2007에 태어난 고객들의 구매 패턴을 추적한 결과, 충청북도 청주시 흥덕구 불정로 259 지역에서 강원특별자치도 원주시 한강대로 126*************** 23% 상승한 점이 눈에 띕니다.
-
-이를 지원하기 위해 아래와 같은 정보를 사내 데이터베이스에 업데이트해 주시기 바랍니다:
-- 고객 식별 번호: **************
-- 운전면허 번호: ***************
-- 외국인등록번호: **************
-- 주민등록번호: **************
-- 여권 번호:**********
-- 연락 가능한 전화번호: *************
-- 공식 이메일 주소:***********************
-- 결제용 카드 번호(마스킹): *******************
-
-위 데이터가 정확히 반영되면, 마케팅 팀은 *******************까지 맞춤형 캠페인을 기획하고, 영업 팀은 **월 2, ***4에 파일럿 프로그램을 런칭할 수 있습니다.******** ** *월 1952에 제출하도록 하며, 필요 시 추가적인 현장 조사와 인터뷰를 진행할 예정입니다.
-
-감사합니다.
-
-************
-전략 기획팀</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre><span class="over">*******************</span>에 발행된 내부 메모
-
-<span class="mask">************</span><span class="over">*</span>께,
-
-저희는 최근 고객 피드백을 기반으로 한 경쟁우위 전략을 구체화하고자 합니다. 이번 전략의 핵심은 강원특별자치도 춘천시 여의대로 232에 위치한 주요 고객군의 84세 평균 연령과 기타 비율을 정밀 분석하고, 이를 토대로 제품 로드맵을 조정하는 것입니다. 특히, 1월 16, 2007에 태어난 고객들의 구매 패턴을 추적한 결과, 충청북도 청주시 흥덕구 불정로 259 지역에서 강원특별자치도 원주시 한강대로 <span class="mask">***</span><span class="over">***************</span> 23% 상승한 점이 눈에 띕니다.
-
-이를 지원하기 위해 아래와 같은 정보를 사내 데이터베이스에 업데이트해 주시기 바랍니다:
-- 고객 식별 번호: <span class="mask">**************</span>
-- 운전면허 번호: <span class="mask">***************</span>
-- 외국인등록번호: <span class="mask">**************</span>
-- 주민등록번호: <span class="mask">**************</span>
-- 여권 번호:<span class="over">*</span><span class="mask">*********</span>
-- 연락 가능한 전화번호: <span class="mask">*************</span>
-- 공식 이메일 주소:<span class="over">*</span><span class="mask">**********************</span>
-- 결제용 카드 번호(마스킹): <span class="mask">*******************</span>
-
-위 데이터가 정확히 반영되면, 마케팅 팀은 <span class="over">*******************</span>까지 맞춤형 캠페인을 기획하고, 영업 팀은 10월 2, 1984에 파일럿 프로그램을 런칭할 수 있습니다.<span class="over">********</span> 23 9월 1952에 제출하도록 하며, 필요 시 추가적인 현장 조사와 인터뷰를 진행할 예정입니다.
-
-감사합니다.
-
-<span class="mask">************</span>
-전략 기획팀</pre></div></div><div class="note">SS-KO-00282 · <b>주소</b> · argmax 는 20자 중 0자만 덮어 TP 실패, Viterbi 가 TP (3자 피복)</div></div><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre><span class="gold">우경수</span>님께,
-안녕하세요! 저희 <span class="gold">광주광역시 서구 시청로 1</span>에 위치한 지역 양조장인 <span class="gold">세종특별자치시 도담동 효령로 210</span>에서 진행되는 ‘전통 맥주 투어’에 초대드리고자 합니다. 투어는 09/06/2025에 시작되며, 참가자분들은 현지에서 직접 양조 과정을 체험하고 시음할 수 있는 특별한 기회를 얻게 됩니다. 예약을 원하시면 <span class="gold">hyewon.lee60@hanmail.net</span> 혹은 <span class="gold">01045326530</span> 로 연락 주시고, 참가 인원과 선호하는 맥주 종류를 알려주시면 맞춤형 안내를 드리겠습니다.
-또한, 투어 당일에는 <span class="gold">광주광역시 북구 테헤란로 256</span> 지역의 신선한 식재료를 활용한 안주가 제공되며, 20세 이상 성인만 참여 가능하니 79 이하의 경우 동반자와 함께 신청해 주세요. 혹시 추가로 필요한 서류가 있으면, <span class="gold">851022-2546902</span> 혹은 <span class="gold">M31739400</span> 번호를 미리 알려주시면 원활한 입장이 가능합니다.
-감사합니다.
-<span class="gold">GEUMSUN LEE</span>
-<span class="leak">세종특별자치시 도담동 디지털로 </span><span class="gold">273</span> 양조장 운영팀
-외국인 투자자의 외국인등록번호는 <span class="gold">870325-5978014</span>으로 확인되었습니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>****께,
-안녕하세요! 저*************************************************에서 진행되는 ‘전통 맥주 투어’에 초대드리고자 합니다. 투어는 **********에 시작되며, 참가자분들은 현지에서 직접 양조 과정을 체험하고 시음할 수 있는 특별한 기회를 얻게 됩니다. 예약을 원하시면************************* 혹은 *********** 로 연락 주시고, 참가 인원과 선호하는 맥주 종류를 알려주시면 맞춤형 안내를 드리겠습니다.
-또한, 투어 당일에는*********************의 신선한 식재료를 활용한 안주가 제공되며, 20세 이상 성인만 참여 가능하니 79 이하의 경우 동반자와 함께 신청해 주세요. 혹시 추가로 필요한 서류가 있으면, ************** 혹은********** 번호를 미리 알려주시면 원활한 입장이 가능합니다.
-감사합니다.
-GE*********
-세종특별자치시 도담동 디지털로 273********
-외국인 투자자의 외국인등록번호는 **************으로 확인되었습니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre><span class="mask">***</span><span class="over">*</span>께,
-안녕하세요! 저<span class="over">**</span><span class="mask">**************</span><span class="over">**************</span><span class="mask">*******************</span>에서 진행되는 ‘전통 맥주 투어’에 초대드리고자 합니다. 투어는 <span class="over">**********</span>에 시작되며, 참가자분들은 현지에서 직접 양조 과정을 체험하고 시음할 수 있는 특별한 기회를 얻게 됩니다. 예약을 원하시면<span class="over">*</span><span class="mask">************************</span> 혹은 <span class="mask">***********</span> 로 연락 주시고, 참가 인원과 선호하는 맥주 종류를 알려주시면 맞춤형 안내를 드리겠습니다.
-또한, 투어 당일에는<span class="over">*</span><span class="mask">*****************</span><span class="over">***</span>의 신선한 식재료를 활용한 안주가 제공되며, 20세 이상 성인만 참여 가능하니 79 이하의 경우 동반자와 함께 신청해 주세요. 혹시 추가로 필요한 서류가 있으면, <span class="mask">**************</span> 혹은<span class="over">*</span><span class="mask">*********</span> 번호를 미리 알려주시면 원활한 입장이 가능합니다.
-감사합니다.
-<span class="mask">***********</span>
-세종특별자치시 도담동 디지털로 <span class="mask">***</span><span class="over">********</span>
-외국인 투자자의 외국인등록번호는 <span class="mask">**************</span>으로 확인되었습니다.</pre></div></div><div class="note">SS-KO-01919 · <b>주소</b> · argmax 는 20자 중 0자만 덮어 TP 실패, Viterbi 가 TP (3자 피복)</div></div><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>회의록: 2024년 이사회 시각화 스킬 점검 회의
-
-일시: 07/04/2025 오전 10시(4:00 PM)
-장소: <span class="leak">경기도 성남시 분당구 반포대로 </span><span class="gold">100</span>시 <span class="gold">충청남도 천안시 서북구 여의대로 59</span> 회의실
-참석자: <span class="gold">MINHUI LEE</span> (CEO), <span class="gold">MINHO PARK</span> (CFO), <span class="gold">EUNJEONG PARK</span> (CTO), <span class="gold">JIHUN LEE</span> (HR 담당)
-
-1. 개요 및 목표
-   - <span class="gold">SUNOK LEE</span>님이 회의를 시작하며, 현재 이사회 시각화 도구 사용 현황과 향후 개선 방향을 논의하기 위한 목적을 설명했습니다.
-2. 현황 보고
-   - <span class="gold">SUNOK CHO</span>님은 최근 도입된 대시보드 솔루션의 활용률이 전체 직원의 68%에 이르며, 주요 KPI 시각화가 <span class="gold">부산광역시 부산진구 대학로 106</span>건 완료되었다고 보고했습니다. 관련 부서의 <span class="gold">jaeseong.park79@kakao.com</span>로 상세 보고서를 받을 수 있습니다.
-3. 문제점 및 개선 방안
-   - <span class="gold">김지우</span>님은 데이터 연동 오류와 디자인 일관성 부족을 지적했으며, 이를 해결하기 위해 새로운 <span class="gold">21-23-401846-69</span> 규격의 API와 색상 가이드라인을 도입할 것을 제안했습니다.
-   - 또한, 사용자의 86와 남성에 따른 맞춤형 뷰 제공을 위해 추가적인 사용자 프로파일링이 필요하다고 언급했습니다(<span class="gold">610606-6066121</span>을 활용).
-4. 실행 계획
-   - 다음 주까지 <span class="gold">조미연</span>님이 교육 자료를 제작하고, 전사 이메일(<span class="gold">jaemin.lee70@gmail.com</span>)을 통해 배포하기로 했습니다.
-   - 비용 청구는 <span class="gold">721210-1625431</span>을 기준으로 진행되며, 결제는 <span class="gold">5894-4782-7023-4272</span>으로 처리됩니다.
-5. 기타 사항
-   - 회의 종료 전, 참석자들은 각자 자신의 <span class="leak">충청남도</span><span class="gold"> 천안시 서북구 불정로 62</span>와 주소(<span class="gold">대전광역시 유성구 효령로 45</span>)를 확인하고, 필요 시 업데이트하도록 요청받았습니다.
-
-다음 회의는 15/12/2009에 동일 장소에서 진행될 예정이며, 모든 진행 상황은 <span class="gold">02-228-9727</span>로 연락 가능합니다.
-증권계좌번호는 <span class="gold">486-81-277998-69</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>회의록: 2024년 이사회 시각화 스킬 점검 회의
-
-일시: ***************************장소: 경기도**남시 분당구 반포대로 100******************* ****의실
-참석자:*********** (CEO),*********** (CFO),************** (CTO),********** (HR 담당)
-
-1. 개요 및 목표
-   -***********이 회의를 시작하며, 현재 이사회 시각화 도구 사용 현황과 향후 개선 방향을 논의하기 위한 목적을 설명했습니다.
-2. 현황 보고
-   -***********은 최근 도입된 대시보드 솔루션의 활용률이 전체 직원의 68%에 이르며, 주요 KPI 시각화가******************** 완료되었다고 보고했습니다. 관련 부서의**************************로 상세 보고서를 받을 수 있습니다.
-3. 문제점 및 개선 방안
-   -*****은 데이터 연동 오류와 디자인 일관성 부족을 지적했으며, 이를 해결하기 위해 새로운 *************** 규격의 API와 색상 가이드라인을 도입할 것을 제안했습니다.
-   - 또한, 사용자의 86와 남성에 따른 맞춤형 뷰 제공을 위해 추가적인 사용자 프로파일링이 필요하다고 언급했습니다(**************을 활용).
-4. 실행 계획
-   - 다음 주까지*****이 교육 자료를 제작하고, 전사 이메일(**********************)을 통해 배포하기로 했습니다.
-   - 비용 청구는 **************을 기준으로 진행되며, 결제는 *******************으로 처리됩니다.
-5. 기타 사항
-   - 회의 종료 전, 참석자들은 각자 자신의 충청남도************************************** 확인하고, 필요 시 업데이트하도록 요청받았습니다.
-
-다음 회의는 **********에 동일 장소에서 진행될 예정이며, 모든 진행 상황은 ***********로 연락 가능합니다.
-증권계좌번호는 ****************이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>회의록: 2024년 이사회 시각화 스킬 점검 회의
-
-일시: <span class="over">***************************</span>장소: 경기도 성남시 분당구 반포대로 <span class="mask">***</span><span class="over">**</span><span class="mask">********************</span><span class="over">****</span>
-참석자:<span class="over">*</span><span class="mask">**********</span> (CEO),<span class="over">*</span><span class="mask">**********</span> (CFO),<span class="over">*</span><span class="mask">*************</span> (CTO),<span class="over">*</span><span class="mask">*********</span> (HR 담당)
-
-1. 개요 및 목표
-   -<span class="over">*</span><span class="mask">*********</span><span class="over">*</span>이 회의를 시작하며, 현재 이사회 시각화 도구 사용 현황과 향후 개선 방향을 논의하기 위한 목적을 설명했습니다.
-2. 현황 보고
-   -<span class="over">*</span><span class="mask">*********</span><span class="over">*</span>은 최근 도입된 대시보드 솔루션의 활용률이 전체 직원의 68%에 이르며, 주요 KPI 시각화가<span class="over">*</span><span class="mask">******************</span><span class="over">*</span> 완료되었다고 보고했습니다. 관련 부서의<span class="over">*</span><span class="mask">*************************</span>로 상세 보고서를 받을 수 있습니다.
-3. 문제점 및 개선 방안
-   -<span class="over">*</span><span class="mask">***</span><span class="over">*</span>은 데이터 연동 오류와 디자인 일관성 부족을 지적했으며, 이를 해결하기 위해 새로운 <span class="mask">***************</span> 규격의 API와 색상 가이드라인을 도입할 것을 제안했습니다.
-   - 또한, 사용자의 86와 남성에 따른 맞춤형 뷰 제공을 위해 추가적인 사용자 프로파일링이 필요하다고 언급했습니다(<span class="mask">**************</span>을 활용).
-4. 실행 계획
-   - 다음 주까지<span class="over">*</span><span class="mask">***</span><span class="over">*</span>이 교육 자료를 제작하고, 전사 이메일(<span class="mask">**********************</span>)을 통해 배포하기로 했습니다.
-   - 비용 청구는 <span class="mask">**************</span>을 기준으로 진행되며, 결제는 <span class="mask">*******************</span>으로 처리됩니다.
-5. 기타 사항
-   - 회의 종료 전, 참석자들은 각자 자신의 충청남도<span class="mask">***************</span><span class="over">*****</span><span class="mask">****************</span><span class="over">**</span> 확인하고, 필요 시 업데이트하도록 요청받았습니다.
-
-다음 회의는 <span class="over">**********</span>에 동일 장소에서 진행될 예정이며, 모든 진행 상황은 <span class="mask">***********</span>로 연락 가능합니다.
-증권계좌번호는 <span class="mask">****************</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div></div><div class="note">SS-KO-00867 · <b>주소</b> · argmax 는 20자 중 2자만 덮어 TP 실패, Viterbi 가 TP (3자 피복)</div></div><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>내부 메모: 신규 거래 <span class="gold">11-52-185532-27</span> 번호를 보유한 <span class="leak">김진숙</span>씨는 최근 17/04/1993에 <span class="gold">충청남도 천안시 서북구 효령로 120</span>번지에서 <span class="gold">M29031679</span> 여권을 사용해 해외 송금을 시도했습니다. 해당 송금은 고액이며, 수신 은행이 <span class="gold">대구광역시 중구 디지털로 131</span>에 위치해 있어 지역적 AML 규제와 충돌 가능성이 있습니다. 또한, <span class="gold">960705-7249868</span> 번호와 논바이너리 정보가 확인되었으며, 이는 고객 프로파일링에 중요한 데이터로 활용됩니다. 위험 평가 결과, 현재 55세의 남성 고객은 <span class="leak">세종특별자치시 한솔동 여의대로 </span><span class="gold">148</span> 우편구역에 거주하고 있어 이전 사례와 유사한 패턴을 보이고 있으므로, 즉시 거래 정지 및 추가 문서(예: <span class="gold">751221-2713058</span> 복사본) 요청이 필요합니다. 향후 보고서는 <span class="gold">yumi.kim61@kakao.com</span>를 통해 공유될 예정이며, 모든 관련 담당자는 해당 사안에 대해 신속히 대응해 주시기 바랍니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>내부 메모: 신규 거래 *************** 번호를 보유한 김진숙씨는 최근 **********에***********************에서********** 여권을 사용해 해외 송금을 시도했습니다. 해당 송금은 고액이며,*************************에 위치해 있어 지역적 AML 규제와 충돌 가능성이 있습니다. 또한, ************** 번호와 논바이너리 정보가 확인되었으며, 이는 고객 프로파일링에 중요한 데이터로 활용됩니다. 위험 평가 결과, 현재 55세의 남성 고객은 세종특별자치시 한솔동 여의** 148****역에 거주하고 있어 이전 사례와 유사한 패턴을 보이고 있으므로, 즉시 거래 정지 및 추가 문서(예:*************** 복사본) 요청이 필요합니다. 향후 보고서는*********************를 통해 공유될 예정이며, 모든 관련 담당자는 해당 사안에 대해 신속히 대응해 주시기 바랍니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>내부 메모: 신규 거래 <span class="mask">***************</span> 번호를 보유한 김진숙씨는 최근 <span class="over">**********</span>에<span class="over">*</span><span class="mask">********************</span><span class="over">**</span>에서<span class="over">*</span><span class="mask">*********</span> 여권을 사용해 해외 송금을 시도했습니다. 해당 송금은 고액이며,<span class="over">********</span><span class="mask">*****************</span>에 위치해 있어 지역적 AML 규제와 충돌 가능성이 있습니다. 또한, <span class="mask">**************</span> 번호와 논바이너리 정보가 확인되었으며, 이는 고객 프로파일링에 중요한 데이터로 활용됩니다. 위험 평가 결과, 현재 55세의 남성 고객은 세종특별자치시 한솔동 여의대로 <span class="mask">***</span><span class="over">*****</span>에 거주하고 있어 이전 사례와 유사한 패턴을 보이고 있으므로, 즉시 거래 정지 및 추가 문서(예:<span class="over">*</span><span class="mask">**************</span> 복사본) 요청이 필요합니다. 향후 보고서는<span class="over">*</span><span class="mask">********************</span>를 통해 공유될 예정이며, 모든 관련 담당자는 해당 사안에 대해 신속히 대응해 주시기 바랍니다.</pre></div></div><div class="note">SS-KO-02718 · <b>주소</b> · argmax 는 20자 중 2자만 덮어 TP 실패, Viterbi 가 TP (3자 피복)</div></div><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>혁신가들이 팀 내에서 효과적인 협업을 이끌어내기 위해서는 먼저 <span class="leak">이정환</span>처럼 명확한 역할과 책임을 정의해야 합니다. 이를 위해서는 6월 20, 2017에 기반한 연령과 경험(74)을 고려해 적절한 멘토링 구조를 설계하고, 팀원들의 남성와 남성 다양성을 존중하는 문화가 필요합니다. 소통 채널로는 <span class="gold">jinyeong.park55@naver.com</span>과 <span class="gold">01077272431</span>을 활용해 실시간 피드백을 주고받으며, 회의 일정은 9월 25, 1969에 맞춰 조율하고, 회의록은 <span class="gold">충청남도 천안시 서북구 대학로 207</span>에 위치한 <span class="gold">강원특별자치도 원주시</span><span class="leak"> 여의대로 45</span> 사무실에 보관합니다. 또한 혁신적인 아이디어를 보호하기 위해서는 모든 참여자는 <span class="gold">880918-3758424</span>과 <span class="gold">700322-6554573</span>를 사전 등록하고, 프로젝트 예산은 <span class="gold">980515-1377335</span>와 연동된 투명한 회계 시스템을 통해 관리됩니다. 마지막으로, 팀원들이 개인적인 보안을 유지하면서도 자유롭게 의견을 제시하도록 <span class="gold">5615-3313-3133-5552</span>과 같은 민감 정보는 마스킹 처리하고, 필요 시 <span class="gold">M40854335</span>을 통해 국제 협업 시 신분 확인 절차를 진행합니다.
-증권계좌번호는 <span class="gold">798-26-893644-31</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>혁신가들이 팀 내에서 효과적인 협업을 이끌어내기 위해서는 먼저 이정환처럼 명확한 역할과 책임을 정의해야 합니다. 이를 위해서는 6월 20, 2017에 기반한 연령과 경험(74)을 고려해 적절한 멘토링 구조를 설계하고, 팀원들의 남성와 남성 다양성을 존중하는 문화가 필요합니다. 소통 채널로는**************************과 ***********을 활용해 실시간 피드백을 주고받으며, 회의 일정은 ***********에 맞춰 조율하고, 회의록은*****************************특별자치도 원주시 여의대로 45 사무실에 보관합니다. 또한 혁신적인 아이디어를 보호하기 위해서는 모든 참여자는 **************과 **************를 사전 등록하고, 프로젝트 예산은 **************와 연동된 투명한 회계 시스템을 통해 관리됩니다. 마지막으로, 팀원들이 개인적인 보안을 유지하면서도 자유롭게 의견을 제시하도록 *******************과 같은 민감 정보는 마스킹 처리하고, 필요 시**********을 통해 국제 협업 시 신분 확인 절차를 진행합니다.
-증권계좌번호는 ****************이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>혁신가들이 팀 내에서 효과적인 협업을 이끌어내기 위해서는 먼저 이정환처럼 명확한 역할과 책임을 정의해야 합니다. 이를 위해서는 6월 20, 2017에 기반한 연령과 경험(74)을 고려해 적절한 멘토링 구조를 설계하고, 팀원들의 남성와 남성 다양성을 존중하는 문화가 필요합니다. 소통 채널로는<span class="over">*</span><span class="mask">*************************</span>과 <span class="mask">***********</span>을 활용해 실시간 피드백을 주고받으며, 회의 일정은 <span class="over">***********</span>에 맞춰 조율하고, 회의록은<span class="over">*</span><span class="mask">********************</span><span class="over">******</span><span class="mask">***********</span> 여의대로 45 사무실에 보관합니다. 또한 혁신적인 아이디어를 보호하기 위해서는 모든 참여자는 <span class="mask">**************</span>과 <span class="mask">**************</span>를 사전 등록하고, 프로젝트 예산은 <span class="mask">**************</span>와 연동된 투명한 회계 시스템을 통해 관리됩니다. 마지막으로, 팀원들이 개인적인 보안을 유지하면서도 자유롭게 의견을 제시하도록 <span class="mask">*******************</span>과 같은 민감 정보는 마스킹 처리하고, 필요 시<span class="over">*</span><span class="mask">*********</span>을 통해 국제 협업 시 신분 확인 절차를 진행합니다.
-증권계좌번호는 <span class="mask">****************</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div></div><div class="note">SS-KO-00359 · <b>주소</b> · argmax 는 19자 중 2자만 덮어 TP 실패, Viterbi 가 TP (11자 피복)</div></div></section><section id="F2_FORM"><span class="tag">F2_FORM</span><h2>양식 칸이나 서명부에 적힌 성명을 놓친다</h2><p class="scale">28,420 스팬 중 238건 · 대표 5건</p><p class="desc">'성명:' '담당자:' 뒤나 문서 끝 서명 자리처럼 앞뒤 문맥이 짧은 위치에서 한국어 이름을 배경으로 처리한다. 국문 성명 재현율이 11개 항목 중 가장 낮은 이유다.</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>승계 계획 양식에 아래 정보를 기입해 주시기 바랍니다: 성명 – <span class="gold">JUNYEONG PARK</span>; 생년월일 – 07/01/2021; 성별 – M; 주민등록번호 – <span class="gold">820703-3751697</span>; 현재 직책 – <span class="leak">MYEONGSUK PARK</span>; 근무지 주소 – <span class="gold">강원특별자치도 춘천시 디지털로 17</span>; 주민등록번호 – <span class="gold">880803-4013466</span>; 운전면허번호 – <span class="gold">17-68-114805-86</span>; 외국인등록번호 – <span class="gold">990828-6283184</span>; 여권번호 – <span class="gold">M61967609</span>; 신용카드번호(마스킹) – <span class="gold">5303-7179-4839-9353</span>. 모든 정보를 9월/13까지 회신해 주시면 감사하겠습니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>승계 계획 양식에 아래 정보를 기입해 주시기 바랍니다: 성명 –<span class="over">*</span><span class="mask">*************</span>; 생년월일 – <span class="over">**********</span>; 성별 – M; 주민등록번호 – <span class="mask">**************</span>; 현재 직책 – MYEONGSUK PARK; 근무지 주소 –<span class="over">*</span><span class="mask">*******************</span>; 주민등록번호 – <span class="mask">**************</span>; 운전면허번호 – <span class="mask">***************</span>; 외국인등록번호 – <span class="mask">**************</span>; 여권번호 –<span class="over">*</span><span class="mask">*********</span>; 신용카드번호(마스킹) – <span class="mask">*******************</span>. 모든 정보를 <span class="over">*****</span>까지 회신해 주시면 감사하겠습니다.</pre></div></div><div class="note">SS-KO-01484 · <b>영문 성명</b> · 양식 단서 뒤 영문 성명 14자 완전미탐</div></div><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>리더십 역량 평가 양식 (예시)
+<span class="mask">***********</span></pre></div></div><div class="note">SS-KO-00320 · <b>(문서 전건)</b> · 정답 스팬 18개 전건 TP</div></div></section><div class="chap" id="ch2"><div class="rn">Ⅱ</div><h2>못하는 것</h2></div><section id="F2_FORM"><div class="shead"><h2>표 안의 이름은 못 찾습니다</h2><span class="tag">F2_FORM</span></div><p class="scale">28,420 스팬 중 238건 · 대표 5건</p><p class="desc">폼·서명부처럼 앞뒤 문맥이 없으면 놓칩니다</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>승계 계획 양식에 아래 정보를 기입해 주시기 바랍니다: 성명 – <span class="gold">JUNYEONG PARK</span>; 생년월일 – 07/01/2021; 성별 – M; 주민등록번호 – <span class="gold">820703-3751697</span>; 현재 직책 – <span class="leak">MYEONGSUK PARK</span>; 근무지 주소 – <span class="gold">강원특별자치도 춘천시 디지털로 17</span>; 주민등록번호 – <span class="gold">880803-4013466</span>; 운전면허번호 – <span class="gold">17-68-114805-86</span>; 외국인등록번호 – <span class="gold">990828-6283184</span>; 여권번호 – <span class="gold">M61967609</span>; 신용카드번호(마스킹) – <span class="gold">5303-7179-4839-9353</span>. 모든 정보를 9월/13까지 회신해 주시면 감사하겠습니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>승계 계획 양식에 아래 정보를 기입해 주시기 바랍니다: 성명 –<span class="over">*</span><span class="mask">*************</span>; 생년월일 – <span class="over">**********</span>; 성별 – M; 주민등록번호 – <span class="mask">**************</span>; 현재 직책 – MYEONGSUK PARK; 근무지 주소 –<span class="over">*</span><span class="mask">*******************</span>; 주민등록번호 – <span class="mask">**************</span>; 운전면허번호 – <span class="mask">***************</span>; 외국인등록번호 – <span class="mask">**************</span>; 여권번호 –<span class="over">*</span><span class="mask">*********</span>; 신용카드번호(마스킹) – <span class="mask">*******************</span>. 모든 정보를 <span class="over">*****</span>까지 회신해 주시면 감사하겠습니다.</pre></div></div><div class="note">SS-KO-01484 · <b>영문 성명</b> · 양식 단서 뒤 영문 성명 14자 완전미탐</div></div><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>리더십 역량 평가 양식 (예시)
 1. 성명: <span class="leak">JEONGMIN CHOI</span>
 2. 생년월일: 10월 2, 1991
 3. 현재 나이: 47세
@@ -653,7 +370,7 @@ GE*********
 주소:<span class="over">*</span><span class="mask">*********************</span>
 세금 번호: <span class="mask">**************</span>
 외국인 투자자의 외국인등록번호는 <span class="mask">**************</span>으로 확인되었습니다.
-담당<span class="over">****</span><span class="mask">***</span><span class="over">*****************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-01408 · <b>영문 성명</b> · 양식 단서 뒤 영문 성명 13자 완전미탐</div></div></section><section id="F3_NARR"><span class="tag">F3_NARR</span><h2>'주소' 라는 단서가 없으면 서술문 속 주소를 지나친다</h2><p class="scale">28,420 스팬 중 444건 · 대표 5건</p><p class="desc">주소 항목 앞에 라벨이 붙어 있으면 잡지만, 문장 안에 자연스럽게 섞여 있으면 지역 언급으로 읽고 넘어간다.</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre><span class="leak">하진수</span> 님께,
+담당<span class="over">****</span><span class="mask">***</span><span class="over">*****************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-01408 · <b>영문 성명</b> · 양식 단서 뒤 영문 성명 13자 완전미탐</div></div></section><section id="F3_NARR"><div class="shead"><h2>'주소'라는 말이 없으면 주소를 못 봅니다</h2><span class="tag">F3_NARR</span></div><p class="scale">28,420 스팬 중 444건 · 대표 5건</p><p class="desc">문장 속에 녹아든 주소는 지나칩니다</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre><span class="leak">하진수</span> 님께,
 
 안녕하세요. 저희 문화유산 보전팀은 전통 레시피의 디지털 아카이브 구축 프로젝트를 진행 중이며, 귀하께서 보유하고 계신 <span class="leak">충청북도 청주시 흥덕구 한강대로 255</span> 지역의 고유 레시피를 기록하고자 합니다. 이를 위해 아래와 같은 정보를 제공해 주시면 감사하겠습니다.
 
@@ -758,7 +475,7 @@ GE*********
 증권계좌번호는 <span class="mask">****************</span>이며, 출금은 본인 명의 계좌로만 가능합니다.
 주문번호 <span class="over">***************</span>,<span class="over">************</span> 건은 정상 체결되었습니다.</pre></div></div><div class="note">SS-KO-00173 · <b>주소</b> · '주소' 단서 없는 서술문 안 주소 21자 완전미탐</div></div><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>28/07/1955에 발송된 <span class="leak">이윤정</span>님의 품질 보증(QA) 공지사항:
 첫째, 전사적 작업 관행 개선을 위해 <span class="gold">부산광역시 수영구 효령로 182</span> 본사에서 진행되는 1977-05-18T00:00:00 교육 세션에 모든 팀원이 반드시 참석해야 합니다. 둘째, 각 부서는 최근 30일간 기록된 <span class="leak">경기도 고양시 일산동구 올림픽로 254</span>번 건물의 작업 로그를 검토하고, 발견된 비표준 절차에 대해 <span class="gold">seongmin.lee59@naver.com</span>으로 보고해 주시기 바랍니다. 셋째, 새롭게 도입된 자동화 검증 도구의 라이선스 번호는 <span class="gold">15-72-867676-42</span>이며, 이를 활용한 테스트 결과는 <span class="leak">울산광역시 중구 여의대로 </span><span class="gold">289</span> 우편번호 구역별로 분류해 <span class="gold">02-832-8454</span>으로 공유해 주세요. 마지막으로, 이번 분기의 품질 지표(KPI)는 41점 이상을 목표로 하며, 목표 미달 시 추가 교육 및 시정 조치를 시행할 예정입니다. 모든 직원은 본 메일을 확인하고, 필요한 서류를 <span class="gold">650512-1638736</span>과 함께 첨부하여 회신해 주시기 바랍니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre><span class="over">**********</span>에 발송된 이윤정님의 품질 보증(QA) 공지사항:
-첫째, 전사적 작업 관행 개선을 위해<span class="over">*</span><span class="mask">*****************</span> 본사에서 진행되는 <span class="over">*******************</span> 교육 세션에 모든 팀원이 반드시 참석해야 합니다. 둘째, 각 부서는 최근 30일간 기록된 경기도 고양시 일산동구 올림픽로 254번 건물의 작업 로그를 검토하고, 발견된 비표준 절차에 대해<span class="over">*</span><span class="mask">************************</span>으로 보고해 주시기 바랍니다. 셋째, 새롭게 도입된 자동화 검증 도구의 라이선스 번호는 <span class="mask">***************</span>이며, 이를 활용한 테스트 결과는 울산광역시 중구 여의대로 <span class="mask">***</span><span class="over">**************</span> <span class="mask">***********</span>으로 공유해 주세요. 마지막으로, 이번 분기의 품질 지표(KPI)는 41점 이상을 목표로 하며, 목표 미달 시 추가 교육 및 시정 조치를 시행할 예정입니다. 모든 직원은 본 메일을 확인하고, 필요한 서류를 <span class="mask">**************</span>과 함께 첨부하여 회신해 주시기 바랍니다.</pre></div></div><div class="note">SS-KO-00228 · <b>주소</b> · '주소' 단서 없는 서술문 안 주소 21자 완전미탐</div></div></section><section id="F7_INCONSIST"><span class="tag">F7_INCONSIST</span><h2>같은 문서 같은 항목인데 일부만 가려진다</h2><p class="scale">28,420 스팬 중 2,279건 · 대표 5건</p><p class="desc">한 문서에 같은 종류의 값이 여러 개 있을 때 어떤 것은 덮고 어떤 것은 놓친다. 문서 단위로 보면 일관성이 없어, 사람이 검수할 때 신뢰하기 어렵게 만든다.</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>오전 9시 38분 <span class="gold">김상훈</span>: "이번 주에 우리 브랜드와 파트너 기업의 공동 캠페인 초안을 검토했는데, 몇 가지 수정이 필요해 보여요."
+첫째, 전사적 작업 관행 개선을 위해<span class="over">*</span><span class="mask">*****************</span> 본사에서 진행되는 <span class="over">*******************</span> 교육 세션에 모든 팀원이 반드시 참석해야 합니다. 둘째, 각 부서는 최근 30일간 기록된 경기도 고양시 일산동구 올림픽로 254번 건물의 작업 로그를 검토하고, 발견된 비표준 절차에 대해<span class="over">*</span><span class="mask">************************</span>으로 보고해 주시기 바랍니다. 셋째, 새롭게 도입된 자동화 검증 도구의 라이선스 번호는 <span class="mask">***************</span>이며, 이를 활용한 테스트 결과는 울산광역시 중구 여의대로 <span class="mask">***</span><span class="over">**************</span> <span class="mask">***********</span>으로 공유해 주세요. 마지막으로, 이번 분기의 품질 지표(KPI)는 41점 이상을 목표로 하며, 목표 미달 시 추가 교육 및 시정 조치를 시행할 예정입니다. 모든 직원은 본 메일을 확인하고, 필요한 서류를 <span class="mask">**************</span>과 함께 첨부하여 회신해 주시기 바랍니다.</pre></div></div><div class="note">SS-KO-00228 · <b>주소</b> · '주소' 단서 없는 서술문 안 주소 21자 완전미탐</div></div></section><section id="F7_INCONSIST"><div class="shead"><h2>같은 문서, 같은 이름, 다른 결과</h2><span class="tag">F7_INCONSIST</span></div><p class="scale">28,420 스팬 중 2,279건 · 대표 5건</p><p class="desc">한 번은 가리고 한 번은 놓칩니다</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>오전 9시 38분 <span class="gold">김상훈</span>: "이번 주에 우리 브랜드와 파트너 기업의 공동 캠페인 초안을 검토했는데, 몇 가지 수정이 필요해 보여요."
 오전 9시 47분 <span class="leak">윤창호</span>: "맞아요, 특히 <span class="leak">울산광역시 남구 디지털로 176</span> 지역 타깃팅 전략을 보강해야 할 것 같아요. 제가 담당한 <span class="gold">4479-8499-8970-5529</span> 예산 안에서 가능한 옵션을 몇 개 찾아볼게요."
 오전 8시 12분 <span class="leak">김현지</span>: "그리고 멘토링 프로그램 참가자 중에 58세인 <span class="leak">윤선화</span>님이 디자인 부서에서 좋은 아이디어를 제시했어요. 그 아이디어를 캠페인 비주얼에 반영하면 좋을 것 같습니다."
 오후 10시 46분 <span class="gold">김종훈</span>: "좋아요, 그럼 다음 회의 안건에 포함시켜서 1 3월 1978에 최종 승인받도록 하죠. 회의 초대장은 <span class="gold">seungho.kang76@outlook.com</span>으로 보내드릴게요."
@@ -831,7 +548,161 @@ GE*********
 06:49:08 나재현: "좋아요, 저는 <span class="mask">**************</span>와 <span class="mask">**************</span>를 미리 올려놓을게요. 그리고 비상시를 대비해 <span class="mask">***************</span>도 공유합니다."
 오전 7시 15분 이소영: "모두 안전하게 다녀오길 바라요! 필요하면 언제든지 <span class="mask">***********</span>로 연락 주세요."
 9:15 AM<span class="over">*</span><span class="mask">*************</span>: "끝났어요! 오늘 트레일 정말 멋졌어요. 다음에 또 같이 가요!"
-담당<span class="over">****</span><span class="mask">***</span><span class="over">************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-00427 · <b>국문 성명</b> · 같은 항목 6개 중 5개 완전미탐 — 문서 내 불일치</div></div></section><section id="F6_OVERRUN"><span class="tag">F6_OVERRUN</span><h2>경칭과 직함까지 함께 삼킨다</h2><p class="scale">28,420 스팬 중 2,079건 · 대표 5건</p><p class="desc">이름 뒤의 '님' '수석' 같은 호칭이나 앞의 공백까지 스팬에 포함시킨다. 가려야 할 것은 다 가리므로 유출은 아니지만, 필요 이상으로 문장을 훼손한다.</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>【Starry Night Festival Trails – 참가자 안내서】
+담당<span class="over">****</span><span class="mask">***</span><span class="over">************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-00427 · <b>국문 성명</b> · 같은 항목 6개 중 5개 완전미탐 — 문서 내 불일치</div></div></section><section id="F1_ORPHAN"><div class="shead"><h2>절반만 가려진 마스킹</h2><span class="tag">F1_ORPHAN</span></div><p class="scale">28,420 스팬 중 214건 · 대표 5건</p><p class="desc">앞 두 글자만 지우고 나머지는 그대로</p><div class="case"><div class="cap">argmax 와 다른 문자 4자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>안녕하세요, <span class="gold">SEUNGU LEE</span>님. 저희 빅토리아 시대 예절 수업에 관심을 보여주셔서 진심으로 감사드립니다. 수업은 매주 31/03/2009에 <span class="leak">부산광역시 해운대구 한강대로 </span><span class="gold">4</span>의 <span class="gold">인천광역시 연수구 중앙로 240</span>번지, <span class="gold">충청남도 천안시 서북구 올림픽로 14</span>에서 진행되며, 정장 복장은 필수이니 논바이너리과 27에 맞는 옷차림을 준비해 주시기 바랍니다. 
+
+수강 신청서는 아래와 같이 작성해 주시고, 서명 후 <span class="gold">myeongsun.jung50@gmail.com</span>으로 회신해 주시면 됩니다.
+
+---
+10/05/1984: __________
+남성: __________
+<span class="gold">02-337-6319</span>: __________
+<span class="gold">671228-3790370</span>: __________
+<span class="gold">11-80-527388-64</span>: __________
+<span class="gold">780704-2690466</span>: __________
+---
+
+수강료는 <span class="gold">4441-4109-4724-9459</span>로 결제 가능하며, 결제 확인 후 최종 안내 메일을 보내드립니다. 결제 과정에서 문제가 발생하면 언제든지 <span class="gold">01070358888</span>로 연락해 주시기 바랍니다. 
+
+수업 첫날에는 빅토리아 여왕 시대의 인사말, 좌석 예절, 식탁 매너, 서신 작성법 등을 실습하게 되며, 강사의 상세한 설명과 실시간 피드백을 통해 실력을 키우실 수 있습니다. 마지막으로, 모든 참가자는 수업 종료 후 <span class="gold">M26501413</span>에 기재된 인증서를 받게 되며, 이는 향후 사회적 활동에 큰 도움이 될 것입니다. 궁금한 점이 있으면 언제든지 <span class="gold">seongjun.kim85@gmail.com</span>로 문의해 주세요. 감사합니다.
+증권계좌번호는 <span class="gold">444-74-240940-71</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>안녕하세요,************. 저희 빅토리아 시대 예절 수업에 관심을 보여주셔서 진심으로 감사드립니다. 수업은 매주 **********에 부산광역시 해운대구 한<span class="diff">****</span>********************************************에서 진행되며, 정장 복장은 필수이니 논바이너리과 27에 맞는 옷차림을 준비해 주시기 바랍니다. 
+
+수강 신청서는 아래와 같이 작성해 주시고, 서명 후***************************으로 회신해 주시면 됩니다.
+
+---
+**********: __________
+남성: __________
+***********: __________
+**************: __________
+***************: __________
+**************: __________
+---
+
+수강료는 *******************로 결제 가능하며, 결제 확인 후 최종 안내 메일을 보내드립니다. 결제 과정에서 문제가 발생하면 언제든지 ***********로 연락해 주시기 바랍니다. 
+
+수업 첫날에는 빅토리아 여왕 시대의 인사말, 좌석 예절, 식탁 매너, 서신 작성법 등을 실습하게 되며, 강사의 상세한 설명과 실시간 피드백을 통해 실력을 키우실 수 있습니다. 마지막으로, 모든 참가자는******************에 기재된 인증서를 받게 되며, 이는 향후 사회적 활동에 큰 도움이 될 것입니다. 궁금한 점이 있으면 언제든지*************************로 문의해 주세요. 감사합니다.
+증권계좌번호는 ****************이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>안녕하세요,<span class="over">*</span><span class="mask">**********</span><span class="over">*</span>. 저희 빅토리아 시대 예절 수업에 관심을 보여주셔서 진심으로 감사드립니다. 수업은 매주 <span class="over">**********</span>에 부산광역시 해운대구 한<span class="diff">강대로 </span><span class="mask">*</span><span class="over">**</span><span class="mask">*****************</span><span class="over">****</span><span class="mask">********************</span>에서 진행되며, 정장 복장은 필수이니 논바이너리과 27에 맞는 옷차림을 준비해 주시기 바랍니다. 
+
+수강 신청서는 아래와 같이 작성해 주시고, 서명 후<span class="over">*</span><span class="mask">**************************</span>으로 회신해 주시면 됩니다.
+
+---
+<span class="over">**********</span>: __________
+남성: __________
+<span class="mask">***********</span>: __________
+<span class="mask">**************</span>: __________
+<span class="mask">***************</span>: __________
+<span class="mask">**************</span>: __________
+---
+
+수강료는 <span class="mask">*******************</span>로 결제 가능하며, 결제 확인 후 최종 안내 메일을 보내드립니다. 결제 과정에서 문제가 발생하면 언제든지 <span class="mask">***********</span>로 연락해 주시기 바랍니다. 
+
+수업 첫날에는 빅토리아 여왕 시대의 인사말, 좌석 예절, 식탁 매너, 서신 작성법 등을 실습하게 되며, 강사의 상세한 설명과 실시간 피드백을 통해 실력을 키우실 수 있습니다. 마지막으로, 모든 참가자는<span class="over">*********</span><span class="mask">*********</span>에 기재된 인증서를 받게 되며, 이는 향후 사회적 활동에 큰 도움이 될 것입니다. 궁금한 점이 있으면 언제든지<span class="over">*</span><span class="mask">************************</span>로 문의해 주세요. 감사합니다.
+증권계좌번호는 <span class="mask">****************</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div></div><div class="note">SS-KO-01623 · <b>주소</b> · 정답 17자 중 1자만 덮임 — 16자 노출</div></div><div class="case"><div class="cap">argmax 와 다른 문자 2자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>Short Form – Greenway Trail Volunteer Application
+
+1. Name: <span class="gold">YUGYEONG KIM</span>
+2. Title (if any): <span class="gold">JEONGHO MOON</span>
+3. Date of Birth: 26 9월 1963
+4. Gender: 남성
+5. Contact Email: <span class="gold">yeongjun.kim92@gmail.com</span>
+6. Phone Number: <span class="gold">02-831-9604</span>
+7. Address: <span class="gold">강원특별자치도 원주시 올림픽로 25</span>
+8. Tax ID (for reimbursements): <span class="gold">790725-4963338</span>
+9. Preferred Volunteer Role (e.g., Trail Maintenance, Event Coordination, Safety Officer): ______________________
+10. Any medical conditions or allergies we should be aware of? ______________________
+
+Please return this form to volunteer@greenwaytrails.kr by 20 12월 1950.
+담당 PB <span class="leak">신은</span><span class="gold">미</span> 수석(EUNMI SHIN)이 응대하였습니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>Short Form – Greenway Trail Volunteer Application
+
+1. Name:*************
+2. Title (if any):*************
+3. Date of Birth: **********
+4. Gender: 남성
+5. Contact Email:*************************
+6. Phone Number: ***********
+7. Address:********************
+8. Tax ID (for reimbursements): **************
+9. Preferred Volunteer Role (e.g., Trail Maintenance, Event Coordination, Safety Officer): ______________________
+10. Any medical conditions or allergies we should be aware of? ______________________
+
+Please return this form to volunteer****************** by ***********.
+담당 PB<span class="diff">**</span>은***************)이 응대하였습니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>Short Form – Greenway Trail Volunteer Application
+
+1. Name:<span class="over">*</span><span class="mask">************</span>
+2. Title (if any):<span class="over">*</span><span class="mask">************</span>
+3. Date of Birth: <span class="over">**********</span>
+4. Gender: 남성
+5. Contact Email:<span class="over">*</span><span class="mask">************************</span>
+6. Phone Number: <span class="mask">***********</span>
+7. Address:<span class="over">*</span><span class="mask">*******************</span>
+8. Tax ID (for reimbursements): <span class="mask">**************</span>
+9. Preferred Volunteer Role (e.g., Trail Maintenance, Event Coordination, Safety Officer): ______________________
+10. Any medical conditions or allergies we should be aware of? ______________________
+
+Please return this form to volunteer<span class="over">******************</span> by <span class="over">***********</span>.
+담당 PB<span class="diff"> 신</span>은<span class="mask">*</span><span class="over">**************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-01063 · <b>국문 성명</b> · 정답 3자 중 1자만 덮임 — 2자 노출</div></div><div class="case"><div class="cap">argmax 와 다른 문자 5자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre><span class="leak">이은</span><span class="gold">아</span>님께,
+
+5월 21, 1958에 발송되는 이번 메일은 2024년 제3분기 목표 설정에 관한 안내입니다. 각 팀은 이번 주 안에 <span class="gold">서울특별시 송파구 효령로 263</span> 사무실에 위치한 전략기획팀(<span class="gold">02-205-7698</span>)에 목표 초안을 제출해야 하며, 제출 형식은 첨부된 양식(<span class="gold">서울특별시 서초구 불정로 32</span>)에 따라야 합니다. 목표는 SMART 원칙(구체적, 측정 가능, 달성 가능, 관련성, 시한)을 충족해야 하고, 개인 목표와 팀 목표를 명확히 구분해 기록해야 합니다.
+
+또한, 목표 달성에 필요한 예산 요청은 <span class="gold">5879-0443-5481-8193</span> 형태로 마스킹된 카드 번호와 함께 <span class="gold">sanghui.kim29@hanmail.net</span> 로 송부해 주시길 바랍니다. 질문이 있으면 언제든지 <span class="gold">12-61-884265-89</span> 혹은 <span class="gold">640904-8232309</span> 로 연락 주세요.
+
+감사합니다.
+<span class="leak">SEONOK LIM</span>
+인사부장
+<span class="gold">세종특별자치시 한솔동 디지털로 206</span> ZIP: <span class="gold">세종특별자치시 한솔동 중앙로 269</span></pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>이은***,
+
+***********에 발송되는 이번 메일은 2024년 제3분기 목표 설정에 관한 안내입니다. 각 팀은 이번 주 안에********************************<span class="diff">팀(</span>***********)에 목표 초안을 제출해야 하며, 제출 형식은 첨부된 양식(****************<span class="diff">)에</span> 따라야 합니다. 목표는 SMART 원칙(구체적, 측정 가능, 달성 가능, 관련성, 시한)을 충족해야 하고, 개인 목표와 팀 목표를 명확히 구분해 기록해야 합니다.
+
+또한, 목표 달성에 필요한 예산 요청은 ******************* 형태로 마스킹된 카드 번호와 함께************************** 로 송부해 주시길 바랍니다. 질문이 있으면 언제든지 *************** 혹은 ************** 로 연락 주세요.
+
+감사합니다.
+SEONOK LIM
+인사부장
+*<span class="diff">종</span>*******************************************</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>이은<span class="mask">*</span><span class="over">**</span>,
+
+<span class="over">***********</span>에 발송되는 이번 메일은 2024년 제3분기 목표 설정에 관한 안내입니다. 각 팀은 이번 주 안에<span class="over">*</span><span class="mask">*****************</span><span class="over">**************</span><span class="diff">**</span><span class="mask">***********</span>)에 목표 초안을 제출해야 하며, 제출 형식은 첨부된 양식(<span class="mask">****************</span><span class="diff">**</span> 따라야 합니다. 목표는 SMART 원칙(구체적, 측정 가능, 달성 가능, 관련성, 시한)을 충족해야 하고, 개인 목표와 팀 목표를 명확히 구분해 기록해야 합니다.
+
+또한, 목표 달성에 필요한 예산 요청은 <span class="mask">*******************</span> 형태로 마스킹된 카드 번호와 함께<span class="over">*</span><span class="mask">*************************</span> 로 송부해 주시길 바랍니다. 질문이 있으면 언제든지 <span class="mask">***************</span> 혹은 <span class="mask">**************</span> 로 연락 주세요.
+
+감사합니다.
+SEONOK LIM
+인사부장
+<span class="mask">*</span><span class="diff">*</span><span class="mask">******************</span><span class="over">******</span><span class="mask">*******************</span></pre></div></div><div class="note">SS-KO-01650 · <b>국문 성명</b> · 정답 3자 중 1자만 덮임 — 2자 노출</div></div><div class="case"><div class="cap">argmax 와 다른 문자 9자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>본 계약서는 <span class="leak">윤성</span><span class="gold">우</span>께서 <span class="gold">SEUNGU KWON</span>에게 제공하는 서비스에 대한 상세한 조항들을 규정합니다. 계약 체결일은 1976-07-17T00:00:00이며, 양 당사자는 각자의 1월 12, 1993과 87을 확인하였습니다. 계약에 의한 의무 이행을 위해 <span class="gold">860206-1956328</span>과 <span class="gold">19-86-680927-55</span>을 사전 검증하고, 필요한 경우 <span class="gold">771012-5799084</span>과 <span class="gold">831216-3354209</span>을 제공하도록 요구합니다. 또한, 본 계약에 명시된 기밀 유지 조항은 <span class="gold">부산광역시 부산진구 한강대로 115</span> 소재 <span class="gold">충청북도 청주시 흥덕구 효령로 164</span> 사무실에서 진행되는 모든 업무에 적용되며, 위반 시 <span class="gold">4289-3374-8868-9542</span>을 통한 손해 배상이 이루어집니다. 마지막으로, 계약 해지 통보는 최소 51일 전에 서면(<span class="gold">hyeonjun.lee19@hanmail.net</span>) 또는 전자우편(<span class="gold">010-9468-2698</span>)으로 전달되어야 하며, 계약 종료 후 <span class="gold">인천광역시 미추홀구 여의대로 89</span> 지역 내에서 발생하는 모든 법적 분쟁은 <span class="gold">부산광역시 부산진구 한강대로 115</span> 관할 법원에서 해결됩니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>본 계약서는 윤<span class="diff">*</span>***************에게 제공하는 서비스에 대한 상세한 조항들을 규정합니다. 계약 체결일은 *******************이며, 양 당사자는 각자의 ***********과 87을 확인하였습니다. 계약에 의한 의무 이행을 위해 **************과 ***************을 사전 검증하고, 필요한 경우 **************과 **************을 제공하도록 요구합니다. 또한, 본 계약에 명시된 기밀 유지 조항은************************************************에서 진행되는 모든 업무에 적용되며, 위반 시 *******************을 통한 손해 배상이 이루어집니다. 마지막으로, 계약 해지 통보는 최소 <span class="diff">**</span>일 전에 서면***************************) 또는 전<span class="diff">***</span>(**************으로 전달되어야 하며,********************************에서 발생하는 모든<span class="diff"> 법</span>************************* 관할 법<span class="diff">*</span>에서 해결됩니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>본 계약서는 윤<span class="diff">성</span><span class="mask">*</span><span class="over">***</span><span class="mask">***********</span>에게 제공하는 서비스에 대한 상세한 조항들을 규정합니다. 계약 체결일은 <span class="over">*******************</span>이며, 양 당사자는 각자의 <span class="over">***********</span>과 87을 확인하였습니다. 계약에 의한 의무 이행을 위해 <span class="mask">**************</span>과 <span class="mask">***************</span>을 사전 검증하고, 필요한 경우 <span class="mask">**************</span>과 <span class="mask">**************</span>을 제공하도록 요구합니다. 또한, 본 계약에 명시된 기밀 유지 조항은<span class="over">*</span><span class="mask">*******************</span><span class="over">****</span><span class="mask">********************</span><span class="over">****</span>에서 진행되는 모든 업무에 적용되며, 위반 시 <span class="mask">*******************</span>을 통한 손해 배상이 이루어집니다. 마지막으로, 계약 해지 통보는 최소 <span class="diff">51</span>일 전에 서면<span class="over">*</span><span class="mask">**************************</span>) 또는 전<span class="diff">자우편</span>(<span class="mask">*************</span><span class="over">*</span>으로 전달되어야 하며,<span class="over">*********</span><span class="mask">******************</span><span class="over">*****</span>에서 발생하는 모든<span class="diff">**</span><span class="over">******</span><span class="mask">*******************</span> 관할 법<span class="diff">원</span>에서 해결됩니다.</pre></div></div><div class="note">SS-KO-02366 · <b>국문 성명</b> · 정답 3자 중 1자만 덮임 — 2자 노출</div></div><div class="case"><div class="cap">argmax 와 다른 문자 0자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>온보딩 체크리스트 (짧게):
+19/06/1962: 입사일
+<span class="gold">대구광역시 수성구 한강대로 236</span> 사무실 위치
+<span class="gold">경기도 용인시 기흥구 시청로 42</span> 우편번호
+
+필수 서류:
+- <span class="gold">960711-4535432</span> 사본
+- <span class="gold">13-47-772861-58</span> (선택 사항)
+- <span class="gold">910919-5026235</span> 제공
+
+연락처:
+- 담당자: <span class="gold">EUNGYEONG LEE</span> (<span class="gold">김</span><span class="leak">은미</span>)
+- 전화: <span class="gold">02-926-4343</span>
+- 이메일: <span class="gold">sangjun.jung75@gmail.com</span></pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>온보딩 체크리스트 (짧게):
+**********:****
+*************************************************
+
+필수 서류:
+- *****************
+- *************** (선택 사항)
+- *****************
+
+연락처:
+- 담당자:************** (*은미)
+- 전화: ***********
+- 이메일:*************************</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>온보딩 체크리스트 (짧게):
+<span class="over">**********</span>:<span class="over">****</span>
+<span class="mask">******************</span><span class="over">********</span><span class="mask">******************</span><span class="over">*****</span>
+
+필수 서류:
+- <span class="mask">**************</span><span class="over">***</span>
+- <span class="mask">***************</span> (선택 사항)
+- <span class="mask">**************</span><span class="over">***</span>
+
+연락처:
+- 담당자:<span class="over">*</span><span class="mask">*************</span> (<span class="mask">*</span>은미)
+- 전화: <span class="mask">***********</span>
+- 이메일:<span class="over">*</span><span class="mask">************************</span></pre></div></div><div class="note">SS-KO-02421 · <b>국문 성명</b> · 정답 3자 중 1자만 덮임 — 2자 노출 (직전 문자 '(')</div></div></section><div class="chap" id="ch3"><div class="rn">Ⅲ</div><h2>오탐이지만 문제되지 않는 것</h2></div><section id="F6_OVERRUN"><div class="shead"><h2>직함까지 삼켜버립니다</h2><span class="tag">F6_OVERRUN</span></div><p class="scale">28,420 스팬 중 2,079건 · 대표 5건</p><p class="desc">이름만 지우면 될 것을 '수석'까지</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>【Starry Night Festival Trails – 참가자 안내서】
 1. 기본 정보: 이름(<span class="gold">홍순자</span>), 나이(14), 성별(남성), 연락처(<span class="gold">010-1283-4553</span>), 이메일(<span class="gold">insu.lee71@daum.net</span>).
 2. 숙소 및 교통: 행사 당일 <span class="gold">서울특별시 서초구 디지털로 298</span>에 임시 숙소가 마련되며, 주변 주차장은 <span class="gold">대전광역시 서구 디지털로 289</span> 구역에 위치합니다. 대중교통을 이용하실 경우 <span class="gold">부산광역시 수영구 올림픽로 169</span>역에서 도보 10분 거리입니다.
 3. 안전 및 보안: 모든 참가자는 <span class="gold">921123-6683483</span>와 <span class="gold">711224-2262192</span>를 사전 등록해야 하며, 비상시 연락 가능한 <span class="gold">010-6097-7684</span>를 반드시 제공해 주십시오.
@@ -875,13 +746,13 @@ GE*********
 증권계좌번호는 <span class="gold">212-32-109750-84</span>이며, 출금은 본인 명의 계좌로만 가능합니다.
 주문번호 20260796-960040, 종목코드 207940 건은 정상 체결되었습니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>안녕하세요,<span class="over">*</span><span class="mask">***</span><span class="over">********</span><span class="mask">*****************</span><span class="over">******</span><span class="mask">*******************</span><span class="over">********************</span>를 진행하고 있습니다. 프로젝트 제안서와 예산 계획을 <span class="over">************</span>까지<span class="over">*</span><span class="mask">**************************</span><span class="over">**</span> 회신해 주시면 감사하겠습니다. 신청자 분께서는 현재 나이 29세이며, 성별은 여성이고, 성 정체성은 여성임을 확인해 주세요. 또한, 보안 검토를 위해 <span class="mask">**************</span>과 <span class="mask">***************</span>을 제공해 주시기 바랍니다. 결제는 <span class="mask">*******************</span>으로 진행 가능하며, 우편 주소는<span class="over">*</span><span class="mask">******************</span>입니다.
 증권계좌번호는 <span class="mask">****************</span>이며, 출금은 본인 명의 계좌로만 가능합니다.
-주문번호 <span class="over">***************</span>,<span class="over">************</span> 건은 정상 체결되었습니다.</pre></div></div><div class="note">SS-KO-01017 · <b>주소</b> · 경계 57자 과확장 — 경칭·직함 삼킴</div></div></section><section id="F5_MISLABEL"><span class="tag">F5_MISLABEL</span><h2>라벨은 틀렸지만 문자는 정확히 덮는다</h2><p class="scale">28,420 스팬 중 2,277건 · 대표 5건</p><p class="desc">카드번호를 연락처로, 운전면허번호를 계좌번호로 분류하는 식이다. 마스킹이 목적이라면 결과는 동일하므로 이 프로젝트에서는 실패로 세지 않는다.</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>역사적인 수영복 개발은 9월/15에 시작되었습니다. 당시 <span class="leak">GYEONGHWA CHOI</span>는 86세였으며, F에 대한 사회적 기대치가 디자인에 큰 영향을 주었습니다. 초기 모델은 <span class="gold">대구광역시 수성구 반포대로 12</span>에 위치한 작업실에서 제작되었고, <span class="gold">충청북도 청주시 흥덕구 대학로 116</span>의 <span class="gold">대전광역시 유성구 중앙로 86</span> 우편번호를 사용한 기록이 남아 있습니다. 설계 도면에는 <span class="gold">910427-1598261</span>와 <span class="gold">22-36-935422-47</span>가 함께 표기되어 있었으며, 이후 20/05/1951에 대한 연구 결과가 반영되어 오늘날의 모던 수영복으로 진화했습니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>역사적인 수영복 개발은 9월/15에 시작되었습니다. 당시 GYEONGHWA CHOI는 86세였으며, F에 대한 사회적 기대치가 디자인에 큰 영향을 주었습니다. 초기 모델은<span class="over">*</span><span class="mask">*****************</span>에 위치한 작업실에서 제작되었고,<span class="over">*</span><span class="mask">********************</span><span class="over">**</span><span class="mask">****************</span><span class="over">*****</span>를 사용한 기록이 남아 있습니다. 설계 도면에는 <span class="mask">**************</span>와 <span class="mask">***************</span>가 함께 표기되어 있었으며, 이후 <span class="over">**********</span>에 대한 연구 결과가 반영되어 오늘날의 모던 수영복으로 진화했습니다.</pre></div></div><div class="note">SS-KO-00002 · <b>운전면허번호</b> · 오프셋 정확·라벨 account_number -&gt; private_phone</div></div><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>회의록 (2023년 13 12월 1969): 오늘 회의에서는 <span class="gold">JIHYEON CHOI</span>님이 ‘공유 가치 이니셔티브’의 핵심 목표를 설명했습니다. 주요 논의 사항으로는 (1) <span class="gold">서울특별시 송파구 디지털로 92</span>에 있는 우리 파트너 기업과의 협업 방안, (2) 직원들의 35와 기타 다양성을 고려한 참여 프로그램, (3) <span class="gold">4644-8333-5358-3083</span>와 같은 재무 관리 체계 강화가 있었습니다. 또한, 각 부서에서는 18/06/1978까지 <span class="gold">800119-1750904</span>와 <span class="gold">19-79-248922-85</span>를 포함한 개인정보를 수집해 HR 시스템에 업데이트할 예정이며, 관련 문의는 <span class="gold">010-7358-5389</span>으로 연락해 주시기 바랍니다. 다음 회의는 10/01/2021에 <span class="gold">대구광역시 달서구 여의대로 102</span> 회의실에서 진행됩니다.
+주문번호 <span class="over">***************</span>,<span class="over">************</span> 건은 정상 체결되었습니다.</pre></div></div><div class="note">SS-KO-01017 · <b>주소</b> · 경계 57자 과확장 — 경칭·직함 삼킴</div></div></section><section id="F5_MISLABEL"><div class="shead"><h2>이름을 주소로 착각해도 결과는 같습니다</h2><span class="tag">F5_MISLABEL</span></div><p class="scale">28,420 스팬 중 2,277건 · 대표 5건</p><p class="desc">라벨은 틀렸지만 문자는 정확히 덮였습니다</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>역사적인 수영복 개발은 9월/15에 시작되었습니다. 당시 <span class="leak">GYEONGHWA CHOI</span>는 86세였으며, F에 대한 사회적 기대치가 디자인에 큰 영향을 주었습니다. 초기 모델은 <span class="gold">대구광역시 수성구 반포대로 12</span>에 위치한 작업실에서 제작되었고, <span class="gold">충청북도 청주시 흥덕구 대학로 116</span>의 <span class="gold">대전광역시 유성구 중앙로 86</span> 우편번호를 사용한 기록이 남아 있습니다. 설계 도면에는 <span class="gold">910427-1598261</span>와 <span class="gold">22-36-935422-47</span>가 함께 표기되어 있었으며, 이후 20/05/1951에 대한 연구 결과가 반영되어 오늘날의 모던 수영복으로 진화했습니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>역사적인 수영복 개발은 9월/15에 시작되었습니다. 당시 GYEONGHWA CHOI는 86세였으며, F에 대한 사회적 기대치가 디자인에 큰 영향을 주었습니다. 초기 모델은<span class="over">*</span><span class="mask">*****************</span>에 위치한 작업실에서 제작되었고,<span class="over">*</span><span class="mask">********************</span><span class="over">**</span><span class="mask">****************</span><span class="over">*****</span>를 사용한 기록이 남아 있습니다. 설계 도면에는 <span class="mask">**************</span>와 <span class="mask">***************</span>가 함께 표기되어 있었으며, 이후 <span class="over">**********</span>에 대한 연구 결과가 반영되어 오늘날의 모던 수영복으로 진화했습니다.</pre></div></div><div class="note">SS-KO-00002 · <b>운전면허번호</b> · 오프셋 정확·라벨 account_number -&gt; private_phone</div></div><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>회의록 (2023년 13 12월 1969): 오늘 회의에서는 <span class="gold">JIHYEON CHOI</span>님이 ‘공유 가치 이니셔티브’의 핵심 목표를 설명했습니다. 주요 논의 사항으로는 (1) <span class="gold">서울특별시 송파구 디지털로 92</span>에 있는 우리 파트너 기업과의 협업 방안, (2) 직원들의 35와 기타 다양성을 고려한 참여 프로그램, (3) <span class="gold">4644-8333-5358-3083</span>와 같은 재무 관리 체계 강화가 있었습니다. 또한, 각 부서에서는 18/06/1978까지 <span class="gold">800119-1750904</span>와 <span class="gold">19-79-248922-85</span>를 포함한 개인정보를 수집해 HR 시스템에 업데이트할 예정이며, 관련 문의는 <span class="gold">010-7358-5389</span>으로 연락해 주시기 바랍니다. 다음 회의는 10/01/2021에 <span class="gold">대구광역시 달서구 여의대로 102</span> 회의실에서 진행됩니다.
 담당 PB <span class="gold">서미옥</span> 수석(MIOK SEO)이 응대하였습니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>회의록 (<span class="over">*****************</span>): 오늘 회의에서는<span class="over">*</span><span class="mask">************</span><span class="over">*</span>이 ‘공유 가치 이니셔티브’의 핵심 목표를 설명했습니다. 주요 논의 사항으로는 (1)<span class="over">*</span><span class="mask">*****************</span>에 있는 우리 파트너 기업과의 협업 방안, (2) 직원들의 35와 기타 다양성을 고려한 참여 프로그램, (3) <span class="mask">*******************</span>와 같은 재무 관리 체계 강화가 있었습니다. 또한, 각 부서에서는 <span class="over">**********</span>까지 <span class="mask">**************</span>와 <span class="mask">***************</span>를 포함한 개인정보를 수집해 HR 시스템에 업데이트할 예정이며, 관련 문의는 <span class="mask">*************</span>으로 연락해 주시기 바랍니다. 다음 회의는 <span class="over">**********</span>에<span class="over">*</span><span class="mask">******************</span><span class="over">**</span>의실에서 진행됩니다.
 담당<span class="over">****</span><span class="mask">***</span><span class="over">************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-00004 · <b>카드번호</b> · 오프셋 정확·라벨 account_number -&gt; private_phone</div></div><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>회의록 (2023년 13 12월 1969): 오늘 회의에서는 <span class="gold">JIHYEON CHOI</span>님이 ‘공유 가치 이니셔티브’의 핵심 목표를 설명했습니다. 주요 논의 사항으로는 (1) <span class="gold">서울특별시 송파구 디지털로 92</span>에 있는 우리 파트너 기업과의 협업 방안, (2) 직원들의 35와 기타 다양성을 고려한 참여 프로그램, (3) <span class="gold">4644-8333-5358-3083</span>와 같은 재무 관리 체계 강화가 있었습니다. 또한, 각 부서에서는 18/06/1978까지 <span class="gold">800119-1750904</span>와 <span class="gold">19-79-248922-85</span>를 포함한 개인정보를 수집해 HR 시스템에 업데이트할 예정이며, 관련 문의는 <span class="gold">010-7358-5389</span>으로 연락해 주시기 바랍니다. 다음 회의는 10/01/2021에 <span class="gold">대구광역시 달서구 여의대로 102</span> 회의실에서 진행됩니다.
 담당 PB <span class="gold">서미옥</span> 수석(MIOK SEO)이 응대하였습니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>회의록 (<span class="over">*****************</span>): 오늘 회의에서는<span class="over">*</span><span class="mask">************</span><span class="over">*</span>이 ‘공유 가치 이니셔티브’의 핵심 목표를 설명했습니다. 주요 논의 사항으로는 (1)<span class="over">*</span><span class="mask">*****************</span>에 있는 우리 파트너 기업과의 협업 방안, (2) 직원들의 35와 기타 다양성을 고려한 참여 프로그램, (3) <span class="mask">*******************</span>와 같은 재무 관리 체계 강화가 있었습니다. 또한, 각 부서에서는 <span class="over">**********</span>까지 <span class="mask">**************</span>와 <span class="mask">***************</span>를 포함한 개인정보를 수집해 HR 시스템에 업데이트할 예정이며, 관련 문의는 <span class="mask">*************</span>으로 연락해 주시기 바랍니다. 다음 회의는 <span class="over">**********</span>에<span class="over">*</span><span class="mask">******************</span><span class="over">**</span>의실에서 진행됩니다.
 담당<span class="over">****</span><span class="mask">***</span><span class="over">************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-00004 · <b>주민등록번호</b> · 오프셋 정확·라벨 account_number -&gt; private_phone</div></div><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>회의록 (2023년 13 12월 1969): 오늘 회의에서는 <span class="gold">JIHYEON CHOI</span>님이 ‘공유 가치 이니셔티브’의 핵심 목표를 설명했습니다. 주요 논의 사항으로는 (1) <span class="gold">서울특별시 송파구 디지털로 92</span>에 있는 우리 파트너 기업과의 협업 방안, (2) 직원들의 35와 기타 다양성을 고려한 참여 프로그램, (3) <span class="gold">4644-8333-5358-3083</span>와 같은 재무 관리 체계 강화가 있었습니다. 또한, 각 부서에서는 18/06/1978까지 <span class="gold">800119-1750904</span>와 <span class="gold">19-79-248922-85</span>를 포함한 개인정보를 수집해 HR 시스템에 업데이트할 예정이며, 관련 문의는 <span class="gold">010-7358-5389</span>으로 연락해 주시기 바랍니다. 다음 회의는 10/01/2021에 <span class="gold">대구광역시 달서구 여의대로 102</span> 회의실에서 진행됩니다.
 담당 PB <span class="gold">서미옥</span> 수석(MIOK SEO)이 응대하였습니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>회의록 (<span class="over">*****************</span>): 오늘 회의에서는<span class="over">*</span><span class="mask">************</span><span class="over">*</span>이 ‘공유 가치 이니셔티브’의 핵심 목표를 설명했습니다. 주요 논의 사항으로는 (1)<span class="over">*</span><span class="mask">*****************</span>에 있는 우리 파트너 기업과의 협업 방안, (2) 직원들의 35와 기타 다양성을 고려한 참여 프로그램, (3) <span class="mask">*******************</span>와 같은 재무 관리 체계 강화가 있었습니다. 또한, 각 부서에서는 <span class="over">**********</span>까지 <span class="mask">**************</span>와 <span class="mask">***************</span>를 포함한 개인정보를 수집해 HR 시스템에 업데이트할 예정이며, 관련 문의는 <span class="mask">*************</span>으로 연락해 주시기 바랍니다. 다음 회의는 <span class="over">**********</span>에<span class="over">*</span><span class="mask">******************</span><span class="over">**</span>의실에서 진행됩니다.
-담당<span class="over">****</span><span class="mask">***</span><span class="over">************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-00004 · <b>운전면허번호</b> · 오프셋 정확·라벨 account_number -&gt; private_phone</div></div><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>우선, 선사시대 고분 연구팀의 책임자인 <span class="leak">JUNHUI JUNG</span>는 09/03/2000에 태어나 현재 58세이며, 연구 성과를 공유하기 위해 <span class="gold">jeonghun.yoon47@gmail.com</span>와 <span class="gold">02-795-7037</span>으로 연락하실 수 있습니다. 최근 조사 대상인 <span class="gold">광주광역시 서구 디지털로 19</span>의 고분군에 접근 허가를 받기 위해서는 <span class="gold">920814-4120507</span>와 <span class="gold">27-70-178126-49</span>을 사전에 제출해야 하며, 현장 조사 시에는 <span class="gold">충청남도 천안시 서북구 산업로 178</span> 주소에 임시 사무소를 설치할 예정입니다. 또한, 연구비 지원을 위해서는 <span class="gold">650317-2789044</span>과 <span class="gold">900916-6945319</span> 정보를 제공해야 하며, 현지 문화재청과의 협의를 마친 뒤 최종 보고서를 제출하게 됩니다. 마지막으로, 조사 일정은 20/10/1941부터 시작되며, 모든 참가자는 기타과 남성에 관계없이 동등한 기회를 갖게 됩니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>우선, 선사시대 고분 연구팀의 책임자인 JUNHUI JUNG는 <span class="over">**********</span>에 태어나 현재 58세이며, 연구 성과를 공유하기 위해<span class="over">*</span><span class="mask">*************************</span>와 <span class="mask">***********</span>으로 연락하실 수 있습니다. 최근 조사 대상인<span class="over">*</span><span class="mask">****************</span><span class="over">*****</span>에 접근 허가를 받기 위해서는 <span class="mask">**************</span>와 <span class="mask">***************</span>을 사전에 제출해야 하며, 현장 조사 시에는<span class="over">*</span><span class="mask">********************</span> 주소에 임시 사무소를 설치할 예정입니다. 또한, 연구비 지원을 위해서는 <span class="mask">**************</span>과 <span class="mask">**************</span> 정보를 제공해야 하며, 현지 문화재청과의 협의를 마친 뒤 최종 보고서를 제출하게 됩니다. 마지막으로, 조사 일정은 <span class="over">**********</span>부터 시작되며, 모든 참가자는 기타과 남성에 관계없이 동등한 기회를 갖게 됩니다.</pre></div></div><div class="note">SS-KO-00012 · <b>운전면허번호</b> · 오프셋 정확·라벨 account_number -&gt; private_phone</div></div></section><section id="D_UNLABELED"><span class="tag">D_UNLABELED</span><h2>정답에 없는 날짜를 탐지한다 — 오탐이지만 무해하다</h2><p class="scale">순수 오탐 5,498건 중 3,768건 · 대표 5건</p><p class="desc">우리 테스트셋은 날짜를 마스킹 대상으로 두지 않아 정답 스팬이 없다. 모델이 이를 탐지하면 오탐으로 집계되지만, 실제 운영에서는 더 가리는 쪽이라 위험하지 않다.</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>제목: <span class="gold">JIYUN SONG</span>님, 여행 비디오 인플루언서 마케팅 협업 제안
+담당<span class="over">****</span><span class="mask">***</span><span class="over">************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-00004 · <b>운전면허번호</b> · 오프셋 정확·라벨 account_number -&gt; private_phone</div></div><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>우선, 선사시대 고분 연구팀의 책임자인 <span class="leak">JUNHUI JUNG</span>는 09/03/2000에 태어나 현재 58세이며, 연구 성과를 공유하기 위해 <span class="gold">jeonghun.yoon47@gmail.com</span>와 <span class="gold">02-795-7037</span>으로 연락하실 수 있습니다. 최근 조사 대상인 <span class="gold">광주광역시 서구 디지털로 19</span>의 고분군에 접근 허가를 받기 위해서는 <span class="gold">920814-4120507</span>와 <span class="gold">27-70-178126-49</span>을 사전에 제출해야 하며, 현장 조사 시에는 <span class="gold">충청남도 천안시 서북구 산업로 178</span> 주소에 임시 사무소를 설치할 예정입니다. 또한, 연구비 지원을 위해서는 <span class="gold">650317-2789044</span>과 <span class="gold">900916-6945319</span> 정보를 제공해야 하며, 현지 문화재청과의 협의를 마친 뒤 최종 보고서를 제출하게 됩니다. 마지막으로, 조사 일정은 20/10/1941부터 시작되며, 모든 참가자는 기타과 남성에 관계없이 동등한 기회를 갖게 됩니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>우선, 선사시대 고분 연구팀의 책임자인 JUNHUI JUNG는 <span class="over">**********</span>에 태어나 현재 58세이며, 연구 성과를 공유하기 위해<span class="over">*</span><span class="mask">*************************</span>와 <span class="mask">***********</span>으로 연락하실 수 있습니다. 최근 조사 대상인<span class="over">*</span><span class="mask">****************</span><span class="over">*****</span>에 접근 허가를 받기 위해서는 <span class="mask">**************</span>와 <span class="mask">***************</span>을 사전에 제출해야 하며, 현장 조사 시에는<span class="over">*</span><span class="mask">********************</span> 주소에 임시 사무소를 설치할 예정입니다. 또한, 연구비 지원을 위해서는 <span class="mask">**************</span>과 <span class="mask">**************</span> 정보를 제공해야 하며, 현지 문화재청과의 협의를 마친 뒤 최종 보고서를 제출하게 됩니다. 마지막으로, 조사 일정은 <span class="over">**********</span>부터 시작되며, 모든 참가자는 기타과 남성에 관계없이 동등한 기회를 갖게 됩니다.</pre></div></div><div class="note">SS-KO-00012 · <b>운전면허번호</b> · 오프셋 정확·라벨 account_number -&gt; private_phone</div></div></section><section id="D_UNLABELED"><div class="shead"><h2>정답에 없는 날짜까지 찾아냅니다</h2><span class="tag">D_UNLABELED</span></div><p class="scale">순수 오탐 5,498건 중 3,768건 · 대표 5건</p><p class="desc">오탐으로 세지만 지워서 손해가 없습니다</p><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>제목: <span class="gold">JIYUN SONG</span>님, 여행 비디오 인플루언서 마케팅 협업 제안
 
 안녕하세요 <span class="gold">김영선</span>님,
 저희는 <span class="gold">인천광역시 미추홀구 반포대로 106</span>에 본사를 둔 여행 전문 마케팅 에이전시 <span class="leak">MIJEONG CHA</span>입니다. 최근 11/09/2005에 진행된 캠페인에서 귀하의 유튜브 여행 영상이 큰 호응을 얻어, 향후 6개월간 진행될 ‘동남아시아 탐험’ 시리즈에 협업을 제안드리고자 합니다.
@@ -1054,7 +925,218 @@ SANGMIN YU
 위 정보를 <span class="over">**********</span>까지 회신해 주시면 감사드립니다.
 담당<span class="over">****</span><span class="mask">***</span><span class="over">*****************</span>)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-00934 · <b>(정본 무라벨)</b> · 정본 무라벨 구간을 private_date 로 탐지 (35자)</div></div><div class="case"><div class="cols c2"><div class="col"><div class="ch">원문</div><pre>안녕하세요, <span class="gold">SANGU AHN</span>님! 오늘은 <span class="leak">충청남도 천안시 서북구 올림픽로 190</span>에서 진행되는 모터바이크 투어 촬영을 위한 5가지 핵심 팁을 공유하고자 합니다. 첫 번째로, 바람에 흔들리는 사진을 방지하려면 <span class="gold">17-39-639750-14</span>와 같은 고정 장치를 사용하고, 촬영 시 <span class="leak">울산광역시 남구 시청로 223</span>m 높이의 삼각대를 활용하면 안정적인 구도가 나오게 됩니다. 두 번째 팁은 빛을 활용하는 방법인데, 2016-03-13T00:00:00 일 출발 전 02:07에 일출을 맞이할 수 있도록 스케줄을 잡고, 구름이 적은 날씨를 기대해 <span class="leak">세종특별자치시 도담동 대학로 171</span> 지역의 고도 차이를 고려해 ISO 100~200 사이로 설정하는 것이 좋습니다. 세 번째로, 라이더의 움직임을 포착하려면 연속 촬영 모드와 초당 최소 1/500초 이상의 셔터 스피드를 사용하고, 72세 이하의 초보 라이더라면 안전을 위해 헬멧에 부착된 마운트를 이용해 카메라 무게를 최소화하십시오. 네 번째 팁은 색감 보정으로, 현장에서 찍은 RAW 파일은 <span class="gold">gyeongok.kim18@naver.com</span> 로 전송해 전문가에게 색 보정을 의뢰하거나, 직접 <span class="gold">010-2613-5482</span>으로 문의해 맞춤형 프리셋을 받아 사용할 수 있습니다. 마지막으로, 촬영 후 데이터를 백업할 때는 <span class="gold">5163-5499-4131-0465</span>와 같은 보안 토큰을 이용해 클라우드에 암호화 저장하고, 필요 시 <span class="gold">M56982294</span>를 제시해 신분 확인 절차를 거치면 안전하게 보관할 수 있습니다. 즐거운 투어와 멋진 사진을 기대합니다!
 외국인 투자자의 외국인등록번호는 <span class="gold">660209-7430976</span>으로 확인되었습니다.</pre></div><div class="col"><div class="ch">마스킹 결과 (Viterbi)</div><pre>안녕하세요,<span class="over">*</span><span class="mask">*********</span><span class="over">*</span>! 오늘은 충청남도 천안시 서북구 올림픽로 190에서 진행되는 모터바이크 투어 촬영을 위한 5가지 핵심 팁을 공유하고자 합니다. 첫 번째로, 바람에 흔들리는 사진을 방지하려면 <span class="mask">***************</span>와 같은 고정 장치를 사용하고, 촬영 시 울산광역시 남구 시청로 223m 높이의 삼각대를 활용하면 안정적인 구도가 나오게 됩니다. 두 번째 팁은 빛을 활용하는 방법인데, <span class="over">********************************</span>에 일출을 맞이할 수 있도록 스케줄을 잡고, 구름이 적은 날씨를 기대해 세종특별자치시 도담동 대학로 171 지역의 고도 차이를 고려해 ISO 100~200 사이로 설정하는 것이 좋습니다. 세 번째로, 라이더의 움직임을 포착하려면 연속 촬영 모드와 초당 최소 1/500초 이상의 셔터 스피드를 사용하고, 72세 이하의 초보 라이더라면 안전을 위해 헬멧에 부착된 마운트를 이용해 카메라 무게를 최소화하십시오. 네 번째 팁은 색감 보정으로, 현장에서 찍은 RAW 파일은<span class="over">*</span><span class="mask">************************</span> 로 전송해 전문가에게 색 보정을 의뢰하거나, 직접 <span class="mask">*************</span>으로 문의해 맞춤형 프리셋을 받아 사용할 수 있습니다. 마지막으로, 촬영 후 데이터를 백업할 때는 <span class="mask">*******************</span>와 같은 보안 토큰을 이용해 클라우드에 암호화 저장하고, 필요 시<span class="over">*</span><span class="mask">*********</span>를 제시해 신분 확인 절차를 거치면 안전하게 보관할 수 있습니다. 즐거운 투어와 멋진 사진을 기대합니다!
-외국인 투자자의 외국인등록번호는 <span class="mask">**************</span>으로 확인되었습니다.</pre></div></div><div class="note">SS-KO-00162 · <b>(정본 무라벨)</b> · 정본 무라벨 구간을 private_date 로 탐지 (32자)</div></div></section><section id="H1_RULE"><span class="tag">H1_RULE</span><h2>OPF 가 놓친 고유식별번호를 규칙 레이어가 구제한다</h2><p class="scale">28,420 스팬 중 30건 · 대표 5건</p><p class="desc">주민·외국인등록번호, 여권, 운전면허는 형식이 법으로 고정돼 정규식으로 확정 탐지된다. OPF 단독으로 남은 미탐을 규칙과 병용하면 0 이 된다.</p><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>연구개발 현금 흐름 평가 보고서
+외국인 투자자의 외국인등록번호는 <span class="mask">**************</span>으로 확인되었습니다.</pre></div></div><div class="note">SS-KO-00162 · <b>(정본 무라벨)</b> · 정본 무라벨 구간을 private_date 로 탐지 (32자)</div></div></section><div class="chap" id="ch4"><div class="rn">Ⅳ</div><h2>그래서 이렇게 덮습니다</h2></div><section id="V1_DECODE"><div class="shead"><h2>디코딩만 바꿔도 살아나는 것들</h2><span class="tag">V1_DECODE</span></div><p class="scale">28,420 스팬 중 56건 · 대표 5건</p><p class="desc">모델은 그대로, 읽는 방식만 규칙에 맞췄습니다</p><div class="case"><div class="cap">argmax 와 다른 문자 11자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>1976-12-23T00:00:00에 발행된 내부 메모
+
+<span class="gold">GYEONGHO LEE</span>님께,
+
+저희는 최근 고객 피드백을 기반으로 한 경쟁우위 전략을 구체화하고자 합니다. 이번 전략의 핵심은 <span class="leak">강원특별자치도 춘천시 여의대로 232</span>에 위치한 주요 고객군의 84세 평균 연령과 기타 비율을 정밀 분석하고, 이를 토대로 제품 로드맵을 조정하는 것입니다. 특히, 1월 16, 2007에 태어난 고객들의 구매 패턴을 추적한 결과, <span class="leak">충청북도 청주시 흥덕구 불정로 259</span> 지역에서 <span class="leak">강원특별자치도 원주시 한강대로 </span><span class="gold">126</span>번지 인근 매장 방문 빈도가 23% 상승한 점이 눈에 띕니다.
+
+이를 지원하기 위해 아래와 같은 정보를 사내 데이터베이스에 업데이트해 주시기 바랍니다:
+- 고객 식별 번호: <span class="gold">660807-4373852</span>
+- 운전면허 번호: <span class="gold">26-95-257051-94</span>
+- 외국인등록번호: <span class="gold">780321-6381573</span>
+- 주민등록번호: <span class="gold">690415-3791913</span>
+- 여권 번호: <span class="gold">M97893776</span>
+- 연락 가능한 전화번호: <span class="gold">010-8288-9145</span>
+- 공식 이메일 주소: <span class="gold">jiyun.no32@hanmail.net</span>
+- 결제용 카드 번호(마스킹): <span class="gold">5182-9654-8266-9054</span>
+
+위 데이터가 정확히 반영되면, 마케팅 팀은 2005-12-21T00:00:00까지 맞춤형 캠페인을 기획하고, 영업 팀은 10월 2, 1984에 파일럿 프로그램을 런칭할 수 있습니다. 최종 보고서는 23 9월 1952에 제출하도록 하며, 필요 시 추가적인 현장 조사와 인터뷰를 진행할 예정입니다.
+
+감사합니다.
+
+<span class="gold">YEONGHUN KIM</span>
+전략 기획팀</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>*******************에 발행된 내부 메모
+
+*************께,
+
+저희는 최근 고객 피드백을 기반으로 한 경쟁우위 전략을 구체화하고자 합니다. 이번 전략의 핵심은 강원특별자치도 춘천시 여의대로 232에 위치한 주요 고객군의 84세 평균 연령과 기타 비율을 정밀 분석하고, 이를 토대로 제품 로드맵을 조정하는 것입니다. 특히, 1월 16, 2007에 태어난 고객들의 구매 패턴을 추적한 결과, 충청북도 청주시 흥덕구 불정로 259 지역에서 강원특별자치도 원주시 한강대로 <span class="diff">126</span>*************** 23% 상승한 점이 눈에 띕니다.
+
+이를 지원하기 위해 아래와 같은 정보를 사내 데이터베이스에 업데이트해 주시기 바랍니다:
+- 고객 식별 번호: **************
+- 운전면허 번호: ***************
+- 외국인등록번호: **************
+- 주민등록번호: **************
+- 여권 번호:**********
+- 연락 가능한 전화번호: *************
+- 공식 이메일 주소:***********************
+- 결제용 카드 번호(마스킹): *******************
+
+위 데이터가 정확히 반영되면, 마케팅 팀은 *******************까지 맞춤형 캠페인을 기획하고, 영업 팀은 <span class="diff">**</span>월 2, <span class="diff">***</span>4에 파일럿 프로그램을 런칭할 수 있습니다.******** <span class="diff">**</span> <span class="diff">*</span>월 1952에 제출하도록 하며, 필요 시 추가적인 현장 조사와 인터뷰를 진행할 예정입니다.
+
+감사합니다.
+
+************
+전략 기획팀</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre><span class="over">*******************</span>에 발행된 내부 메모
+
+<span class="mask">************</span><span class="over">*</span>께,
+
+저희는 최근 고객 피드백을 기반으로 한 경쟁우위 전략을 구체화하고자 합니다. 이번 전략의 핵심은 강원특별자치도 춘천시 여의대로 232에 위치한 주요 고객군의 84세 평균 연령과 기타 비율을 정밀 분석하고, 이를 토대로 제품 로드맵을 조정하는 것입니다. 특히, 1월 16, 2007에 태어난 고객들의 구매 패턴을 추적한 결과, 충청북도 청주시 흥덕구 불정로 259 지역에서 강원특별자치도 원주시 한강대로 <span class="diff">***</span><span class="over">***************</span> 23% 상승한 점이 눈에 띕니다.
+
+이를 지원하기 위해 아래와 같은 정보를 사내 데이터베이스에 업데이트해 주시기 바랍니다:
+- 고객 식별 번호: <span class="mask">**************</span>
+- 운전면허 번호: <span class="mask">***************</span>
+- 외국인등록번호: <span class="mask">**************</span>
+- 주민등록번호: <span class="mask">**************</span>
+- 여권 번호:<span class="over">*</span><span class="mask">*********</span>
+- 연락 가능한 전화번호: <span class="mask">*************</span>
+- 공식 이메일 주소:<span class="over">*</span><span class="mask">**********************</span>
+- 결제용 카드 번호(마스킹): <span class="mask">*******************</span>
+
+위 데이터가 정확히 반영되면, 마케팅 팀은 <span class="over">*******************</span>까지 맞춤형 캠페인을 기획하고, 영업 팀은 <span class="diff">10</span>월 2, <span class="diff">198</span>4에 파일럿 프로그램을 런칭할 수 있습니다.<span class="over">********</span> <span class="diff">23</span> <span class="diff">9</span>월 1952에 제출하도록 하며, 필요 시 추가적인 현장 조사와 인터뷰를 진행할 예정입니다.
+
+감사합니다.
+
+<span class="mask">************</span>
+전략 기획팀</pre></div></div><div class="note">SS-KO-00282 · <b>주소</b> · argmax 는 20자 중 0자만 덮어 TP 실패, Viterbi 가 TP (3자 피복)</div></div><div class="case"><div class="cap">argmax 와 다른 문자 5자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre><span class="gold">우경수</span>님께,
+안녕하세요! 저희 <span class="gold">광주광역시 서구 시청로 1</span>에 위치한 지역 양조장인 <span class="gold">세종특별자치시 도담동 효령로 210</span>에서 진행되는 ‘전통 맥주 투어’에 초대드리고자 합니다. 투어는 09/06/2025에 시작되며, 참가자분들은 현지에서 직접 양조 과정을 체험하고 시음할 수 있는 특별한 기회를 얻게 됩니다. 예약을 원하시면 <span class="gold">hyewon.lee60@hanmail.net</span> 혹은 <span class="gold">01045326530</span> 로 연락 주시고, 참가 인원과 선호하는 맥주 종류를 알려주시면 맞춤형 안내를 드리겠습니다.
+또한, 투어 당일에는 <span class="gold">광주광역시 북구 테헤란로 256</span> 지역의 신선한 식재료를 활용한 안주가 제공되며, 20세 이상 성인만 참여 가능하니 79 이하의 경우 동반자와 함께 신청해 주세요. 혹시 추가로 필요한 서류가 있으면, <span class="gold">851022-2546902</span> 혹은 <span class="gold">M31739400</span> 번호를 미리 알려주시면 원활한 입장이 가능합니다.
+감사합니다.
+<span class="gold">GEUMSUN LEE</span>
+<span class="leak">세종특별자치시 도담동 디지털로 </span><span class="gold">273</span> 양조장 운영팀
+외국인 투자자의 외국인등록번호는 <span class="gold">870325-5978014</span>으로 확인되었습니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>****께,
+안녕하세요! 저*************************************************에서 진행되는 ‘전통 맥주 투어’에 초대드리고자 합니다. 투어는 **********에 시작되며, 참가자분들은 현지에서 직접 양조 과정을 체험하고 시음할 수 있는 특별한 기회를 얻게 됩니다. 예약을 원하시면************************* 혹은 *********** 로 연락 주시고, 참가 인원과 선호하는 맥주 종류를 알려주시면 맞춤형 안내를 드리겠습니다.
+또한, 투어 당일에는*********************의 신선한 식재료를 활용한 안주가 제공되며, 20세 이상 성인만 참여 가능하니 79 이하의 경우 동반자와 함께 신청해 주세요. 혹시 추가로 필요한 서류가 있으면, ************** 혹은********** 번호를 미리 알려주시면 원활한 입장이 가능합니다.
+감사합니다.
+<span class="diff">GE</span>*********
+세종특별자치시 도담동 디지털로 <span class="diff">273</span>********
+외국인 투자자의 외국인등록번호는 **************으로 확인되었습니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre><span class="mask">***</span><span class="over">*</span>께,
+안녕하세요! 저<span class="over">**</span><span class="mask">**************</span><span class="over">**************</span><span class="mask">*******************</span>에서 진행되는 ‘전통 맥주 투어’에 초대드리고자 합니다. 투어는 <span class="over">**********</span>에 시작되며, 참가자분들은 현지에서 직접 양조 과정을 체험하고 시음할 수 있는 특별한 기회를 얻게 됩니다. 예약을 원하시면<span class="over">*</span><span class="mask">************************</span> 혹은 <span class="mask">***********</span> 로 연락 주시고, 참가 인원과 선호하는 맥주 종류를 알려주시면 맞춤형 안내를 드리겠습니다.
+또한, 투어 당일에는<span class="over">*</span><span class="mask">*****************</span><span class="over">***</span>의 신선한 식재료를 활용한 안주가 제공되며, 20세 이상 성인만 참여 가능하니 79 이하의 경우 동반자와 함께 신청해 주세요. 혹시 추가로 필요한 서류가 있으면, <span class="mask">**************</span> 혹은<span class="over">*</span><span class="mask">*********</span> 번호를 미리 알려주시면 원활한 입장이 가능합니다.
+감사합니다.
+<span class="diff">**</span><span class="mask">*********</span>
+세종특별자치시 도담동 디지털로 <span class="diff">***</span><span class="over">********</span>
+외국인 투자자의 외국인등록번호는 <span class="mask">**************</span>으로 확인되었습니다.</pre></div></div><div class="note">SS-KO-01919 · <b>주소</b> · argmax 는 20자 중 0자만 덮어 TP 실패, Viterbi 가 TP (3자 피복)</div></div><div class="case"><div class="cap">argmax 와 다른 문자 8자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>회의록: 2024년 이사회 시각화 스킬 점검 회의
+
+일시: 07/04/2025 오전 10시(4:00 PM)
+장소: <span class="leak">경기도 성남시 분당구 반포대로 </span><span class="gold">100</span>시 <span class="gold">충청남도 천안시 서북구 여의대로 59</span> 회의실
+참석자: <span class="gold">MINHUI LEE</span> (CEO), <span class="gold">MINHO PARK</span> (CFO), <span class="gold">EUNJEONG PARK</span> (CTO), <span class="gold">JIHUN LEE</span> (HR 담당)
+
+1. 개요 및 목표
+   - <span class="gold">SUNOK LEE</span>님이 회의를 시작하며, 현재 이사회 시각화 도구 사용 현황과 향후 개선 방향을 논의하기 위한 목적을 설명했습니다.
+2. 현황 보고
+   - <span class="gold">SUNOK CHO</span>님은 최근 도입된 대시보드 솔루션의 활용률이 전체 직원의 68%에 이르며, 주요 KPI 시각화가 <span class="gold">부산광역시 부산진구 대학로 106</span>건 완료되었다고 보고했습니다. 관련 부서의 <span class="gold">jaeseong.park79@kakao.com</span>로 상세 보고서를 받을 수 있습니다.
+3. 문제점 및 개선 방안
+   - <span class="gold">김지우</span>님은 데이터 연동 오류와 디자인 일관성 부족을 지적했으며, 이를 해결하기 위해 새로운 <span class="gold">21-23-401846-69</span> 규격의 API와 색상 가이드라인을 도입할 것을 제안했습니다.
+   - 또한, 사용자의 86와 남성에 따른 맞춤형 뷰 제공을 위해 추가적인 사용자 프로파일링이 필요하다고 언급했습니다(<span class="gold">610606-6066121</span>을 활용).
+4. 실행 계획
+   - 다음 주까지 <span class="gold">조미연</span>님이 교육 자료를 제작하고, 전사 이메일(<span class="gold">jaemin.lee70@gmail.com</span>)을 통해 배포하기로 했습니다.
+   - 비용 청구는 <span class="gold">721210-1625431</span>을 기준으로 진행되며, 결제는 <span class="gold">5894-4782-7023-4272</span>으로 처리됩니다.
+5. 기타 사항
+   - 회의 종료 전, 참석자들은 각자 자신의 <span class="leak">충청남도</span><span class="gold"> 천안시 서북구 불정로 62</span>와 주소(<span class="gold">대전광역시 유성구 효령로 45</span>)를 확인하고, 필요 시 업데이트하도록 요청받았습니다.
+
+다음 회의는 15/12/2009에 동일 장소에서 진행될 예정이며, 모든 진행 상황은 <span class="gold">02-228-9727</span>로 연락 가능합니다.
+증권계좌번호는 <span class="gold">486-81-277998-69</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>회의록: 2024년 이사회 시각화 스킬 점검 회의
+
+일시: ***************************장소: 경기도<span class="diff">**</span>남시 분당구 반포대로 <span class="diff">100</span>*******************<span class="diff"> </span>****<span class="diff">의실</span>
+참석자:*********** (CEO),*********** (CFO),************** (CTO),********** (HR 담당)
+
+1. 개요 및 목표
+   -***********이 회의를 시작하며, 현재 이사회 시각화 도구 사용 현황과 향후 개선 방향을 논의하기 위한 목적을 설명했습니다.
+2. 현황 보고
+   -***********은 최근 도입된 대시보드 솔루션의 활용률이 전체 직원의 68%에 이르며, 주요 KPI 시각화가******************** 완료되었다고 보고했습니다. 관련 부서의**************************로 상세 보고서를 받을 수 있습니다.
+3. 문제점 및 개선 방안
+   -*****은 데이터 연동 오류와 디자인 일관성 부족을 지적했으며, 이를 해결하기 위해 새로운 *************** 규격의 API와 색상 가이드라인을 도입할 것을 제안했습니다.
+   - 또한, 사용자의 86와 남성에 따른 맞춤형 뷰 제공을 위해 추가적인 사용자 프로파일링이 필요하다고 언급했습니다(**************을 활용).
+4. 실행 계획
+   - 다음 주까지*****이 교육 자료를 제작하고, 전사 이메일(**********************)을 통해 배포하기로 했습니다.
+   - 비용 청구는 **************을 기준으로 진행되며, 결제는 *******************으로 처리됩니다.
+5. 기타 사항
+   - 회의 종료 전, 참석자들은 각자 자신의 충청남도************************************** 확인하고, 필요 시 업데이트하도록 요청받았습니다.
+
+다음 회의는 **********에 동일 장소에서 진행될 예정이며, 모든 진행 상황은 ***********로 연락 가능합니다.
+증권계좌번호는 ****************이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>회의록: 2024년 이사회 시각화 스킬 점검 회의
+
+일시: <span class="over">***************************</span>장소: 경기도<span class="diff"> 성</span>남시 분당구 반포대로 <span class="diff">***</span><span class="over">**</span><span class="mask">*****************</span><span class="diff">*</span><span class="mask">**</span><span class="over">**</span><span class="diff">**</span>
+참석자:<span class="over">*</span><span class="mask">**********</span> (CEO),<span class="over">*</span><span class="mask">**********</span> (CFO),<span class="over">*</span><span class="mask">*************</span> (CTO),<span class="over">*</span><span class="mask">*********</span> (HR 담당)
+
+1. 개요 및 목표
+   -<span class="over">*</span><span class="mask">*********</span><span class="over">*</span>이 회의를 시작하며, 현재 이사회 시각화 도구 사용 현황과 향후 개선 방향을 논의하기 위한 목적을 설명했습니다.
+2. 현황 보고
+   -<span class="over">*</span><span class="mask">*********</span><span class="over">*</span>은 최근 도입된 대시보드 솔루션의 활용률이 전체 직원의 68%에 이르며, 주요 KPI 시각화가<span class="over">*</span><span class="mask">******************</span><span class="over">*</span> 완료되었다고 보고했습니다. 관련 부서의<span class="over">*</span><span class="mask">*************************</span>로 상세 보고서를 받을 수 있습니다.
+3. 문제점 및 개선 방안
+   -<span class="over">*</span><span class="mask">***</span><span class="over">*</span>은 데이터 연동 오류와 디자인 일관성 부족을 지적했으며, 이를 해결하기 위해 새로운 <span class="mask">***************</span> 규격의 API와 색상 가이드라인을 도입할 것을 제안했습니다.
+   - 또한, 사용자의 86와 남성에 따른 맞춤형 뷰 제공을 위해 추가적인 사용자 프로파일링이 필요하다고 언급했습니다(<span class="mask">**************</span>을 활용).
+4. 실행 계획
+   - 다음 주까지<span class="over">*</span><span class="mask">***</span><span class="over">*</span>이 교육 자료를 제작하고, 전사 이메일(<span class="mask">**********************</span>)을 통해 배포하기로 했습니다.
+   - 비용 청구는 <span class="mask">**************</span>을 기준으로 진행되며, 결제는 <span class="mask">*******************</span>으로 처리됩니다.
+5. 기타 사항
+   - 회의 종료 전, 참석자들은 각자 자신의 충청남도<span class="mask">***************</span><span class="over">*****</span><span class="mask">****************</span><span class="over">**</span> 확인하고, 필요 시 업데이트하도록 요청받았습니다.
+
+다음 회의는 <span class="over">**********</span>에 동일 장소에서 진행될 예정이며, 모든 진행 상황은 <span class="mask">***********</span>로 연락 가능합니다.
+증권계좌번호는 <span class="mask">****************</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div></div><div class="note">SS-KO-00867 · <b>주소</b> · argmax 는 20자 중 2자만 덮어 TP 실패, Viterbi 가 TP (3자 피복)</div></div><div class="case"><div class="cap">argmax 와 다른 문자 6자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>내부 메모: 신규 거래 <span class="gold">11-52-185532-27</span> 번호를 보유한 <span class="leak">김진숙</span>씨는 최근 17/04/1993에 <span class="gold">충청남도 천안시 서북구 효령로 120</span>번지에서 <span class="gold">M29031679</span> 여권을 사용해 해외 송금을 시도했습니다. 해당 송금은 고액이며, 수신 은행이 <span class="gold">대구광역시 중구 디지털로 131</span>에 위치해 있어 지역적 AML 규제와 충돌 가능성이 있습니다. 또한, <span class="gold">960705-7249868</span> 번호와 논바이너리 정보가 확인되었으며, 이는 고객 프로파일링에 중요한 데이터로 활용됩니다. 위험 평가 결과, 현재 55세의 남성 고객은 <span class="leak">세종특별자치시 한솔동 여의대로 </span><span class="gold">148</span> 우편구역에 거주하고 있어 이전 사례와 유사한 패턴을 보이고 있으므로, 즉시 거래 정지 및 추가 문서(예: <span class="gold">751221-2713058</span> 복사본) 요청이 필요합니다. 향후 보고서는 <span class="gold">yumi.kim61@kakao.com</span>를 통해 공유될 예정이며, 모든 관련 담당자는 해당 사안에 대해 신속히 대응해 주시기 바랍니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>내부 메모: 신규 거래 *************** 번호를 보유한 김진숙씨는 최근 **********에***********************에서********** 여권을 사용해 해외 송금을 시도했습니다. 해당 송금은 고액이며,*************************에 위치해 있어 지역적 AML 규제와 충돌 가능성이 있습니다. 또한, ************** 번호와 논바이너리 정보가 확인되었으며, 이는 고객 프로파일링에 중요한 데이터로 활용됩니다. 위험 평가 결과, 현재 55세의 남성 고객은 세종특별자치시 한솔동 여의<span class="diff">**</span> <span class="diff">148</span>****<span class="diff">역</span>에 거주하고 있어 이전 사례와 유사한 패턴을 보이고 있으므로, 즉시 거래 정지 및 추가 문서(예:*************** 복사본) 요청이 필요합니다. 향후 보고서는*********************를 통해 공유될 예정이며, 모든 관련 담당자는 해당 사안에 대해 신속히 대응해 주시기 바랍니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>내부 메모: 신규 거래 <span class="mask">***************</span> 번호를 보유한 김진숙씨는 최근 <span class="over">**********</span>에<span class="over">*</span><span class="mask">********************</span><span class="over">**</span>에서<span class="over">*</span><span class="mask">*********</span> 여권을 사용해 해외 송금을 시도했습니다. 해당 송금은 고액이며,<span class="over">********</span><span class="mask">*****************</span>에 위치해 있어 지역적 AML 규제와 충돌 가능성이 있습니다. 또한, <span class="mask">**************</span> 번호와 논바이너리 정보가 확인되었으며, 이는 고객 프로파일링에 중요한 데이터로 활용됩니다. 위험 평가 결과, 현재 55세의 남성 고객은 세종특별자치시 한솔동 여의<span class="diff">대로</span> <span class="diff">***</span><span class="over">****</span><span class="diff">*</span>에 거주하고 있어 이전 사례와 유사한 패턴을 보이고 있으므로, 즉시 거래 정지 및 추가 문서(예:<span class="over">*</span><span class="mask">**************</span> 복사본) 요청이 필요합니다. 향후 보고서는<span class="over">*</span><span class="mask">********************</span>를 통해 공유될 예정이며, 모든 관련 담당자는 해당 사안에 대해 신속히 대응해 주시기 바랍니다.</pre></div></div><div class="note">SS-KO-02718 · <b>주소</b> · argmax 는 20자 중 2자만 덮어 TP 실패, Viterbi 가 TP (3자 피복)</div></div><div class="case"><div class="cap">argmax 와 다른 문자 9자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>혁신가들이 팀 내에서 효과적인 협업을 이끌어내기 위해서는 먼저 <span class="leak">이정환</span>처럼 명확한 역할과 책임을 정의해야 합니다. 이를 위해서는 6월 20, 2017에 기반한 연령과 경험(74)을 고려해 적절한 멘토링 구조를 설계하고, 팀원들의 남성와 남성 다양성을 존중하는 문화가 필요합니다. 소통 채널로는 <span class="gold">jinyeong.park55@naver.com</span>과 <span class="gold">01077272431</span>을 활용해 실시간 피드백을 주고받으며, 회의 일정은 9월 25, 1969에 맞춰 조율하고, 회의록은 <span class="gold">충청남도 천안시 서북구 대학로 207</span>에 위치한 <span class="gold">강원특별자치도 원주시</span><span class="leak"> 여의대로 45</span> 사무실에 보관합니다. 또한 혁신적인 아이디어를 보호하기 위해서는 모든 참여자는 <span class="gold">880918-3758424</span>과 <span class="gold">700322-6554573</span>를 사전 등록하고, 프로젝트 예산은 <span class="gold">980515-1377335</span>와 연동된 투명한 회계 시스템을 통해 관리됩니다. 마지막으로, 팀원들이 개인적인 보안을 유지하면서도 자유롭게 의견을 제시하도록 <span class="gold">5615-3313-3133-5552</span>과 같은 민감 정보는 마스킹 처리하고, 필요 시 <span class="gold">M40854335</span>을 통해 국제 협업 시 신분 확인 절차를 진행합니다.
+증권계좌번호는 <span class="gold">798-26-893644-31</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>혁신가들이 팀 내에서 효과적인 협업을 이끌어내기 위해서는 먼저 이정환처럼 명확한 역할과 책임을 정의해야 합니다. 이를 위해서는 6월 20, 2017에 기반한 연령과 경험(74)을 고려해 적절한 멘토링 구조를 설계하고, 팀원들의 남성와 남성 다양성을 존중하는 문화가 필요합니다. 소통 채널로는**************************과 ***********을 활용해 실시간 피드백을 주고받으며, 회의 일정은 ***********에 맞춰 조율하고, 회의록은*****************************<span class="diff">특별자치도 원주시</span> 여의대로 45 사무실에 보관합니다. 또한 혁신적인 아이디어를 보호하기 위해서는 모든 참여자는 **************과 **************를 사전 등록하고, 프로젝트 예산은 **************와 연동된 투명한 회계 시스템을 통해 관리됩니다. 마지막으로, 팀원들이 개인적인 보안을 유지하면서도 자유롭게 의견을 제시하도록 *******************과 같은 민감 정보는 마스킹 처리하고, 필요 시**********을 통해 국제 협업 시 신분 확인 절차를 진행합니다.
+증권계좌번호는 ****************이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>혁신가들이 팀 내에서 효과적인 협업을 이끌어내기 위해서는 먼저 이정환처럼 명확한 역할과 책임을 정의해야 합니다. 이를 위해서는 6월 20, 2017에 기반한 연령과 경험(74)을 고려해 적절한 멘토링 구조를 설계하고, 팀원들의 남성와 남성 다양성을 존중하는 문화가 필요합니다. 소통 채널로는<span class="over">*</span><span class="mask">*************************</span>과 <span class="mask">***********</span>을 활용해 실시간 피드백을 주고받으며, 회의 일정은 <span class="over">***********</span>에 맞춰 조율하고, 회의록은<span class="over">*</span><span class="mask">********************</span><span class="over">******</span><span class="mask">**</span><span class="diff">*********</span> 여의대로 45 사무실에 보관합니다. 또한 혁신적인 아이디어를 보호하기 위해서는 모든 참여자는 <span class="mask">**************</span>과 <span class="mask">**************</span>를 사전 등록하고, 프로젝트 예산은 <span class="mask">**************</span>와 연동된 투명한 회계 시스템을 통해 관리됩니다. 마지막으로, 팀원들이 개인적인 보안을 유지하면서도 자유롭게 의견을 제시하도록 <span class="mask">*******************</span>과 같은 민감 정보는 마스킹 처리하고, 필요 시<span class="over">*</span><span class="mask">*********</span>을 통해 국제 협업 시 신분 확인 절차를 진행합니다.
+증권계좌번호는 <span class="mask">****************</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div></div><div class="note">SS-KO-00359 · <b>주소</b> · argmax 는 19자 중 2자만 덮어 TP 실패, Viterbi 가 TP (11자 피복)</div></div></section><section id="V2_REGRESS"><div class="shead"><h2>사라진 것은 성공이 아니라 착시였습니다</h2><span class="tag">V2_REGRESS</span></div><p class="scale">28,420 스팬 중 207건 · 대표 5건</p><p class="desc">불법 경로로 만들어진 스팬이 정직한 실패로 바뀌었습니다</p><div class="case"><div class="cap">argmax 와 다른 문자 3자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>안녕하세요, <span class="leak">신세진</span>입니다. 저는 현재 <span class="leak">충청북도 청주시 흥덕구 디지털로 133</span>에 위치한 연구소에서 기억 소멸 방지를 위한 프로젝트를 맡고 있습니다. 본 이메일은 7월 6, 2024에 예정된 'Safeguarding Eroding Memories Initiatives' 워크숍에 관한 사전 안내를 드리기 위해 작성되었습니다. 워크숍 장소는 <span class="gold">부산광역시 부산진구 세종대로 254</span>번 건물, <span class="gold">충청남도 천안시 서북구 한강대로 78</span>이며, 참가자 명단에는 <span class="gold">SEONGHUN GWAK</span>님의 13/12/2021 (만 40세, F)과 같은 다양한 배경의 전문가들이 포함됩니다. 또한, 개인정보 보호를 위해 참가자들의 <span class="gold">821006-1497038</span>, <span class="gold">12-50-894573-19</span>, <span class="gold">700827-8490898</span> 및 <span class="gold">891123-1634687</span> 정보를 사전 수집할 예정이며, 필요 시 <span class="gold">M34374102</span>와 <span class="gold">4949-4671-3455-0763</span>도 요청할 수 있습니다. 자세한 사항은 제 이메일(<span class="gold">jiyun.park50@outlook.com</span>) 또는 전화(<span class="gold">01036742779</span>)로 문의해 주시기 바랍니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>안녕하세요, 신세진입니다. 저는 현재 충청북도 청주시 흥덕구 디지털<span class="diff">*</span> 133에 위치한 연구소에서 기억 소멸 방지를 위한 프로젝트를 맡고 있습니다. 본 이메일은 **********에 예정된 'Safeguarding Eroding Memories Initiatives' 워크숍에 관한 사전 안내를 드리기 위해 작성되었습니다. 워크숍 장소는**********************************************이며, 참가자 명단<span class="diff">**</span>**************님의 *********************과 같은 다양한 배경의 전문가들이 포함됩니다. 또한, 개인정보 보호를 위해 참가자들의 **************, ***************, ************** 및 ************** 정보를 사전 수집할 예정이며, 필요 시**********와 *******************도 요청할 수 있습니다. 자세한 사항은 제 이메일*************************) 또는 전화(***********)로 문의해 주시기 바랍니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>안녕하세요, 신세진입니다. 저는 현재 충청북도 청주시 흥덕구 디지털<span class="diff">로</span> 133에 위치한 연구소에서 기억 소멸 방지를 위한 프로젝트를 맡고 있습니다. 본 이메일은 <span class="over">**********</span>에 예정된 'Safeguarding Eroding Memories Initiatives' 워크숍에 관한 사전 안내를 드리기 위해 작성되었습니다. 워크숍 장소는<span class="over">*</span><span class="mask">*******************</span><span class="over">******</span><span class="mask">********************</span>이며, 참가자 명단<span class="diff">에는</span><span class="over">*</span><span class="mask">*************</span>님의 <span class="over">*********************</span>과 같은 다양한 배경의 전문가들이 포함됩니다. 또한, 개인정보 보호를 위해 참가자들의 <span class="mask">**************</span>, <span class="mask">***************</span>, <span class="mask">**************</span> 및 <span class="mask">**************</span> 정보를 사전 수집할 예정이며, 필요 시<span class="over">*</span><span class="mask">*********</span>와 <span class="mask">*******************</span>도 요청할 수 있습니다. 자세한 사항은 제 이메일<span class="over">*</span><span class="mask">************************</span>) 또는 전화(<span class="mask">***********</span>)로 문의해 주시기 바랍니다.</pre></div></div><div class="note">SS-KO-02337 · <b>주소</b> · argmax 피복 1자 / 정답 스팬 21자</div></div><div class="case"><div class="cap">argmax 와 다른 문자 6자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre><span class="cut">…</span>1월/18까지 12개 국가의 전통 직물 기술을 분석하였다. 주요 발견으로는 한국의 비단과 인도의 실크, 그리고 나미비아의 가죽 직조 방식이 현대 패치워크에 새로운 색채와 텍스처를 제공한다는 점이다. 인터뷰 대상자는 <span class="leak">이민호</span> (연령 8세, M), <span class="leak">권윤정</span> (직함: <span class="leak">YURI LIM</span> 디자이너) 등 총 8명이며, 모든 연락처는 <span class="gold">hyerin.yu77@hanmail.net</span>와 <span class="gold">02-995-4230</span> 로 기록되었다. 조사 중 수집된 샘플은 <span class="leak">세종특별자치시 도담동 광교중앙로 270</span>의 문화재청에 보관되었으며, 각 샘플에는 고유 번호(<span class="gold">720818-4166090</span>)와 현지 세금 번호(<span class="gold">860704-4165488</span>)가 라벨링되어 있다. 최종 권고사항으로는 국제 협업 프로그램에 <span class="gold">5412-1158-2854-3617</span> 예산을 배정하고, 매년 2회 이상 교환 전시회를 개최할 것을 제안한다.
+증권계좌번호는 <span class="gold">690-86-619423-96</span>이며, 출금은 본인 명의 계좌로만 가능합니다.
+담당 PB <span class="leak">이인수</span> 수석(INSU LEE)이 응대하였습니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre><span class="cut">…</span>*****까지 12개 국가의 전통 직물 기술을 분석하였다. 주요 발견으로는 한국의 비단과 인도의 실크, 그리고 나미비아의 가죽 직조 방식이 현대 패치워크에 새로운 색채와 텍스처를 제공한다는 점이다. 인터뷰 대상자는 이민호 (연령 8세, M), 권윤정 (직함: YURI LIM 디자이너) 등 총 8명이며, 모든 연락처는************************와 *********** 로 기록되었다. 조사 중 수집된 샘플은 세종특별자치시 도담동 광교중<span class="diff">**</span> 270의 문화재청에 보관되었으며, 각 샘플에는 고유 번호(**************)와 현지 세금 번호(**************)가 라벨링되어 있다. 최종 권고사항으로는 국제 협업 프로그램에 ******************* 예산을 배정하고, 매년 2회 이상 교환 전시회를 개최할 것을 제안한다.
+증권계좌번호는 ****************이며, 출금은 본인 명의 계좌로만 가능합니다.
+담당 PB 이인수 수석(<span class="diff">****</span> LEE)이 응대하였습니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre><span class="cut">…</span><span class="over">*****</span>까지 12개 국가의 전통 직물 기술을 분석하였다. 주요 발견으로는 한국의 비단과 인도의 실크, 그리고 나미비아의 가죽 직조 방식이 현대 패치워크에 새로운 색채와 텍스처를 제공한다는 점이다. 인터뷰 대상자는 이민호 (연령 8세, M), 권윤정 (직함: YURI LIM 디자이너) 등 총 8명이며, 모든 연락처는<span class="over">*</span><span class="mask">***********************</span>와 <span class="mask">***********</span> 로 기록되었다. 조사 중 수집된 샘플은 세종특별자치시 도담동 광교중<span class="diff">앙로</span> 270의 문화재청에 보관되었으며, 각 샘플에는 고유 번호(<span class="mask">**************</span>)와 현지 세금 번호(<span class="mask">**************</span>)가 라벨링되어 있다. 최종 권고사항으로는 국제 협업 프로그램에 <span class="mask">*******************</span> 예산을 배정하고, 매년 2회 이상 교환 전시회를 개최할 것을 제안한다.
+증권계좌번호는 <span class="mask">****************</span>이며, 출금은 본인 명의 계좌로만 가능합니다.
+담당 PB 이인수 수석(<span class="diff">INSU</span> LEE)이 응대하였습니다.</pre></div></div><div class="note">SS-KO-01039 · <b>주소</b> · argmax 피복 2자 / 정답 스팬 21자</div></div><div class="case"><div class="cap">argmax 와 다른 문자 3자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>안녕하세요 <span class="gold">JEONGJA MOON</span>님, 
+귀하의 유연 셔틀 패스 신청이 접수되었습니다. 패스는 10월/38에 기반하여 67세로 확인되었습니다. 발급을 위해 아래 정보를 꼭 확인해 주세요:
+- 이메일: <span class="gold">jinsu.hong66@naver.com</span>
+- 연락처: <span class="gold">02-930-6618</span>
+- 거주지: <span class="gold">대전광역시 서구 여의대로 47</span>시, <span class="gold">울산광역시 남구 디지털로 112</span>로, 건물번호 <span class="gold">경기도 고양시 일산동구 광교중앙로 1</span>, 우편번호 <span class="gold">대구광역시 수성구 시청로 56</span>
+패스는 다음 주 월요일부터 사용 가능하며, 이용 전 <span class="leak">16-32-789153-13</span> 번호와 <span class="gold">5997-1821-0361-1086</span>로 결제 확인이 필요합니다. 궁금한 점은 언제든지 회신 주세요.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>안녕하세요**************, 
+귀하의 유연 셔틀 패스 신청이 접수되었습니다. 패스는 10월/38에 기반하여 67세로 확인되었습니다. 발급을 위해 아래 정보를 꼭 확인해 주세요:
+- 이메일:***********************
+- 연락처: ***********
+- 거주지:****************************************************************************************
+패스는 다음 주 월요일부터 사용 가능하며, 이용 전 16-32-789<span class="diff">***</span>-13 번호와 *******************로 결제 확인이 필요합니다. 궁금한 점은 언제든지 회신 주세요.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>안녕하세요<span class="over">*</span><span class="mask">************</span><span class="over">*</span>, 
+귀하의 유연 셔틀 패스 신청이 접수되었습니다. 패스는 10월/38에 기반하여 67세로 확인되었습니다. 발급을 위해 아래 정보를 꼭 확인해 주세요:
+- 이메일:<span class="over">*</span><span class="mask">**********************</span>
+- 연락처: <span class="mask">***********</span>
+- 거주지:<span class="over">*</span><span class="mask">****************</span><span class="over">***</span><span class="mask">*****************</span><span class="over">********</span><span class="mask">********************</span><span class="over">*******</span><span class="mask">****************</span>
+패스는 다음 주 월요일부터 사용 가능하며, 이용 전 16-32-789<span class="diff">153</span>-13 번호와 <span class="mask">*******************</span>로 결제 확인이 필요합니다. 궁금한 점은 언제든지 회신 주세요.</pre></div></div><div class="note">SS-KO-02592 · <b>운전면허번호</b> · argmax 피복 3자 / 정답 스팬 15자</div></div><div class="case"><div class="cap">argmax 와 다른 문자 15자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>제목: 해외 스타트업 투자 보고서 (2024년 하반기)
+작성자: <span class="leak">MISEON LIM</span> (<span class="leak">HYEYEON LEE</span>)
+날짜: 8월 1, 1976
+
+1. 서론 – 현재 전 세계 주요 스타트업 허브(실리콘밸리, 베이징, 베를린, 텔레비젼)에서 가장 눈에 띄는 트렌드는 AI 기반 서비스와 지속 가능한 기술에 대한 투자 증가입니다. 특히, <span class="gold">서울특별시 강남구 광교중앙로 39</span>에 위치한 투자 펀드는 최근 12개월간 <span class="leak">4962-7632-8045-4789</span> 규모의 자금을 배분했으며, 투자 대상 기업의 평균 연령은 16세, 성비는 M가 남성보다 높게 나타났습니다.
+2. 주요 투자 대상 – ① <span class="leak">SUNRYE KIM</span>의 ‘EcoDrive’(드라이버 라이선스 번호: <span class="gold">11-69-911202-26</span>)는 전기차 충전 인프라 플랫폼을 개발 중이며, 현재 시드 라운드에서 <span class="gold">860705-7997666</span> 금액을 확보했습니다. ② <span class="leak">정경미</span>이 설립한 ‘HealthAI’는 의료 데이터 분석 서비스를 제공하며, 최근 <span class="leak">M76274646</span> 인증을 획득했습니다.
+3. 결론 – 향후 2년 내에 해외 스타트업과의 협업을 확대하기 위해서는 현지 법규(특히 <span class="gold">650526-4041377</span>와 관련된 세무 규정)와 문화적 차이를 충분히 고려한 맞춤형 지원 프로그램이 필요합니다.
+증권계좌번호는 <span class="gold">761-69-968608-10</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>제목: 해외 스타트업 투자 보고서 (2024년 하반기)
+작성자: MISEON LIM (HYEYEON LEE)
+날짜: 8월 1, 1976
+
+1. 서론 – 현재 전 세계 주요 스타트업 허브(실리콘밸리, 베이징, 베를린, 텔레비젼)에서 가장 눈에 띄는 트렌드는 AI 기반 서비스와 지속 가능한 기술에 대한 투자 증가입니다. 특히,*******************에 위치한 투자 펀드는 최근 12개월간 496<span class="diff">*</span>-<span class="diff">****</span>-<span class="diff">****</span>-<span class="diff">***</span>9 규모의 자금을 배분했으며, 투자 대상 기업의 평균 연령은 16세, 성비는 M가 남성보다 높게 나타났습니다.
+2. 주요 투자 대상 – ① SUNRYE KIM의 ‘EcoDrive’(드라이버 라이선스 번호: ***************)는 전기차 충전 인프라 플랫폼을 개발 중이며, 현재 시드 라운드에서 ************** 금액을 확보했습니다. ② 정경미이 설립한 ‘HealthAI’는 의료 데이터 분석 서비스를 제공하며, 최근 M762<span class="diff">***</span>46 인증을 획득했습니다.
+3. 결론 – 향후 2년 내에 해외 스타트업과의 협업을 확대하기 위해서는 현지 법규(특히 **************와 관련된 세무 규정)와 문화적 차이를 충분히 고려한 맞춤형 지원 프로그램이 필요합니다.
+증권계좌번호는 ****************이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>제목: 해외 스타트업 투자 보고서 (2024년 하반기)
+작성자: MISEON LIM (HYEYEON LEE)
+날짜: 8월 1, 1976
+
+1. 서론 – 현재 전 세계 주요 스타트업 허브(실리콘밸리, 베이징, 베를린, 텔레비젼)에서 가장 눈에 띄는 트렌드는 AI 기반 서비스와 지속 가능한 기술에 대한 투자 증가입니다. 특히,<span class="over">*</span><span class="mask">******************</span>에 위치한 투자 펀드는 최근 12개월간 496<span class="diff">2</span>-<span class="diff">7632</span>-<span class="diff">8045</span>-<span class="diff">478</span>9 규모의 자금을 배분했으며, 투자 대상 기업의 평균 연령은 16세, 성비는 M가 남성보다 높게 나타났습니다.
+2. 주요 투자 대상 – ① SUNRYE KIM의 ‘EcoDrive’(드라이버 라이선스 번호: <span class="mask">***************</span>)는 전기차 충전 인프라 플랫폼을 개발 중이며, 현재 시드 라운드에서 <span class="mask">**************</span> 금액을 확보했습니다. ② 정경미이 설립한 ‘HealthAI’는 의료 데이터 분석 서비스를 제공하며, 최근 M762<span class="diff">746</span>46 인증을 획득했습니다.
+3. 결론 – 향후 2년 내에 해외 스타트업과의 협업을 확대하기 위해서는 현지 법규(특히 <span class="mask">**************</span>와 관련된 세무 규정)와 문화적 차이를 충분히 고려한 맞춤형 지원 프로그램이 필요합니다.
+증권계좌번호는 <span class="mask">****************</span>이며, 출금은 본인 명의 계좌로만 가능합니다.</pre></div></div><div class="note">SS-KO-00303 · <b>카드번호</b> · argmax 피복 12자 / 정답 스팬 19자</div></div><div class="case"><div class="cap">argmax 와 다른 문자 8자</div><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>친환경 생활용품 박람회 구매 영수증
+
+구매일자: 5월/06
+구매자: <span class="gold">SEONGHUI SHIN</span>
+상품: 재사용 가능한 대나무 주방용품 세트 (1개) - 가격: ₩<span class="leak">4814-9686-1977-0922</span> (마스크 처리된 번호)
+결제수단: 신용카드 번호 <span class="gold">5506-1966-0253-2819</span>
+부가세(TAX): <span class="gold">990916-4841426</span>
+발행처: <span class="gold">광주광역시 서구 여의대로 129</span> 친환경 협회, 주소: <span class="gold">울산광역시 남구 시청로 51</span>, 우편번호 <span class="gold">광주광역시 서구 한강대로 74</span>
+
+감사합니다. 다음 박람회 일정은 추후 공지될 예정이며, 문의 사항은 <span class="gold">seungmin.jang38@gmail.com</span> 또는 전화 <span class="gold">010-3903-4497</span> 로 연락 주세요.</pre></div><div class="col"><div class="ch">argmax 마스킹</div><pre>친환경 생활용품 박람회 구매 영수증
+
+구매일자: *****
+구매자:**************
+상품: 재사용 가능한 대나무 주방용품 세트 (1개) - 가격: ₩4814-<span class="diff">***</span>6<span class="diff">*****</span>-0922 (마스크 처리된 번호)
+결제수단: 신용카드 번호 *******************
+부가세(TAX): **************
+발행처:*************************, 주소:***************************************
+
+감사합니다. 다음**** 일정은 추후 공지될 예정이며, 문의 사항은************************** 또는 전화 ************* 로 연락 주세요.</pre></div><div class="col"><div class="ch">Viterbi 마스킹</div><pre>친환경 생활용품 박람회 구매 영수증
+
+구매일자: <span class="over">*****</span>
+구매자:<span class="over">*</span><span class="mask">*************</span>
+상품: 재사용 가능한 대나무 주방용품 세트 (1개) - 가격: ₩4814-<span class="diff">968</span>6<span class="diff">-1977</span>-0922 (마스크 처리된 번호)
+결제수단: 신용카드 번호 <span class="mask">*******************</span>
+부가세(TAX): <span class="mask">**************</span>
+발행처:<span class="over">*</span><span class="mask">*****************</span><span class="over">*******</span>, 주소:<span class="over">*</span><span class="mask">***************</span><span class="over">*******</span><span class="mask">****************</span>
+
+감사합니다. 다음<span class="over">****</span> 일정은 추후 공지될 예정이며, 문의 사항은<span class="over">*</span><span class="mask">*************************</span> 또는 전화 <span class="mask">*************</span> 로 연락 주세요.</pre></div></div><div class="note">SS-KO-00912 · <b>카드번호</b> · argmax 피복 8자 / 정답 스팬 19자</div></div></section><section id="H1_RULE"><div class="shead"><h2>마지막 30건은 규칙이 메웁니다</h2><span class="tag">H1_RULE</span></div><p class="scale">28,420 스팬 중 30건 · 대표 5건</p><p class="desc">법정 고유식별정보 4종 미탐 30 → 0, 오탐 증가 없음</p><div class="case"><div class="cols c3"><div class="col"><div class="ch">원문</div><pre>연구개발 현금 흐름 평가 보고서
 
 1. 개요
 본 보고서는 <span class="leak">대구광역시 수성구 테헤란로 227</span>에 위치한 본사 연구개발 부문의 2024 회계연도 현금 흐름을 종합적으로 분석한 문서이며, 주요 KPI는 순현금 흐름(NCF)과 투자 대비 회수율(ROI)입니다. 분석 기간은 16/01/2006부터 23 4월 1937까지이며, 모든 금액은 <span class="leak">4787-9532-3684-5650</span> 형태로 마스킹 처리되었습니다.
@@ -1189,7 +1271,7 @@ Best regards,
 4:08 PM<span class="mask">****</span>: "나는 87살이고, 이번에 처음 사막에 가보는 거라서 미리 준비물 리스트를 공유해 줘. 혹시<span class="mask">**************************</span>로 메일 보내줄 수 있어?"
 오후 10시 20분 윤재희: "물론! 리스트와 함께 <span class="mask">**************</span> 사전 등록 양식도 첨부할게. 우리 모두 남성이니까 즐겁게 다녀오자!"
 11:48:49<span class="mask">*********</span> NAM: "<span class="mask">********************************</span>도 확인하고, 필요하면 <span class="mask">*******************</span>으로 비상금을 준비하자."
-끝으로, 사진 촬영 후에는 모두 함께<span class="mask">************************************</span>에 #<span class="mask">************</span> 해시태그로 올리기로 했어요.</pre></div></div><div class="note">SS-KO-00902 · <b>주민등록번호</b> · OPF 가 주민등록번호 14자를 완전히 덮지 못함(완전미탐) — 규칙 레이어 경계 정확</div></div></section><section id="H2_OPF_ONLY"><span class="tag">H2_OPF_ONLY</span><h2>규칙으로는 손댈 수 없는 항목을 OPF 가 처리한다</h2><p class="scale">28,420 스팬 중 18,222건 · 대표 5건</p><p class="desc">성명·주소·이메일·연락처·계좌·카드는 형태가 일정하지 않아 정규식으로 잡히지 않는다. 규칙 단독 칸은 고유식별 4종 몇 건만 가린 채 나머지 PII 를 그대로 남긴다 — 규칙만으로는 이 문서를 가릴 수 없다는 뜻이다.</p><div class="case"><div class="cols c3" style="grid-template-columns:repeat(4,1fr)"><div class="col"><div class="ch">원문</div><pre>회의록 - 집단 지능 활용 워크숍 (2024년 5월 12일)
+끝으로, 사진 촬영 후에는 모두 함께<span class="mask">************************************</span>에 #<span class="mask">************</span> 해시태그로 올리기로 했어요.</pre></div></div><div class="note">SS-KO-00902 · <b>주민등록번호</b> · OPF 가 주민등록번호 14자를 완전히 덮지 못함(완전미탐) — 규칙 레이어 경계 정확</div></div></section><section id="H2_OPF_ONLY"><div class="shead"><h2>그런데 규칙만으로는 안 됩니다</h2><span class="tag">H2_OPF_ONLY</span></div><p class="scale">28,420 스팬 중 18,222건 · 대표 5건</p><p class="desc">나머지 20,731스팬(72.95%)은 규칙 예측 0건</p><div class="case"><div class="cols c3" style="grid-template-columns:repeat(4,1fr)"><div class="col"><div class="ch">원문</div><pre>회의록 - 집단 지능 활용 워크숍 (2024년 5월 12일)
 참석자: <span class="gold">이영옥</span>(<span class="gold">JUHUI CHOI</span>), <span class="gold">김미옥</span>(<span class="gold">김현지</span>), 그리고 외부 전문가 <span class="gold">이재원</span>
 1. 프로젝트 비전 소개 – <span class="gold">YEONGSU LEE</span>가 58세(생년월일: 16/08/1982)인 배경과 남성와 여성 다양성에 대한 논의를 진행했습니다.
 2. 데이터 공유 정책 – <span class="gold">박태호</span>는 <span class="gold">870507-8125972</span>과 <span class="gold">890823-1330857</span>을 활용한 익명화 방안을 제시했고, 모든 참여자는 <span class="gold">4933-3890-8946-1841</span>와 같은 민감 정보는 암호화된 채널을 통해 전송하기로 합의했습니다.
