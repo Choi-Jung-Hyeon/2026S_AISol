@@ -23,7 +23,7 @@ from collections import Counter, defaultdict
 import numpy as np
 
 import viterbi
-from postproc import group_spans          # argmax 기준선용. 수정하지 않는다.
+from postproc import group_spans, split_tag   # argmax 기준선용. 수정하지 않는다.
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GOLD = os.path.join(HERE, "data", "ss_pii_testset_ko_v1.json")
@@ -216,9 +216,72 @@ def identifiable(text, gs, ge, covered):
 
 # ---------------------------------------------------------------- 디코딩
 
+def _span_openers(tags, offs):
+    """group_spans 가 내는 스팬과 **같은 순서**로, 각 스팬을 연 토큰의
+    전이 정보 (이전태그, 이전카테고리, 현재태그, 현재카테고리, 첫토큰여부) 를 낸다.
+
+    group_spans 의 분기를 그대로 따라 걷기만 한다. 판정은 하지 않는다.
+    """
+    out, cur = [], None
+    prev_t = prev_c = None
+    first = True
+
+    def close():
+        nonlocal cur
+        if cur is not None:
+            out.append(cur[1])
+        cur = None
+
+    for tag, (s, e) in zip(tags, offs):
+        if s == e:                              # group_spans 와 동일하게 건너뛴다
+            continue
+        pre, lab = split_tag(tag)
+        t = None if pre == "O" else pre
+        c = None if pre == "O" else lab
+        info = (prev_t, prev_c, t, c, first)
+        if pre == "O":
+            close()
+        elif pre == "S":
+            close()
+            out.append(info)
+        elif pre == "B":
+            close()
+            cur = (lab, info)
+        else:                                   # I / E — 고아면 여기서 스팬이 열린다
+            if cur is None or cur[0] != lab:
+                close()
+                cur = (lab, info)
+            if pre == "E":
+                close()
+        prev_t, prev_c = t, c
+        first = False
+    close()
+    return out
+
+
+def illegal_opened(tags, offs, n_span):
+    """argmax 스팬 중 '금지 전이로 열린' 것의 인덱스 집합.
+
+    판정 술어는 viterbi.is_valid_transition 을 그대로 쓴다 — 새 규칙을 만들지 않는다.
+    시퀀스 첫 토큰 규칙도 count_illegal_transitions 와 같다(B-/S-/O 만 허용).
+    """
+    infos = _span_openers(tags, offs)
+    if len(infos) != n_span:
+        die("스팬 개수 불일치 %d != %d — 금지 전이 귀속을 중단합니다"
+            % (len(infos), n_span))
+    ill = set()
+    for si, (pt, pc, t, c, first) in enumerate(infos):
+        bad = (t not in ("B", "S")) if first else \
+              (not viterbi.is_valid_transition(pt, pc, t, c))
+        if bad:
+            ill.add(si)
+    return ill
+
+
 def decode_all(z, rows, i2l, V):
     """캐시에서 argmax / Viterbi 두 경로를 낸다. 재추론하지 않는다."""
     out = {}
+    arg_ill = {}
     t_arg = t_vit = 0.0
     bad_arg = bad_vit = 0
     for did, text, offs in rows:
@@ -230,6 +293,7 @@ def decode_all(z, rows, i2l, V):
         sp_a = [(s["start"], s["end"], s["label"])
                 for s in group_spans(tags_a, offs)]
         t_arg += time.time() - t0
+        arg_ill[did] = illegal_opened(tags_a, offs, len(sp_a))
 
         t0 = time.time()
         ids_v = V.decode(lg)
@@ -240,7 +304,7 @@ def decode_all(z, rows, i2l, V):
         bad_arg += viterbi.count_illegal_transitions(ids_a, i2l)
         bad_vit += viterbi.count_illegal_transitions(ids_v, i2l)
         out[did] = (text, offs, sp_a, sp_v)
-    return out, (t_arg, t_vit), (bad_arg, bad_vit)
+    return out, (t_arg, t_vit), (bad_arg, bad_vit), arg_ill
 
 
 def summarize(dec, gold_by, which_idx):
@@ -314,8 +378,8 @@ def summarize(dec, gold_by, which_idx):
 
 # ---------------------------------------------------------------- 축 분류 (D)
 
-def classify(dec, gold_by, rule_by_text):
-    """기준은 전부 Viterbi 결과다. argmax 는 V1_DECODE 비교에만 쓴다."""
+def classify(dec, gold_by, rule_by_text, arg_ill=None):
+    """기준은 전부 Viterbi 결과다. argmax 는 V1_DECODE / V2_REGRESS 비교에만 쓴다."""
     grows, prows, drows = [], [], []
     mis_pairs = Counter()
 
@@ -327,6 +391,7 @@ def classify(dec, gold_by, rule_by_text):
         rep = greedy_match(gold, sp_v)         # 대표 예측 (F5/F6 용)
         rule = rule_by_text.get(text, [])
         rc = cov_set(rule)
+        ill = (arg_ill or {}).get(did, set())
 
         by_item = defaultdict(list)
         all_tp = bool(gold) and len(m) == len(gold)   # 정답 스팬 전건 TP
@@ -337,7 +402,14 @@ def classify(dec, gold_by, rule_by_text):
             ca = len(pc_a & span)
             n = ge - gs
             verdict = "완전미탐" if cv == 0 else ("완전탐지" if cv == n else "부분노출")
+            verdict_arg = ("완전미탐" if ca == 0
+                           else ("완전탐지" if ca == n else "부분노출"))
             by_item[item].append(verdict)
+            # 정답 스팬과 실제로 겹친 예측 스팬들 (겹침 1자 이상, 라벨 무관)
+            hit_a = [pj for pj, q in enumerate(sp_a)
+                     if overlap(gs, ge, q[0], q[1])]
+            hit_v = [pj for pj, q in enumerate(sp_v)
+                     if overlap(gs, ge, q[0], q[1])]
             pi = rep.get(gi)
             tags = []
 
@@ -376,6 +448,9 @@ def classify(dec, gold_by, rule_by_text):
             # V1_DECODE — argmax 에서 TP 가 아니었는데 Viterbi 에서 TP 가 된 정답 스팬
             if gi in m and gi not in m_arg:
                 tags.append("V1_DECODE")
+            # V2_REGRESS — argmax 가 최소 1자는 덮었으나 Viterbi 에서 완전미탐이 된 스팬
+            if verdict_arg in ("완전탐지", "부분노출") and verdict == "완전미탐":
+                tags.append("V2_REGRESS")
 
             ok_id, mx = (identifiable(text, gs, ge, pc_v)
                          if 0 < cv < n else (False, 0))
@@ -385,6 +460,10 @@ def classify(dec, gold_by, rule_by_text):
                 "n_cov": cv, "n_left": n - cv, "n_cov_arg": ca,
                 "n_left_arg": n - ca, "pred_idx": pi, "n_over": n_over,
                 "identifiable": ok_id, "max_chunk": mx,
+                "verdict_arg": verdict_arg,
+                "n_hit_arg": len(hit_a), "n_hit_vit": len(hit_v),
+                "n_hit_arg_ill": sum(1 for pj in hit_a if pj in ill),
+                "tp_vit": gi in m, "tp_arg": gi in m_arg,
                 "rule_exact": any(rs == gs and re_ == ge for rs, re_, _ in rule),
                 "tags": tags})
 
@@ -419,6 +498,250 @@ def classify(dec, gold_by, rule_by_text):
                           "label": p[2], "length": p[1] - p[0], "tags": tags})
 
     return grows, prows, drows, mis_pairs
+
+
+V_ORDER = ("완전탐지", "부분노출", "완전미탐")
+V_NAME = {"완전탐지": "완전 피복", "부분노출": "부분 노출", "완전미탐": "완전 미탐"}
+
+
+def v2_report(grows):
+    """R1 상태 전이 행렬 + V2_REGRESS 모집단·원인 진단. 전수 집계, 표본 아님."""
+    # ---- R1 3x3 교차표 -------------------------------------------------
+    cx = {a: {b: 0 for b in V_ORDER} for a in V_ORDER}
+    for r in grows:
+        cx[r["verdict_arg"]][r["verdict"]] += 1
+    rowsum = {a: sum(cx[a].values()) for a in V_ORDER}
+    colsum = {b: sum(cx[a][b] for a in V_ORDER) for b in V_ORDER}
+    total = sum(rowsum.values())
+
+    print("[4-1] 상태 전이 행렬 — argmax 상태 x Viterbi 상태 (정답 스팬 전수)")
+    print("      행 = argmax, 열 = Viterbi. 상태는 문자 피복 기준이다(지표 아님).")
+    print()
+    print("      %-14s %12s %12s %12s %12s"
+          % ("argmax \\ Viterbi", V_NAME[V_ORDER[0]], V_NAME[V_ORDER[1]],
+             V_NAME[V_ORDER[2]], "행 합계"))
+    print("      " + "-" * 66)
+    for a in V_ORDER:
+        print("      %-14s %12d %12d %12d %12d"
+              % (V_NAME[a], cx[a][V_ORDER[0]], cx[a][V_ORDER[1]],
+                 cx[a][V_ORDER[2]], rowsum[a]))
+    print("      " + "-" * 66)
+    print("      %-14s %12d %12d %12d %12d"
+          % ("열 합계", colsum[V_ORDER[0]], colsum[V_ORDER[1]],
+             colsum[V_ORDER[2]], total))
+    print()
+    print("      총합 검증 : %d (기대 %d) %s"
+          % (total, len(grows), "일치" if total == len(grows) else "불일치"))
+    exp_row = (25564, 710, 2146)
+    exp_col = (25859, 214, 2347)
+    got_row = tuple(rowsum[a] for a in V_ORDER)
+    got_col = tuple(colsum[b] for b in V_ORDER)
+    print("      행 합계   : %s (기대 %s) %s"
+          % (got_row, exp_row, "일치" if got_row == exp_row else "불일치"))
+    print("      열 합계   : %s (기대 %s) %s"
+          % (got_col, exp_col, "일치" if got_col == exp_col else "불일치"))
+    if total != 28420 or got_row != exp_row or got_col != exp_col:
+        die("상태 전이 행렬이 기대값과 어긋납니다 — 집계를 중단합니다")
+    print()
+
+    # ---- R2 모집단 정의 -------------------------------------------------
+    v2 = [r for r in grows if "V2_REGRESS" in r["tags"]]
+    inflow = cx["완전탐지"]["완전미탐"] + cx["부분노출"]["완전미탐"]
+    outflow = cx["완전미탐"]["완전탐지"] + cx["완전미탐"]["부분노출"]
+    net = inflow - outflow
+
+    print("[4-2] V2_REGRESS 모집단")
+    print("      정의 : argmax 가 (완전피복 또는 부분노출) 이면서 Viterbi 가 완전미탐")
+    print("      유입(V2_REGRESS) %d건 = 완전피복->완전미탐 %d + 부분노출->완전미탐 %d"
+          % (inflow, cx["완전탐지"]["완전미탐"], cx["부분노출"]["완전미탐"]))
+    print("      태그 부여 건수 %d건 — 교차표 두 칸 합과 %s"
+          % (len(v2), "일치" if len(v2) == inflow else "불일치"))
+    print("      유출(반대 방향) %d건 = 완전미탐->완전피복 %d + 완전미탐->부분노출 %d"
+          % (outflow, cx["완전미탐"]["완전탐지"], cx["완전미탐"]["부분노출"]))
+    print("      유입 - 유출 = %d - %d = %+d  (완전미탐 순증 기대 +201) %s"
+          % (inflow, outflow, net, "일치" if net == 201 else "불일치"))
+    if len(v2) != inflow:
+        die("V2_REGRESS 태그 건수가 교차표와 어긋납니다 — 중단합니다")
+    print()
+
+    # ---- R3 원인 진단 ---------------------------------------------------
+    n = len(v2)
+    print("[4-3] 원인 진단")
+    print("  (a) argmax 가 덮은 문자 수 분포 (모집단 %d건)" % n)
+    bins = [("1자", lambda c: c == 1), ("2자", lambda c: c == 2),
+            ("3~5자", lambda c: 3 <= c <= 5), ("6자 이상", lambda c: c >= 6)]
+    print("      %-10s %8s %14s %10s" % ("구간", "건수", "분수", "백분율"))
+    print("      " + "-" * 46)
+    chk = 0
+    for name, f in bins:
+        k = sum(1 for r in v2 if f(r["n_cov_arg"]))
+        chk += k
+        print("      %-10s %8d %14s %9.2f%%"
+              % (name, k, "%d/%d" % (k, n), 100.0 * k / n if n else 0.0))
+    print("      " + "-" * 46)
+    print("      %-10s %8d %14s %9.2f%%"
+          % ("합계", chk, "%d/%d" % (chk, n), 100.0 * chk / n if n else 0.0))
+    covs = sorted(r["n_cov_arg"] for r in v2)
+    if covs:
+        print("      최소 %d자 / 중앙값 %d자 / 최대 %d자 / 평균 %.2f자"
+              % (covs[0], covs[len(covs) // 2], covs[-1],
+                 sum(covs) / float(len(covs))))
+    print()
+
+    print("  (b) Viterbi 예측 스팬과의 겹침 이분")
+    z0 = sum(1 for r in v2 if r["n_hit_vit"] == 0)
+    z1 = n - z0
+    print("      겹친 Viterbi 예측 스팬 0개            : %d건 (%d/%d)" % (z0, z0, n))
+    print("      겹쳤으나 3자 미만이라 미탐 처리       : %d건 (%d/%d)" % (z1, z1, n))
+    print("      주: 이 코드에서 '완전미탐' 의 정의는 문자 피복 0 (cv == 0) 이다.")
+    print("          따라서 1자라도 겹치면 '부분노출' 로 가고 완전미탐이 될 수 없어")
+    print("          두 번째 칸은 정의상 항상 0 이다. 3자 규칙과는 무관한 축이다.")
+    ntp = sum(1 for r in v2 if not r["tp_vit"])
+    print("      참고(3자 매칭 기준) : V2_REGRESS 중 Viterbi 비TP %d/%d" % (ntp, n))
+    print()
+
+    print("  (c) 해당 스팬을 덮었던 argmax 예측 스팬 중 BIOES 금지 전이로 열린 것")
+    print("      판정 술어는 viterbi.is_valid_transition 재사용 (신규 규칙 없음).")
+    tot_hit = sum(r["n_hit_arg"] for r in v2)
+    tot_ill = sum(r["n_hit_arg_ill"] for r in v2)
+    any_ill = sum(1 for r in v2 if r["n_hit_arg_ill"] > 0)
+    all_ill = sum(1 for r in v2 if r["n_hit_arg"] > 0
+                  and r["n_hit_arg_ill"] == r["n_hit_arg"])
+    print("      겹친 argmax 예측 스팬 총계             : %d개" % tot_hit)
+    print("      그중 금지 전이로 열린 것               : %d개 (%d/%d)"
+          % (tot_ill, tot_ill, tot_hit))
+    print("      금지 전이 스팬을 1개 이상 가진 정답 스팬: %d건 (%d/%d)"
+          % (any_ill, any_ill, n))
+    print("      겹친 argmax 스팬이 전부 금지 전이인 정답 스팬: %d건 (%d/%d)"
+          % (all_ill, all_ill, n))
+    print()
+
+    print("  (d) 항목별 V2_REGRESS 건수 (내림차순)")
+    by_item = Counter(r["item"] for r in v2)
+    print("      %-16s %8s %14s" % ("항목", "건수", "분수"))
+    print("      " + "-" * 42)
+    for it, k in sorted(by_item.items(), key=lambda kv: (-kv[1], kv[0])):
+        print("      %-16s %8d %14s" % (it, k, "%d/%d" % (k, n)))
+    print("      " + "-" * 42)
+    print("      %-16s %8d" % ("합계", sum(by_item.values())))
+    print()
+    return v2
+
+
+V2_BINS = (("B1", "1자", 1), ("B2", "2자", 1),
+           ("B3", "3~5자", 1), ("B4", "6자 이상", 2))
+V2_EXPECT = {"B1": 56, "B2": 44, "B3": 61, "B4": 46}
+
+
+def v2_bin(c):
+    """argmax 피복 문자 수 -> 구간 이름."""
+    if c <= 1:
+        return "B1"
+    if c == 2:
+        return "B2"
+    if c <= 5:
+        return "B3"
+    return "B4"
+
+
+def pick_v2(v2, n=TOP_N):
+    """V2_REGRESS 대표 케이스를 피복 문자 수 구간별로 층화 선별한다.
+
+    전수 모집단을 B1(1자)/B2(2자)/B3(3~5자)/B4(6자 이상) 로 나누고
+    할당량 1/1/1/2 로 채운다. 난수를 쓰지 않는다 — 정렬은 전부 결정적이다.
+
+    구간 내 정렬 : 정답 스팬 길이 내림차순 -> 피복 문자 수 내림차순
+                   -> (doc_id, gold.start) 오름차순
+    제약         : 문서당 1건(완화하지 않음), 항목당 2건
+    항목 상한 때문에 구간을 못 채우면 R5 순서로만 완화하고 그 사실을 출력한다.
+    """
+    pools = defaultdict(list)
+    for r in v2:
+        pools[v2_bin(r["n_cov_arg"])].append(r)
+    for k in pools:
+        pools[k].sort(key=lambda r: (-r["n_gold"], -r["n_cov_arg"],
+                                     r["doc_id"], r["start"]))
+
+    print("[4-4] V2_REGRESS 대표 케이스 — 피복 문자 수 구간별 층화 선별")
+    print("      %-6s %-10s %8s %8s" % ("구간", "정의", "모집단", "할당"))
+    print("      " + "-" * 38)
+    tot = 0
+    bad = []
+    for key, name, quota in V2_BINS:
+        k = len(pools[key])
+        tot += k
+        if k != V2_EXPECT[key]:
+            bad.append((key, k, V2_EXPECT[key]))
+        print("      %-6s %-10s %8d %8d" % (key, name, k, quota))
+    print("      " + "-" * 38)
+    print("      %-6s %-10s %8d %8d" % ("합계", "", tot, n))
+    if bad or tot != len(v2):
+        die("구간 건수가 기대값과 어긋납니다 %s (합 %d / 모집단 %d)"
+            % (bad, tot, len(v2)))
+    print("      구간 건수 검증 : %s (기대 %s) 일치 / 합 %d"
+          % (tuple(len(pools[k]) for k, _, _ in V2_BINS),
+             tuple(V2_EXPECT[k] for k, _, _ in V2_BINS), tot))
+    print()
+
+    seen_doc, cnt_item, picked = set(), Counter(), []
+    relax = []
+
+    def take(key, cap):
+        """구간 key 에서 항목 상한 cap 으로 1건 뽑는다. 성공하면 True."""
+        for r in pools[key]:
+            if r in picked or r["doc_id"] in seen_doc:
+                continue
+            if cnt_item[r["item"]] >= cap:
+                continue
+            seen_doc.add(r["doc_id"])
+            cnt_item[r["item"]] += 1
+            picked.append(r)
+            r["_bin"] = key
+            return True
+        return False
+
+    order = [k for k, _, _ in V2_BINS]
+    for key, name, quota in V2_BINS:
+        for _ in range(quota):
+            if take(key, 2):
+                continue
+            # R5-1) 이 구간에 한해 항목 상한 2 -> 3 완화
+            if take(key, 3):
+                relax.append("%s 구간 — 항목 상한 2 -> 3 완화" % key)
+                continue
+            # R5-2) 인접 구간에서 대체 (B4 는 B3, 그 외는 번호가 큰 쪽)
+            i = order.index(key)
+            alt = order[i - 1] if key == "B4" else order[i + 1]
+            done = False
+            for cap in (2, 3):
+                if take(alt, cap):
+                    relax.append("%s 구간 미충족, %s 에서 대체%s"
+                                 % (key, alt, " (항목 상한 3 완화)"
+                                    if cap == 3 else ""))
+                    done = True
+                    break
+            if not done:
+                relax.append("%s 구간 미충족, %s 대체도 실패" % (key, alt))
+
+    if relax:
+        print("      R5 대체 규칙 적용 내역")
+        for s in relax:
+            print("        - %s" % s)
+    else:
+        print("      R5 대체 규칙 : 적용 없음 (할당량 그대로 충족)")
+    if len(picked) != n:
+        die("V2_REGRESS 대표 케이스가 %d건입니다 — %d건이 아닙니다"
+            % (len(picked), n))
+    print()
+    print("      %-14s %-12s %8s %8s %6s"
+          % ("doc_id", "항목", "arg피복", "정답길이", "구간"))
+    print("      " + "-" * 54)
+    for r in picked:
+        print("      %-14s %-12s %8d %8d %6s"
+              % (r["doc_id"], r["item"], r["n_cov_arg"], r["n_gold"],
+                 r["_bin"]))
+    print()
+    return picked
 
 
 def pick(rows, tag, keyfn, n=TOP_N, one_per_doc=False):
@@ -463,8 +786,8 @@ def build_record(tag, item, note, doc, extra=False):
     return rec
 
 
-def emit(dec, gold_by, rule_by_text, out_path):
-    grows, prows, drows, mis = classify(dec, gold_by, rule_by_text)
+def emit(dec, gold_by, rule_by_text, out_path, arg_ill=None):
+    grows, prows, drows, mis = classify(dec, gold_by, rule_by_text, arg_ill)
     by_doc = {d["doc_id"]: d for d in drows}
 
     gt = Counter(t for r in grows for t in r["tags"])
@@ -485,12 +808,13 @@ def emit(dec, gold_by, rule_by_text, out_path):
         "H1_RULE": "고유식별 4종 중 OPF 예측과 3자 미달",
         "H2_OPF_ONLY": "규칙 불가 항목 중 OPF 가 완전 피복",
         "V1_DECODE": "argmax 非TP -> Viterbi TP",
+        "V2_REGRESS": "argmax 1자 이상 피복 -> Viterbi 완전미탐",
     }
     print("    %-14s %-10s %8s   %s" % ("축", "모집단축", "건수", "정의"))
     print("    " + "-" * 78)
     for t in ("F1_ORPHAN", "F2_FORM", "F3_NARR", "F5_MISLABEL",
               "F6_OVERRUN", "F7_INCONSIST", "H1_RULE", "H2_OPF_ONLY",
-              "V1_DECODE"):
+              "V1_DECODE", "V2_REGRESS"):
         print("    %-14s %-10s %8d   %s" % (t, "정답스팬", gt.get(t, 0), DESC[t]))
     print("    %-14s %-10s %8d   %s"
           % ("D_UNLABELED", "예측스팬", pt.get("D_UNLABELED", 0),
@@ -508,6 +832,8 @@ def emit(dec, gold_by, rule_by_text, out_path):
     print("    H1_RULE 내역 : 완전피복이나 3자미달 %d + 부분노출 %d + 완전미탐 %d = %d"
           % (h1_full, h1_part, h1_miss, len(h1)))
     print()
+
+    v2 = v2_report(grows)
 
     recs = []
 
@@ -540,6 +866,13 @@ def emit(dec, gold_by, rule_by_text, out_path):
     add("V1_DECODE", grows, lambda r: -r["n_left_arg"],
         lambda r, d: "argmax 는 %d자 중 %d자만 덮어 TP 실패, Viterbi 가 TP (%d자 피복)"
         % (r["n_gold"], r["n_cov_arg"], r["n_cov"]))
+    # V2_REGRESS — 피복 문자 수 구간별 층화 선별. 결정적이며 난수를 쓰지 않는다.
+    for r in pick_v2(v2):
+        recs.append(build_record(
+            "V2_REGRESS", r["item"],
+            "argmax 피복 %d자 / 정답 스팬 %d자" % (r["n_cov_arg"], r["n_gold"]),
+            by_doc[r["doc_id"]]))
+
     add("D_UNLABELED", prows, lambda r: -r["length"],
         lambda r, d: "정본 무라벨 구간을 private_date 로 탐지 (%d자)" % r["length"])
 
@@ -638,7 +971,7 @@ def main():
     print("    캐시 문서 %d / 정답 보유 %d" % (len(meta), len(gold_by)))
     print()
 
-    dec, (t_a, t_v), (bad_a, bad_v) = decode_all(z, meta, i2l, V)
+    dec, (t_a, t_v), (bad_a, bad_v), arg_ill = decode_all(z, meta, i2l, V)
     A = summarize(dec, gold_by, 0)
     B = summarize(dec, gold_by, 1)
     ra, f1a = rf1(A["tp"], A["fn"], A["fp"])
@@ -758,7 +1091,7 @@ def main():
         print()
 
     if args.out:
-        emit(dec, gold_by, rule_by, args.out)
+        emit(dec, gold_by, rule_by, args.out, arg_ill)
 
 
 if __name__ == "__main__":
